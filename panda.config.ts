@@ -1,15 +1,15 @@
-import { defineConfig } from '@pandacss/dev'
-import { config } from '@pandacss/presets'
+import { defineConfig } from "@pandacss/dev";
+import { config } from "@pandacss/presets";
 
 export default defineConfig({
   preflight: true,
-  jsxFramework: 'react',
-  include: ['./src/**/*.{tsx,jsx}', './pages/**/*.{jsx,tsx}'],
+  jsxFramework: "react",
+  include: ["./src/**/*.{tsx,jsx}", "./pages/**/*.{jsx,tsx}"],
   exclude: [],
-  outdir: 'design-system',
+  outdir: "styled-system",
   strictTokens: false,
   conditions: {
-    resizeHandleActive: '[data-resize-handle-active] &',
+    resizeHandleActive: "[data-resize-handle-active] &",
     panelHorizontalActive: '[data-panel-group-direction="horizontal"] &',
     panelVerticalActive: '[data-panel-group-direction="vertical"] &',
   },
@@ -21,8 +21,8 @@ export default defineConfig({
         return {
           width: value,
           height: value,
-        }
+        };
       },
     },
   },
-})
+});

@@ -40,6 +40,6 @@ export const initialInputList = {
 };
 
 export const initialOutputList = {
-  "panda-App.tsx": "",
+  "App.tsx": "",
   "transformed.md": "",
 };
