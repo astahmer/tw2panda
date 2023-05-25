@@ -6,7 +6,7 @@ export default defineConfig({
   jsxFramework: "react",
   include: ["./src/**/*.{tsx,jsx}", "./pages/**/*.{jsx,tsx}"],
   exclude: [],
-  outdir: "styled-system",
+  outdir: "design-system",
   strictTokens: false,
   conditions: {
     resizeHandleActive: "[data-resize-handle-active] &",

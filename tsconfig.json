@@ -19,8 +19,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "panda/*": ["./styled-system/*"]
+      "panda/*": ["./design-system/*"]
     }
   },
-  "include": ["src", "styled-system"]
+  "include": ["src", "design-system"]
 }
