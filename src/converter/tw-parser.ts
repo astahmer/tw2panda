@@ -1,5 +1,5 @@
 import { createLogger } from "@box-extractor/logger";
-import { candidatePermutations } from "./candidate-permutations";
+import { candidatePermutations } from "./tw-candidate-permutations";
 
 const logger = createLogger("reversewind");
 const fromExternalState = ["group", "peer"];

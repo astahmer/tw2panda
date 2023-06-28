@@ -8,7 +8,7 @@ import {
   preferShorthands,
   twClassListToPandaStyleObjects,
 } from "./tw-to-panda";
-import { TailwindContext } from "./types";
+import { TailwindContext } from "./tw-types";
 
 type StyleObject = Record<string, any>;
 export type TwResultItem = {

@@ -6,9 +6,8 @@ import { kebabToCamel } from "pastable";
 import { resolveMatches, createTailwindContext } from "./tw-context";
 import { PandaContext, createPandaContext } from "./panda-context";
 import { initialInputList } from "../components/Playground/Playground.constants";
-import { parseClassName } from "./parser";
-import { TailwindContext } from "./types";
-import { candidatePermutations } from "./candidate-permutations";
+import { parseClassName } from "./tw-parser";
+import { TailwindContext } from "./tw-types";
 import { walkObject } from "@pandacss/shared";
 
 type StyleObject = Record<string, any>;
@@ -42,11 +41,6 @@ export function twClassListToPandaStyleObjects(
     const classInfo = parseClassName(className);
     if (!classInfo) return;
 
-    const utility = findUtility(className, panda);
-    if (utility) {
-      return;
-    }
-
     const maybeValue = classInfo.value;
     if (!maybeValue) return;
 
@@ -62,7 +56,9 @@ export function twClassListToPandaStyleObjects(
         const value =
           !propValues || propValues[maybeValue]
             ? maybeValue
-            : findMatchingValue(classInfo.permutations ?? [], propValues);
+            : findMatchingValue(classInfo.permutations ?? [], propValues) ||
+              maybeValue;
+
         if (!value) return;
 
         // bg-red-500 => red.500
@@ -87,17 +83,6 @@ export function twClassListToPandaStyleObjects(
 
   return styles;
 }
-
-const findUtility = (className: string, context: PandaContext) => {
-  if (!context.config.utilities) return;
-
-  const possibilities = candidatePermutations(className);
-  return possibilities.find((perm) =>
-    perm.find((p) => {
-      return context.config.utilities![kebabToCamel(p)];
-    })
-  );
-};
 
 const findActualPropertyNames = (root: P.Rule | P.AtRule | P.Declaration) => {
   let rules = [root];
