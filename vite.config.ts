@@ -36,6 +36,7 @@ export default defineConfig({
     alias: {
       module: path.join(dirname, "./module.shim.ts"),
       crosspath: "path-browserify",
+      esbuild: "esbuild-wasm",
     },
   },
 });

@@ -72,6 +72,7 @@ export const Playground = () => {
               language="typescript"
               path="tw-App.tsx"
               value={state.context.inputList[state.context.selectedInput]}
+              options={{ minimap: { enabled: false } }}
               beforeMount={(monaco) => {
                 monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
                   {
@@ -162,7 +163,7 @@ export const Playground = () => {
             overflow="hidden"
           >
             <Editor
-              // options={{ fontSize: 15, minimap: { enabled: false } }}
+              options={{ minimap: { enabled: false } }}
               theme={colorMode === "dark" ? "vs-dark" : "vs-light"}
               language="typescript"
               path="App.tsx"

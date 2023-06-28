@@ -1,11 +1,13 @@
 import type * as P from "postcss";
+import type { Config } from "tailwindcss";
 
 export type TailwindContext = {
   getClassOrder: (
     classes: string[]
   ) => Array<[className: string, order: bigint]>;
-  candidateRuleMap: Array<[string, Candidate[]]>;
+  candidateRuleMap: Map<string, Candidate[]>;
   variantMap: Array<Record<string, never>>;
+  tailwindConfig: Config;
 };
 
 export type Candidate = [

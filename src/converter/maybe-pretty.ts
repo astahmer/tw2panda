@@ -9,7 +9,9 @@ export function maybePretty(input: string, options?: Options | null): string {
       plugins: [parserTypescript],
       ...options,
     });
-  } catch {
+  } catch (err) {
+    console.warn("Failed to format code");
+    console.warn(err);
     return input; // assume it's invalid syntax and ignore
   }
 }

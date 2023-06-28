@@ -1,33 +1,20 @@
-import {
-  extract,
-  ExtractedComponentInstance,
-  ExtractResultByName,
-} from "@box-extractor/core";
+import { ExtractResultByName } from "@box-extractor/core";
 import type { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import type { Config } from "tailwindcss";
-import resolveConfig from "tailwindcss/resolveConfig";
-import { Node, Project, SourceFile, ts } from "ts-morph";
+import { SourceFile } from "ts-morph";
 import { assign, createMachine } from "xstate";
 import { choose } from "xstate/lib/actions";
-import { createTwParser } from "../../converter/tw";
 import { initialInputList, initialOutputList } from "./Playground.constants";
 
-import { optimizeCss } from "@pandacss/core";
-import MagicString from "magic-string";
-import postcss, { Root } from "postcss";
-import postcssJS from "postcss-js";
-import { createProject } from "./createProject";
-import { evalTheme } from "./evalTheme";
-import { maybePretty } from "./maybePretty";
+import {
+  extractClassList,
+  TwResultItem,
+} from "../../converter/extract-class-list";
 
-type TwResultItem = {
-  classList: Set<string>;
-  css: string;
-  js: postcssJS.CssInJs;
-  query: ExtractedComponentInstance;
-  ast: Root;
-};
+import { createMergeCss } from "@pandacss/shared";
+
+import { createPandaContext } from "../../converter/panda-context";
+import { createTailwindContext } from "../../converter/tw-context";
 
 type PlaygroundContext = {
   monaco: Monaco | null;
@@ -53,8 +40,6 @@ type PlaygroundEvent =
   | { type: "Select input tab"; name: string }
   | { type: "Select output tab"; name: string }
   | { type: "Update input"; value: string };
-
-const project: Project = createProject();
 
 const initialContext: PlaygroundContext = {
   monaco: null,
@@ -153,106 +138,21 @@ export const playgroundMachine = createMachine(
           event.type === "Update input"
             ? event.value
             : ctx.inputEditor?.getValue() ?? "";
-        const sourceFile = project.createSourceFile("App.tsx", value, {
-          scriptKind: ts.ScriptKind.TSX,
-          overwrite: true,
-        });
-        console.time("extract");
-        const extracted = extract({
-          ast: sourceFile,
-          components: {
-            matchTag: () => true,
-            matchProp: ({ propName }) =>
-              ["class", "className"].includes(propName),
-          },
-        });
-        console.timeEnd("extract");
-
-        console.time("resolveConfig");
         const themeContent = ctx.inputList["theme.ts"] ?? "module.exports = {}";
-        const evaluatedTheme = evalTheme(themeContent) ?? {};
-        const userTheme = {
-          ...evaluatedTheme,
-          corePlugins: {
-            ...evaluatedTheme.corePlugins,
-            preflight: false,
-          },
-        };
 
-        const config = resolveConfig(userTheme);
-        console.timeEnd("resolveConfig");
+        const tw = createTailwindContext(themeContent);
+        const tailwind = tw.context;
 
-        const parser = createTwParser(config as Config);
-        const classListByInstance = new Map<
-          ExtractedComponentInstance,
-          { classList: Set<string>; node: Node }
-        >();
-
-        extracted.forEach((entry) => {
-          (entry.queryList as ExtractedComponentInstance[]).forEach((query) => {
-            const classList = new Set<string>();
-            const classLiteral =
-              query.box.value.get("className") ?? query.box.value.get("class");
-            if (!classLiteral) return;
-            if (!classLiteral.isLiteral()) return;
-            if (typeof classLiteral.value !== "string") return;
-
-            const classes = classLiteral.value.split(" ");
-            classes.forEach((c) => classList.add(c));
-
-            classListByInstance.set(query, {
-              classList,
-              node: classLiteral.getNode(),
-            });
-          });
+        const panda = createPandaContext();
+        const { mergeCss } = createMergeCss({
+          utility: panda.utility,
+          conditions: panda.conditions,
+          hash: false,
         });
 
-        const resultList = [] as TwResultItem[];
-        const code = sourceFile.getFullText();
-        const magicStr = new MagicString(code);
-
-        console.time("tw parsing");
-        classListByInstance.forEach(({ classList, node }, query) => {
-          const parsed = parser(classList);
-          const css = parsed.toString();
-          const js = postcssJS.objectify(postcss.parse(css));
-
-          resultList.push({ classList, css, js, query, ast: parsed });
-          magicStr.update(
-            node.getStart(),
-            node.getEnd(),
-            `{css(${JSON.stringify(
-              postcssJS.objectify(postcss.parse(optimizeCss(css))),
-              null,
-              2
-            )})}`
-          );
-        });
-        console.timeEnd("tw parsing");
-
-        const output = maybePretty(magicStr.toString());
-        const outputList = {
-          ["App.tsx"]: output,
-          "transformed.md": resultList
-            .map((result) => {
-              return `// ${Array.from(result.classList).join(
-                " "
-              )}\n\`\`\`json\n${JSON.stringify(
-                postcssJS.objectify(postcss.parse(optimizeCss(result.css))),
-                null,
-                2
-              )}\n\`\`\``;
-            })
-            .join("\n\n//------------------------------------\n"),
-        };
-        console.log({
-          extracted,
-          config,
-          resultList,
-          output,
-          editor: ctx.outputEditor,
-          outputList,
-        });
+        const result = extractClassList(value, tailwind, panda, mergeCss);
+        const { sourceFile, extracted, resultList, outputList } = result;
+        console.log(result);
 
         // if (ctx.monaco && ctx.outputEditor) {
         //   ctx.outputEditor.setValue(output);
