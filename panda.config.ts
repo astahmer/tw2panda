@@ -1,22 +1,26 @@
 import { defineConfig } from "@pandacss/dev";
-import { config } from "@pandacss/presets";
+import { preset as basePreset } from "@pandacss/preset-base";
+import { preset as pandaPreset } from "@pandacss/preset-panda";
+import { themePreset } from "./theme/preset";
 
 export default defineConfig({
   preflight: true,
-  jsxFramework: "react",
   include: ["./src/**/*.{tsx,jsx}", "./pages/**/*.{jsx,tsx}"],
   exclude: [],
-  outdir: "styled-system",
-  strictTokens: false,
+  jsxFramework: "react",
+  presets: [pandaPreset, themePreset],
   conditions: {
+    // next-themes
+    dark: '.dark &, [data-theme="dark"] &',
+    light: ".light &",
+    // react-resizable-panels
     resizeHandleActive: "[data-resize-handle-active] &",
     panelHorizontalActive: '[data-panel-group-direction="horizontal"] &',
     panelVerticalActive: '[data-panel-group-direction="vertical"] &',
   },
   utilities: {
     boxSize: {
-      // @ts-ignore
-      values: config.utilities?.width?.values,
+      values: basePreset.utilities?.width?.values,
       transform: (value) => {
         return {
           width: value,

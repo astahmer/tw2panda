@@ -18,8 +18,11 @@ export function extractClassCandidates(content: string, panda: PandaContext) {
     }
 
     if (Node.isStringLiteral(node)) {
+      const string = (node.getLiteralText() ?? "").trim();
+      if (!string) return;
+
       nodes.add(node);
-      candidates.add(node.getLiteralText());
+      candidates.add(string);
     }
   });
 

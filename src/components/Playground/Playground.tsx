@@ -1,22 +1,23 @@
 import Editor from "@monaco-editor/react";
 import { useActor } from "@xstate/react";
 import { Panel, PanelGroup } from "react-resizable-panels";
-import { css } from "../../../styled-system/css";
-import { Flex, panda } from "../../../styled-system/jsx";
+import { css } from "panda/css";
+import { Flex, styled } from "panda/jsx";
 import { usePlaygroundContext } from "./PlaygroundMachineProvider";
 import { ResizeHandle } from "./ResizeHandle";
 import ReactDeclaration from "../../../react.d.ts?raw";
+import { useTheme } from "../vite-theme";
 
 export const Playground = () => {
   const service = usePlaygroundContext();
   const [state, send] = useActor(service);
   console.log(state.value, state.context);
 
-  // TODO
-  const colorMode = "light";
+  const theme = useTheme();
+  const colorMode = theme.resolvedTheme;
 
   return (
-    <panda.div display="flex" w="100%" h="100%" pos="relative">
+    <styled.div display="flex" w="100%" h="100%" pos="relative">
       <PanelGroup direction="horizontal">
         <Panel
           className={css({ display: "flex", flexDirection: "column" })}
@@ -29,7 +30,7 @@ export const Playground = () => {
             role="tablist"
           >
             {Object.entries(state.context.inputList).map(([fileName]) => (
-              <panda.button
+              <styled.button
                 role="tab"
                 key={fileName}
                 onClick={() =>
@@ -39,7 +40,7 @@ export const Playground = () => {
                 fontWeight="medium"
                 borderRadius="0"
                 p="2"
-                color="blue.400"
+                color="cyan.500"
                 opacity={0.8}
                 transition="color opacity 150ms ease"
                 bg="none"
@@ -49,17 +50,17 @@ export const Playground = () => {
                   state.context.selectedInput === fileName ? "" : undefined
                 }
                 _active={{
-                  color: "blue.600",
+                  color: "cyan.600",
                   opacity: 1,
-                  borderBottom: "solid 1px token(colors.blue.500, red)",
+                  borderBottom: "solid 1px token(colors.cyan.600, red)",
                 }}
-                _hover={{ color: "blue.600" }}
+                _hover={{ color: "cyan.600" }}
               >
                 {fileName}
-              </panda.button>
+              </styled.button>
             ))}
           </Flex>
-          <panda.div
+          <styled.div
             boxSize="full"
             display="flex"
             flexDirection="row"
@@ -110,9 +111,9 @@ export const Playground = () => {
                 send({ type: "Update input", value: content ?? "" })
               }
             />
-          </panda.div>
+          </styled.div>
         </Panel>
-        <ResizeHandle />
+        <ResizeHandle className={css({ color: "black" })} />
         <Panel
           className={css({ display: "flex", flexDirection: "column" })}
           minSize={20}
@@ -124,7 +125,7 @@ export const Playground = () => {
             role="tablist"
           >
             {Object.entries(state.context.outputList).map(([fileName]) => (
-              <panda.button
+              <styled.button
                 role="tab"
                 key={fileName}
                 onClick={() =>
@@ -134,7 +135,7 @@ export const Playground = () => {
                 fontWeight="medium"
                 borderRadius="0"
                 p="2"
-                color="blue.400"
+                color="cyan.500"
                 opacity={0.8}
                 transition="color opacity 150ms ease"
                 bg="none"
@@ -144,17 +145,17 @@ export const Playground = () => {
                   state.context.selectedOutput === fileName ? "" : undefined
                 }
                 _active={{
-                  color: "blue.600",
+                  color: "cyan.600",
                   opacity: 1,
-                  borderBottom: "solid 1px token(colors.blue.500, red)",
+                  borderBottom: "solid 1px token(colors.cyan.600, red)",
                 }}
-                _hover={{ color: "blue.600" }}
+                _hover={{ color: "cyan.600" }}
               >
                 {fileName}
-              </panda.button>
+              </styled.button>
             ))}
           </Flex>
-          <panda.div
+          <styled.div
             boxSize="full"
             display="flex"
             flexDirection="row"
@@ -179,9 +180,9 @@ export const Playground = () => {
                 send({ type: "Editor Loaded", editor, monaco, kind: "output" });
               }}
             />
-          </panda.div>
+          </styled.div>
         </Panel>
       </PanelGroup>
-    </panda.div>
+    </styled.div>
   );
 };

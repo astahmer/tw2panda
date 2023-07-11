@@ -9,8 +9,8 @@ import { createMergeCss } from "@pandacss/shared";
 
 import { createPandaContext } from "../../converter/panda-context";
 import { createTailwindContext } from "../../converter/tw-context";
-import { TwResultItem } from "../../converter/tw-to-panda";
 import { rewriteTwFileContentToPanda } from "../../converter/rewrite-tw-file-content-to-panda";
+import { TwResultItem } from "../../converter/types";
 
 type PlaygroundContext = {
   monaco: Monaco | null;

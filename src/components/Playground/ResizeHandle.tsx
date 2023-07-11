@@ -1,6 +1,6 @@
 import { PanelResizeHandle } from "react-resizable-panels";
-import { css } from "../../../styled-system/css";
-import { panda } from "../../../styled-system/jsx";
+import { css } from "panda/css";
+import { styled } from "panda/jsx";
 
 // adapted from https://github.com/bvaughn/react-resizable-panels/blob/820f48f263407b6b78feecf975a6914c417107e6/packages/react-resizable-panels-website/src/components/ResizeHandle.tsx
 export function ResizeHandle({
@@ -25,7 +25,7 @@ export function ResizeHandle({
       id={id ?? null}
       style={{ flex: "0 0 1.5em", transition: "background-color .2s linear" }}
     >
-      <panda.div
+      <styled.div
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -49,7 +49,7 @@ export function ResizeHandle({
           })}
           type="resize-vertical"
         />
-      </panda.div>
+      </styled.div>
     </PanelResizeHandle>
   );
 }

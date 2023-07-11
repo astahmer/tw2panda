@@ -24,7 +24,9 @@ export function rewriteTwFileContentToPanda(
 
   nodes.forEach((node) => {
     const string = node.getLiteralText();
-    const classList = new Set(string.split(" "));
+    const classList = new Set(string.split(" ").filter((t) => t.trim()));
+    if (!classList.size) return;
+
     const { styles } = twClassListToPandaStyles(classList, tailwind, panda);
     if (!styles.length) return;
 
