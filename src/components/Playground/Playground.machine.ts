@@ -56,6 +56,7 @@ globalThis.__dirname = "/";
 export const playgroundMachine = createMachine(
   {
     predictableActionArguments: true,
+    preserveActionOrder: true,
     id: "playground",
     tsTypes: {} as import("./Playground.machine.typegen").Typegen0,
     schema: {
@@ -112,10 +113,6 @@ export const playgroundMachine = createMachine(
       updateSelectedInput: assign((ctx, event) => {
         if (event.type !== "Update input") return ctx;
 
-        // if (ctx.inputEditor) {
-        // ctx.inputEditor.setValue(event.value);
-        // }
-
         const { inputList, selectedInput } = ctx;
         if (inputList[selectedInput]) {
           inputList[selectedInput] = event.value;
@@ -131,9 +128,9 @@ export const playgroundMachine = createMachine(
       ]),
       extractClassList: assign((ctx, event) => {
         const value =
-          event.type === "Update input"
+          (event.type === "Update input"
             ? event.value
-            : ctx.inputEditor?.getValue() ?? "";
+            : ctx.inputList[ctx.selectedInput]) ?? "";
         const themeContent = ctx.inputList["theme.ts"] ?? "module.exports = {}";
 
         const tw = createTailwindContext(themeContent);
