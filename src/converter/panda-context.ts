@@ -47,4 +47,4 @@ export const createPandaContext = (conf?: Partial<ConfigResultWithHooks>) => {
     ...conf,
   });
 };
-export type PandaContext = ReturnType<typeof createPandaContext>;
+export interface PandaContext extends ReturnType<typeof createPandaContext> {}

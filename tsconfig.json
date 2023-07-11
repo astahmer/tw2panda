@@ -9,7 +9,7 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "noEmit": true,
     "jsx": "react-jsx",
 
@@ -22,5 +22,5 @@
       "panda/*": ["./design-system/*"]
     }
   },
-  "include": ["src", "design-system"]
+  "include": ["src", "design-system", "scripts", "tests"]
 }

@@ -2,7 +2,15 @@
   "name": "tailwind-to-panda",
   "type": "module",
   "version": "0.0.1",
+  "bin": {
+    "tw2panda": "bin.js"
+  },
   "scripts": {
+    "prepare": "panda && panda codegen && pnpm gen:react-declaration",
+    "gen:react-declaration": "tsx ./get-ts-declarations.ts",
+    "cli:start": "node ./dist/cli.cjs",
+    "cli:dev": "tsup --watch",
+    "cli:build": "tsup",
     "astro:dev": "astro dev",
     "astro:start": "astro dev",
     "astro:build": "astro build",
@@ -10,8 +18,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "gen:react-declaration": "tsx ./get-ts-declarations.ts",
-    "prepare": "panda && panda codegen && pnpm gen:react-declaration"
+    "test": "vitest"
   },
   "dependencies": {
     "@astrojs/react": "^2.0.2",
@@ -67,12 +74,14 @@
     "rollup": "^3.19.1",
     "rollup-plugin-dts": "^5.3.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
+    "tsup": "^7.1.0",
     "tsx": "^3.12.7",
     "type-fest": "^3.6.1",
     "typescript": "^5.0.2",
     "vite": "^4.3.8",
     "vite-plugin-node-polyfills": "^0.9.0",
     "vite-plugin-react-click-to-component": "^2.0.0",
-    "vite-tsconfig-paths": "^4.2.0"
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.33.0"
   }
 }

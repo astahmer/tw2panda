@@ -27,7 +27,7 @@ const defaultCode = `
 
 const themeCode = `
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export const config = {
   theme: {
     extend: {},
   },

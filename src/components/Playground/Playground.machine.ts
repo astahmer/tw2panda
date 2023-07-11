@@ -1,27 +1,23 @@
-import { ExtractResultByName } from "@box-extractor/core";
 import type { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import { SourceFile } from "ts-morph";
+import { Node, SourceFile } from "ts-morph";
 import { assign, createMachine } from "xstate";
 import { choose } from "xstate/lib/actions";
 import { initialInputList, initialOutputList } from "./Playground.constants";
-
-import {
-  extractClassList,
-  TwResultItem,
-} from "../../converter/extract-class-list";
 
 import { createMergeCss } from "@pandacss/shared";
 
 import { createPandaContext } from "../../converter/panda-context";
 import { createTailwindContext } from "../../converter/tw-context";
+import { TwResultItem } from "../../converter/tw-to-panda";
+import { rewriteTwFileContentToPanda } from "../../converter/rewrite-tw-file-content-to-panda";
 
 type PlaygroundContext = {
   monaco: Monaco | null;
   inputEditor: editor.IStandaloneCodeEditor | null;
   outputEditor: editor.IStandaloneCodeEditor | null;
   sourceFile: SourceFile | null;
-  extracted: ExtractResultByName | null;
+  extracted: Node[];
   resultList: TwResultItem[];
   inputList: Record<string, string>;
   selectedInput: string;
@@ -46,7 +42,7 @@ const initialContext: PlaygroundContext = {
   inputEditor: null,
   outputEditor: null,
   sourceFile: null,
-  extracted: null,
+  extracted: [],
   resultList: [],
   inputList: initialInputList,
   selectedInput: "tw-App.tsx",
@@ -150,15 +146,42 @@ export const playgroundMachine = createMachine(
           hash: false,
         });
 
-        const result = extractClassList(value, tailwind, panda, mergeCss);
-        const { sourceFile, extracted, resultList, outputList } = result;
+        const result = rewriteTwFileContentToPanda(
+          value,
+          tailwind,
+          panda,
+          mergeCss
+        );
+        const { sourceFile, nodes, output, resultList = [] } = result;
+
+        const outputList = {
+          ["App.tsx"]: output,
+          "transformed.md": resultList
+            .map((result) => {
+              return `// ${Array.from(result.classList).join(
+                " "
+              )}\n\`\`\`json\n${JSON.stringify(
+                result.styles,
+                null,
+                2
+              )}\n\`\`\``;
+            })
+            .join("\n\n//------------------------------------\n"),
+        };
         console.log(result);
+        console.log({ tailwind: tw, panda });
 
         // if (ctx.monaco && ctx.outputEditor) {
         //   ctx.outputEditor.setValue(output);
         // }
 
-        return { ...ctx, sourceFile, extracted, resultList, outputList };
+        return {
+          ...ctx,
+          sourceFile,
+          extracted: nodes as any,
+          resultList,
+          outputList,
+        };
       }),
     },
     guards: {
