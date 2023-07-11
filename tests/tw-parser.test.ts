@@ -1,18 +1,33 @@
 import { test, expect } from "vitest";
-import { parseClassName } from "../src/converter/tw-parser";
+import { parseTwClassName } from "../src/converter/tw-parser";
 
 const parseTailwindClasses = (classList: string) =>
-  classList.split(" ").map(parseClassName);
+  classList.split(" ").map((className) => parseTwClassName(className));
 
-// simple
 test("variant no value", () => {
   expect(parseTailwindClasses("flex")).toMatchInlineSnapshot(`
     [
       {
         "className": "flex",
         "modifiers": [],
-        "utility": undefined,
-        "value": undefined,
+        "utility": "flex",
+        "value": "flex",
+        "variant": "flex",
+      },
+    ]
+  `);
+});
+
+test("variant no value with breakpoint modifier", () => {
+  expect(parseTailwindClasses("md:flex")).toMatchInlineSnapshot(`
+    [
+      {
+        "className": "md:flex",
+        "modifiers": [
+          "md",
+        ],
+        "utility": "flex",
+        "value": "flex",
         "variant": "flex",
       },
     ]
@@ -25,12 +40,6 @@ test("variant with value", () => {
       {
         "className": "flex-1",
         "modifiers": [],
-        "permutations": [
-          [
-            "flex",
-            "1",
-          ],
-        ],
         "utility": "flex",
         "value": "1",
         "variant": "flex-1",
@@ -38,16 +47,6 @@ test("variant with value", () => {
       {
         "className": "bg-slate-100",
         "modifiers": [],
-        "permutations": [
-          [
-            "bg-slate",
-            "100",
-          ],
-          [
-            "bg",
-            "slate-100",
-          ],
-        ],
         "utility": "bg",
         "value": "slate-100",
         "variant": "bg-slate-100",
@@ -142,8 +141,8 @@ test("variant no value with modifier", () => {
           "modifiers": [
             "md",
           ],
-          "utility": undefined,
-          "value": undefined,
+          "utility": "flex",
+          "value": "flex",
           "variant": "flex",
         },
         {
@@ -152,8 +151,8 @@ test("variant no value with modifier", () => {
             "lg",
             "dark",
           ],
-          "utility": undefined,
-          "value": undefined,
+          "utility": "rounded",
+          "value": "rounded",
           "variant": "rounded",
         },
       ]
@@ -169,12 +168,6 @@ test("variant with value with modifier", () => {
           "modifiers": [
             "md",
           ],
-          "permutations": [
-            [
-              "flex",
-              "1",
-            ],
-          ],
           "utility": "flex",
           "value": "1",
           "variant": "flex-1",
@@ -184,16 +177,6 @@ test("variant with value with modifier", () => {
           "modifiers": [
             "lg",
             "dark",
-          ],
-          "permutations": [
-            [
-              "bg-slate",
-              "100",
-            ],
-            [
-              "bg",
-              "slate-100",
-            ],
           ],
           "utility": "bg",
           "value": "slate-100",
@@ -315,12 +298,6 @@ test("styling based on parent state", () => {
           "modifiers": [
             "group-hover",
           ],
-          "permutations": [
-            [
-              "stroke",
-              "white",
-            ],
-          ],
           "utility": "stroke",
           "value": "white",
           "variant": "stroke-white",
@@ -339,18 +316,8 @@ test("differenciating nested groups", () => {
           "modifiers": [
             "group-hover/edit",
           ],
-          "permutations": [
-            [
-              "translate-x",
-              "0.5",
-            ],
-            [
-              "translate",
-              "x-0.5",
-            ],
-          ],
-          "utility": "translate",
-          "value": "x-0.5",
+          "utility": "translate-x",
+          "value": "0.5",
           "variant": "translate-x-0.5",
         },
       ]
@@ -370,8 +337,8 @@ test("arbitrary groups", () => {
         "modifiers": [
           "group-[.is-published]",
         ],
-        "utility": undefined,
-        "value": undefined,
+        "utility": "block",
+        "value": "block",
         "variant": "block",
       },
       {
@@ -379,8 +346,8 @@ test("arbitrary groups", () => {
         "modifiers": [
           "group-[:nth-of-type(3)_&]",
         ],
-        "utility": undefined,
-        "value": undefined,
+        "utility": "block",
+        "value": "block",
         "variant": "block",
       },
     ]
@@ -388,7 +355,6 @@ test("arbitrary groups", () => {
 });
 
 // https://tailwindcss.com/docs/hover-focus-and-other-states#arbitrary-peers
-// TODO
 test("arbitrary peers", () => {
   expect(parseTailwindClasses("peer-[.is-dirty]:peer-required:block"))
     .toMatchInlineSnapshot(`
@@ -397,16 +363,11 @@ test("arbitrary peers", () => {
           "className": "peer-[.is-dirty]:peer-required:block",
           "modifiers": [
             "peer-[.is-dirty]",
+            "peer-required",
           ],
-          "permutations": [
-            [
-              "peer",
-              "required:block",
-            ],
-          ],
-          "utility": "peer",
-          "value": "required:block",
-          "variant": "peer-required:block",
+          "utility": "block",
+          "value": "block",
+          "variant": "block",
         },
       ]
     `);
@@ -433,12 +394,6 @@ test("before and after", () => {
         "modifiers": [
           "after",
         ],
-        "permutations": [
-          [
-            "ml",
-            "0.5",
-          ],
-        ],
         "utility": "ml",
         "value": "0.5",
         "variant": "ml-0.5",
@@ -447,16 +402,6 @@ test("before and after", () => {
         "className": "after:text-red-500",
         "modifiers": [
           "after",
-        ],
-        "permutations": [
-          [
-            "text-red",
-            "500",
-          ],
-          [
-            "text",
-            "red-500",
-          ],
         ],
         "utility": "text",
         "value": "red-500",
@@ -475,23 +420,17 @@ test("arbitrary variant", () => {
           "className": "lg:[&:nth-child(3)]:hover:underline",
           "modifiers": [
             "lg",
-            "&:nth-child(3)",
+            "&-[&:nth-child(3)]",
             "hover",
           ],
-          "utility": undefined,
-          "value": undefined,
+          "utility": "underline",
+          "value": "underline",
           "variant": "underline",
         },
         {
           "className": "[&_p]:mt-4",
           "modifiers": [
             "&_p",
-          ],
-          "permutations": [
-            [
-              "mt",
-              "4",
-            ],
           ],
           "utility": "mt",
           "value": "4",
@@ -509,12 +448,6 @@ test("data attributes", () => {
         "className": "data-[size=large]:p-8",
         "modifiers": [
           "data-[size=large]",
-        ],
-        "permutations": [
-          [
-            "p",
-            "8",
-          ],
         ],
         "utility": "p",
         "value": "8",
@@ -535,8 +468,8 @@ test("targeting a single breakpoint", () => {
           "md",
           "max-lg",
         ],
-        "utility": undefined,
-        "value": undefined,
+        "utility": "flex",
+        "value": "flex",
         "variant": "flex",
       },
     ]
@@ -553,12 +486,6 @@ test("arbitrary breakpoint", () => {
           "modifiers": [
             "min-[320px]",
           ],
-          "permutations": [
-            [
-              "text",
-              "center",
-            ],
-          ],
           "utility": "text",
           "value": "center",
           "variant": "text-center",
@@ -567,16 +494,6 @@ test("arbitrary breakpoint", () => {
           "className": "max-[600px]:bg-sky-300",
           "modifiers": [
             "max-[600px]",
-          ],
-          "permutations": [
-            [
-              "bg-sky",
-              "300",
-            ],
-            [
-              "bg",
-              "sky-300",
-            ],
           ],
           "utility": "bg",
           "value": "sky-300",
@@ -594,16 +511,16 @@ test("handling whitespace", () => {
         {
           "className": "grid",
           "modifiers": [],
-          "utility": undefined,
-          "value": undefined,
+          "utility": "grid",
+          "value": "grid",
           "variant": "grid",
         },
         {
           "className": "grid-cols-[1fr_500px_2fr]",
           "kind": "arbitrary-value",
           "modifiers": [],
-          "utility": "grid-cols",
-          "value": "1fr_500px_2fr",
+          "utility": "-ols",
+          "value": "cols-[1fr_500px_2fr]",
           "variant": "grid-cols-[1fr_500px_2fr]",
         },
       ]
@@ -662,16 +579,16 @@ test("resolving ambiguities", () => {
         "className": "text-[length:var(--my-var)]",
         "kind": "arbitrary-value",
         "modifiers": [],
-        "utility": "length",
-        "value": "var(--my-var)",
+        "utility": "text",
+        "value": "length:var(--my-var)",
         "variant": "text-[length:var(--my-var)]",
       },
       {
         "className": "text-[color:var(--my-var)]",
         "kind": "arbitrary-value",
         "modifiers": [],
-        "utility": "color",
-        "value": "var(--my-var)",
+        "utility": "text",
+        "value": "color:var(--my-var)",
         "variant": "text-[color:var(--my-var)]",
       },
     ]
@@ -684,20 +601,6 @@ test("variant with rgba alpha transparent", () => {
       {
         "className": "text-blue-500/40",
         "modifiers": [],
-        "permutations": [
-          [
-            "text-blue-500",
-            "/40",
-          ],
-          [
-            "text-blue",
-            "500/40",
-          ],
-          [
-            "text",
-            "blue-500/40",
-          ],
-        ],
         "utility": "text",
         "value": "blue-500/40",
         "variant": "text-blue-500/40",
@@ -712,16 +615,6 @@ test("variant with forward slash", () => {
       {
         "className": "w-3/4",
         "modifiers": [],
-        "permutations": [
-          [
-            "w-3",
-            "/4",
-          ],
-          [
-            "w",
-            "3/4",
-          ],
-        ],
         "utility": "w",
         "value": "3/4",
         "variant": "w-3/4",
@@ -751,12 +644,6 @@ test("variant with dot", () => {
       {
         "className": "pl-3.5",
         "modifiers": [],
-        "permutations": [
-          [
-            "pl",
-            "3.5",
-          ],
-        ],
         "utility": "pl",
         "value": "3.5",
         "variant": "pl-3.5",
@@ -773,50 +660,30 @@ test("variant with important", () => {
           "className": "flex!",
           "isImportant": true,
           "modifiers": [],
-          "utility": undefined,
-          "value": undefined,
+          "utility": "flex!",
+          "value": "flex!",
           "variant": "flex!",
         },
         {
           "className": "underline!",
           "isImportant": true,
           "modifiers": [],
-          "utility": undefined,
-          "value": undefined,
+          "utility": "underline!",
+          "value": "underline!",
           "variant": "underline!",
         },
         {
           "className": "min-w-4!",
           "isImportant": true,
           "modifiers": [],
-          "permutations": [
-            [
-              "min-w",
-              "4!",
-            ],
-            [
-              "min",
-              "w-4!",
-            ],
-          ],
-          "utility": "min",
-          "value": "w-4!",
+          "utility": "min-w",
+          "value": "4!",
           "variant": "min-w-4!",
         },
         {
           "className": "text-white/40!",
           "isImportant": true,
           "modifiers": [],
-          "permutations": [
-            [
-              "text-white",
-              "/40!",
-            ],
-            [
-              "text",
-              "white/40!",
-            ],
-          ],
           "utility": "text",
           "value": "white/40!",
           "variant": "text-white/40!",

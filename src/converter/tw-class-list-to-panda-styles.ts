@@ -1,7 +1,7 @@
 import { kebabToCamel } from "pastable";
 import { PandaContext } from "./panda-context";
 import { resolveMatches } from "./tw-context";
-import { parseClassName } from "./tw-parser";
+import { parseTwClassName } from "./tw-parser";
 import { TailwindContext } from "./tw-types";
 import { MatchingToken, StyleObject } from "./types";
 import { findRuleProps } from "./postcss-find-rule-props";
@@ -46,10 +46,12 @@ function getMatchingTwCandidates(
   panda: PandaContext
 ) {
   const tokens = [] as MatchingToken[];
-  const classInfo = parseClassName(className);
+  const classInfo = parseTwClassName(className);
   if (!classInfo) return tokens;
 
-  if (!classInfo.value && !classInfo.permutations) return tokens;
+  if (!classInfo.value && !classInfo.permutations) {
+    return tokens;
+  }
 
   const matches = Array.from(resolveMatches(className, tailwind));
   matches.forEach((match) => {
@@ -64,22 +66,14 @@ function getMatchingTwCandidates(
       const prop = panda.config.utilities?.[propName];
       const propValues = prop && panda.utility["getPropertyValues"](prop);
 
-      let value = classInfo.value ?? "";
+      let value;
+
       if (tailwind.candidateRuleMap.get(ruleProp.rawValue) || !propValues) {
         value = ruleProp.rawValue;
-      } else if (classInfo.permutations) {
-        classInfo.permutations.forEach((parts) => {
-          parts.forEach((part, index) => {
-            if (tailwind.candidateRuleMap.get(part)) {
-              value = parts[index + 1];
-            }
-          });
-        });
-
+      } else {
         // bg-red-500 => red.500
-        value = value.replace("-", ".");
+        value = (classInfo.value ?? "").replace("-", ".");
       }
-
       if (!value) return;
 
       tokens.push({ propName, tokenName: value, classInfo });

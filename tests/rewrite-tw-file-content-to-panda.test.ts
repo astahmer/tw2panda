@@ -1,10 +1,11 @@
 import { createMergeCss } from "@pandacss/shared";
 import { describe, expect, test } from "vitest";
-import buttonRaw from "../samples/button?raw";
 import { createPandaContext } from "../src/converter/panda-context";
 import { createTailwindContext } from "../src/converter/tw-context";
 import { initialInputList } from "../src/components/Playground/Playground.constants";
 import { rewriteTwFileContentToPanda } from "../src/converter/rewrite-tw-file-content-to-panda";
+import buttonRaw from "../samples/button?raw";
+import tailwindConfigRaw from "../samples/tailwind.config";
 
 describe("extract-tw-class-list", () => {
   test("samples/button.ts", () => {
@@ -51,10 +52,101 @@ describe("extract-tw-class-list", () => {
             variant: {
               default: 'bg-primary text-primary-foreground hover:bg-primary/90',
               destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-              outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+              outline: css({ borderWidth: '1px' }),
               secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
               ghost: 'hover:bg-accent hover:text-accent-foreground',
-              link: css({ textUnderlineOffset: '4px' }),
+              link: css({ textUnderlineOffset: '4px', _hover: { textDecorationLine: 'underline' } }),
+            },
+            size: {
+              default: css({ h: '10', pl: '4', pr: '4', pt: '2', pb: '2' }),
+              sm: css({ h: '9', rounded: 'md', pl: '3', pr: '3' }),
+              lg: css({ h: '11', rounded: 'md', pl: '8', pr: '8' }),
+              icon: css({ h: '10', w: '10' }),
+            },
+          },
+          defaultVariants: {
+            variant: 'default',
+            size: 'default',
+          },
+        },
+      )
+
+      export interface ButtonProps
+        extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+          VariantProps<typeof buttonVariants> {
+        asChild?: boolean
+      }
+
+      const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+        ({ className, variant, size, asChild = false, ...props }, ref) => {
+          const Comp = asChild ? Slot : 'button'
+          return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+        },
+      )
+      Button.displayName = 'Button'
+
+      export { Button, buttonVariants }
+      "
+    `);
+  });
+
+  test("samples/button.ts with custom tailwind.config", () => {
+    const tailwind = createTailwindContext(tailwindConfigRaw);
+    const panda = createPandaContext();
+    const { mergeCss } = createMergeCss({
+      utility: panda.utility,
+      conditions: panda.conditions,
+      hash: false,
+    });
+
+    const { output } = rewriteTwFileContentToPanda(
+      buttonRaw,
+      tailwind.context,
+      panda,
+      mergeCss
+    );
+
+    expect(output).toMatchInlineSnapshot(`
+      "/** @see https://github.com/shadcn/ui/blob/ac5c727fc966a8cf859ced4a4074ddf9a31da922/apps/www/registry/default/ui/button.tsx#L12 */
+
+      import * as React from 'react'
+      import { Slot } from '@radix-ui/react-slot'
+      import { cva, type VariantProps } from 'class-variance-authority'
+      import { cn } from '@/lib/utils'
+
+      const buttonVariants = cva(
+        css({
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          rounded: 'md',
+          fontSize: 'sm',
+          lineHeight: 'sm',
+          fontWeight: 'medium',
+          transitionProperty: 'colors',
+          transitionTimingFunction: 'colors',
+          transitionDuration: 'colors',
+          'focus-visible': { ring: 'none', ringOffset: 'none', shadow: '2' },
+          _disabled: { pointerEvents: 'none', opacity: '0.5' },
+        }),
+        {
+          variants: {
+            variant: {
+              default: css({ bgColor: 'primary', color: 'primary.foreground', _hover: { bgColor: 'primary/90' } }),
+              destructive: css({
+                bgColor: 'destructive',
+                color: 'destructive.foreground',
+                _hover: { bgColor: 'destructive/90' },
+              }),
+              outline: css({
+                borderWidth: '1px',
+                borderColor: 'input',
+                bgColor: 'background',
+                _hover: { bgColor: 'accent', color: 'accent.foreground' },
+              }),
+              secondary: css({ bgColor: 'secondary', color: 'secondary.foreground', _hover: { bgColor: 'secondary/80' } }),
+              ghost: css({ _hover: { bgColor: 'accent', color: 'accent.foreground' } }),
+              link: css({ color: 'primary', textUnderlineOffset: '4px', _hover: { textDecorationLine: 'underline' } }),
             },
             size: {
               default: css({ h: '10', pl: '4', pr: '4', pt: '2', pb: '2' }),
@@ -110,7 +202,13 @@ describe("extract-tw-class-list", () => {
         return (
           <>
             <figure
-              class={css({ bgColor: 'slate.100', rounded: 'xl', p: '8', md: { p: '0' }, _dark: { bgColor: 'slate.800' } })}
+              class={css({
+                md: { display: 'flex', p: '0' },
+                bgColor: 'slate.100',
+                rounded: 'xl',
+                p: '8',
+                _dark: { bgColor: 'slate.800' },
+              })}
             >
               <img
                 class={css({

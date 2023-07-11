@@ -1,10 +1,11 @@
 import { createMergeCss } from "@pandacss/shared";
 import { describe, expect, test } from "vitest";
-import buttonRaw from "../samples/button?raw";
 import { extractTwFileClassList } from "../src/converter/extract-tw-class-list";
 import { createPandaContext } from "../src/converter/panda-context";
 import { createTailwindContext } from "../src/converter/tw-context";
 import { initialInputList } from "../src/components/Playground/Playground.constants";
+import buttonRaw from "../samples/button?raw";
+import tailwindConfigRaw from "../samples/tailwind.config";
 
 describe("extract-tw-class-list", () => {
   test("samples/button.ts", () => {
@@ -67,12 +68,236 @@ describe("extract-tw-class-list", () => {
         },
         {
           "classList": Set {
+            "border",
+            "border-input",
+            "bg-background",
+            "hover:bg-accent",
+            "hover:text-accent-foreground",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "borderWidth": "1px",
+          },
+        },
+        {
+          "classList": Set {
             "text-primary",
             "underline-offset-4",
             "hover:underline",
           },
           "node": StringLiteral,
           "styles": {
+            "_hover": {
+              "textDecorationLine": "underline",
+            },
+            "textUnderlineOffset": "4px",
+          },
+        },
+        {
+          "classList": Set {
+            "h-10",
+            "px-4",
+            "py-2",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "h": "10",
+            "pb": "2",
+            "pl": "4",
+            "pr": "4",
+            "pt": "2",
+          },
+        },
+        {
+          "classList": Set {
+            "h-9",
+            "rounded-md",
+            "px-3",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "h": "9",
+            "pl": "3",
+            "pr": "3",
+            "rounded": "md",
+          },
+        },
+        {
+          "classList": Set {
+            "h-11",
+            "rounded-md",
+            "px-8",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "h": "11",
+            "pl": "8",
+            "pr": "8",
+            "rounded": "md",
+          },
+        },
+        {
+          "classList": Set {
+            "h-10",
+            "w-10",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "h": "10",
+            "w": "10",
+          },
+        },
+      ]
+    `);
+  });
+
+  test("samples/button.ts with custom tailwind.config", () => {
+    const tailwind = createTailwindContext(tailwindConfigRaw);
+    const panda = createPandaContext();
+    const { mergeCss } = createMergeCss({
+      utility: panda.utility,
+      conditions: panda.conditions,
+      hash: false,
+    });
+
+    const { resultList } = extractTwFileClassList(
+      buttonRaw,
+      tailwind.context,
+      panda,
+      mergeCss
+    );
+
+    expect(resultList).toMatchInlineSnapshot(`
+      [
+        {
+          "classList": Set {
+            "inline-flex",
+            "items-center",
+            "justify-center",
+            "rounded-md",
+            "text-sm",
+            "font-medium",
+            "ring-offset-background",
+            "transition-colors",
+            "focus-visible:outline-none",
+            "focus-visible:ring-2",
+            "focus-visible:ring-ring",
+            "focus-visible:ring-offset-2",
+            "disabled:pointer-events-none",
+            "disabled:opacity-50",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_disabled": {
+              "opacity": "0.5",
+              "pointerEvents": "none",
+            },
+            "alignItems": "center",
+            "display": "inline-flex",
+            "focus-visible": {
+              "ring": "none",
+              "ringOffset": "none",
+              "shadow": "2",
+            },
+            "fontSize": "sm",
+            "fontWeight": "medium",
+            "justifyContent": "center",
+            "lineHeight": "sm",
+            "rounded": "md",
+            "transitionDuration": "colors",
+            "transitionProperty": "colors",
+            "transitionTimingFunction": "colors",
+          },
+        },
+        {
+          "classList": Set {
+            "bg-primary",
+            "text-primary-foreground",
+            "hover:bg-primary/90",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_hover": {
+              "bgColor": "primary/90",
+            },
+            "bgColor": "primary",
+            "color": "primary.foreground",
+          },
+        },
+        {
+          "classList": Set {
+            "bg-destructive",
+            "text-destructive-foreground",
+            "hover:bg-destructive/90",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_hover": {
+              "bgColor": "destructive/90",
+            },
+            "bgColor": "destructive",
+            "color": "destructive.foreground",
+          },
+        },
+        {
+          "classList": Set {
+            "border",
+            "border-input",
+            "bg-background",
+            "hover:bg-accent",
+            "hover:text-accent-foreground",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_hover": {
+              "bgColor": "accent",
+              "color": "accent.foreground",
+            },
+            "bgColor": "background",
+            "borderColor": "input",
+            "borderWidth": "1px",
+          },
+        },
+        {
+          "classList": Set {
+            "bg-secondary",
+            "text-secondary-foreground",
+            "hover:bg-secondary/80",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_hover": {
+              "bgColor": "secondary/80",
+            },
+            "bgColor": "secondary",
+            "color": "secondary.foreground",
+          },
+        },
+        {
+          "classList": Set {
+            "hover:bg-accent",
+            "hover:text-accent-foreground",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_hover": {
+              "bgColor": "accent",
+              "color": "accent.foreground",
+            },
+          },
+        },
+        {
+          "classList": Set {
+            "text-primary",
+            "underline-offset-4",
+            "hover:underline",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_hover": {
+              "textDecorationLine": "underline",
+            },
+            "color": "primary",
             "textUnderlineOffset": "4px",
           },
         },
@@ -168,6 +393,7 @@ describe("extract-tw-class-list", () => {
             },
             "bgColor": "slate.100",
             "md": {
+              "display": "flex",
               "p": "0",
             },
             "p": "8",
