@@ -1,4 +1,4 @@
-import { Flex } from "../../design-system/jsx";
+import { Flex } from "../../styled-system/jsx";
 import PlaygroundWithMachine from "./Playground/PlaygroundWithMachine";
 
 import "../styles.css";

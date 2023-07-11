@@ -1,6 +1,6 @@
 import { PanelResizeHandle } from "react-resizable-panels";
-import { css } from "../../../design-system/css";
-import { panda } from "../../../design-system/jsx";
+import { css } from "../../../styled-system/css";
+import { panda } from "../../../styled-system/jsx";
 
 // adapted from https://github.com/bvaughn/react-resizable-panels/blob/820f48f263407b6b78feecf975a6914c417107e6/packages/react-resizable-panels-website/src/components/ResizeHandle.tsx
 export function ResizeHandle({

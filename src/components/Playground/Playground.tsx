@@ -1,8 +1,8 @@
 import Editor from "@monaco-editor/react";
 import { useActor } from "@xstate/react";
 import { Panel, PanelGroup } from "react-resizable-panels";
-import { css } from "../../../design-system/css";
-import { Flex, panda } from "../../../design-system/jsx";
+import { css } from "../../../styled-system/css";
+import { Flex, panda } from "../../../styled-system/jsx";
 import { usePlaygroundContext } from "./PlaygroundMachineProvider";
 import { ResizeHandle } from "./ResizeHandle";
 import ReactDeclaration from "../../../react.d.ts?raw";
