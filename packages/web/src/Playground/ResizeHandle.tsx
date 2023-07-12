@@ -3,13 +3,7 @@ import { css } from "panda/css";
 import { styled } from "panda/jsx";
 
 // adapted from https://github.com/bvaughn/react-resizable-panels/blob/820f48f263407b6b78feecf975a6914c417107e6/packages/react-resizable-panels-website/src/components/ResizeHandle.tsx
-export function ResizeHandle({
-  className = "",
-  id,
-}: {
-  className?: string;
-  id?: string;
-}) {
+export function ResizeHandle({ className = "", id }: { className?: string; id?: string }) {
   return (
     <PanelResizeHandle
       className={[
@@ -68,13 +62,7 @@ export type IconType =
   | "search"
   | "typescript";
 
-function Icon({
-  className = "",
-  type,
-}: {
-  className?: string;
-  type: IconType;
-}) {
+function Icon({ className = "", type }: { className?: string; type: IconType }) {
   let path = "";
   switch (type) {
     case "chevron-down": {
@@ -101,14 +89,12 @@ function Icon({
     }
 
     case "horizontal-collapse": {
-      path =
-        "M13,20V4H15.03V20H13M10,20V4H12.03V20H10M5,8L9.03,12L5,16V13H2V11H5V8M20,16L16,12L20,8V11H23V13H20V16Z";
+      path = "M13,20V4H15.03V20H13M10,20V4H12.03V20H10M5,8L9.03,12L5,16V13H2V11H5V8M20,16L16,12L20,8V11H23V13H20V16Z";
       break;
     }
 
     case "horizontal-expand": {
-      path =
-        "M9,11H15V8L19,12L15,16V13H9V16L5,12L9,8V11M2,20V4H4V20H2M20,20V4H22V20H20Z";
+      path = "M9,11H15V8L19,12L15,16V13H9V16L5,12L9,8V11M2,20V4H4V20H2M20,20V4H22V20H20Z";
       break;
     }
 
@@ -125,14 +111,12 @@ function Icon({
     }
 
     case "resize-horizontal": {
-      path =
-        "M18,16V13H15V22H13V2H15V11H18V8L22,12L18,16M2,12L6,16V13H9V22H11V2H9V11H6V8L2,12Z";
+      path = "M18,16V13H15V22H13V2H15V11H18V8L22,12L18,16M2,12L6,16V13H9V22H11V2H9V11H6V8L2,12Z";
       break;
     }
 
     case "resize-vertical": {
-      path =
-        "M8,18H11V15H2V13H22V15H13V18H16L12,22L8,18M12,2L8,6H11V9H2V11H22V9H13V6H16L12,2Z";
+      path = "M8,18H11V15H2V13H22V15H13V18H16L12,22L8,18M12,2L8,6H11V9H2V11H22V9H13V6H16L12,2Z";
       break;
     }
 

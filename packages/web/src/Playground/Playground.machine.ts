@@ -7,7 +7,7 @@ import { initialInputList, initialOutputList } from "../../../../demo-code-sampl
 
 import { createMergeCss } from "@pandacss/shared";
 
-import { createPandaContext, createTailwindContext,rewriteTwFileContentToPanda, type TwResultItem } from "tw2panda";
+import { createPandaContext, createTailwindContext, rewriteTwFileContentToPanda, type TwResultItem } from "tw2panda";
 
 type PlaygroundContext = {
   monaco: Monaco | null;
@@ -125,10 +125,7 @@ export const playgroundMachine = createMachine(
         { actions: ["updateSelectedInput"] },
       ]),
       extractClassList: assign((ctx, event) => {
-        const value =
-          (event.type === "Update input"
-            ? event.value
-            : ctx.inputList[ctx.selectedInput]) ?? "";
+        const value = (event.type === "Update input" ? event.value : ctx.inputList[ctx.selectedInput]) ?? "";
         const themeContent = ctx.inputList["tailwind.config.js"] ?? "module.exports = {}";
 
         const tw = createTailwindContext(themeContent);
@@ -141,24 +138,17 @@ export const playgroundMachine = createMachine(
           hash: false,
         });
 
-        const result = rewriteTwFileContentToPanda(
-          value,
-          tailwind,
-          panda,
-          mergeCss
-        );
+        const result = rewriteTwFileContentToPanda(value, tailwind, panda, mergeCss);
         const { sourceFile, nodes, output, resultList = [] } = result;
 
         const outputList = {
           ["App.tsx"]: output,
           "transformed.md": resultList
             .map((result) => {
-              return `// ${Array.from(result.classList).join(
-                " "
-              )}\n\`\`\`json\n${JSON.stringify(
+              return `// ${Array.from(result.classList).join(" ")}\n\`\`\`json\n${JSON.stringify(
                 result.styles,
                 null,
-                2
+                2,
               )}\n\`\`\``;
             })
             .join("\n\n//------------------------------------\n"),
@@ -187,5 +177,5 @@ export const playgroundMachine = createMachine(
         return ctx.selectedInput === "tw-App.tsx";
       },
     },
-  }
+  },
 );

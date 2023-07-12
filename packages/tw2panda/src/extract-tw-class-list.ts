@@ -15,7 +15,7 @@ export const extractTwFileClassList = (
   content: string,
   tailwind: TailwindContext,
   panda: PandaContext,
-  mergeCss: (...styles: StyleObject[]) => StyleObject
+  mergeCss: (...styles: StyleObject[]) => StyleObject,
 ) => {
   const { nodes } = findTwClassCandidates(content, panda);
   const resultList = [] as TwResultItem[];

@@ -11,9 +11,7 @@ import tailwindConfigRaw from "../samples/tailwind.config";
 
 describe("extract-tw-class-list", () => {
   test("samples/button.ts", () => {
-    const tailwind = createTailwindContext(
-      initialInputList["tailwind.config.js"]
-    );
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
     const panda = createPandaContext();
     const { mergeCss } = createMergeCss({
       utility: panda.utility,
@@ -21,12 +19,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(
-      buttonRaw,
-      tailwind.context,
-      panda,
-      mergeCss
-    );
+    const { output } = rewriteTwFileContentToPanda(buttonRaw, tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
       "/** @see https://github.com/shadcn/ui/blob/ac5c727fc966a8cf859ced4a4074ddf9a31da922/apps/www/registry/default/ui/button.tsx#L12 */
@@ -103,12 +96,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(
-      buttonRaw,
-      tailwind.context,
-      panda,
-      mergeCss
-    );
+    const { output } = rewriteTwFileContentToPanda(buttonRaw, tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
       "/** @see https://github.com/shadcn/ui/blob/ac5c727fc966a8cf859ced4a4074ddf9a31da922/apps/www/registry/default/ui/button.tsx#L12 */
@@ -186,9 +174,7 @@ describe("extract-tw-class-list", () => {
   });
 
   test("Playground defaultCode", () => {
-    const tailwind = createTailwindContext(
-      initialInputList["tailwind.config.js"]
-    );
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
     const panda = createPandaContext();
     const { mergeCss } = createMergeCss({
       utility: panda.utility,
@@ -196,12 +182,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(
-      initialInputList["tw-App.tsx"],
-      tailwind.context,
-      panda,
-      mergeCss
-    );
+    const { output } = rewriteTwFileContentToPanda(initialInputList["tw-App.tsx"], tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
       "const App = () => {

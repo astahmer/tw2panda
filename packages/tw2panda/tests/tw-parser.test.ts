@@ -56,11 +56,7 @@ test("variant with value", () => {
 });
 
 test("variant with arbitrary value", () => {
-  expect(
-    parseTailwindClasses(
-      "w-[1ch] opacity-[.08] top-[117px] bg-[#bada55] text-[22px]"
-    )
-  ).toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("w-[1ch] opacity-[.08] top-[117px] bg-[#bada55] text-[22px]")).toMatchInlineSnapshot(`
     [
       {
         "className": "w-[1ch]",
@@ -108,8 +104,7 @@ test("variant with arbitrary value", () => {
 
 // https://tailwindcss.com/docs/adding-custom-styles#arbitrary-properties
 test("variant with arbitrary property", () => {
-  expect(parseTailwindClasses("[mask-type:luminance] [--scroll-offset:56px]"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("[mask-type:luminance] [--scroll-offset:56px]")).toMatchInlineSnapshot(`
       [
         {
           "className": "[mask-type:luminance]",
@@ -133,8 +128,7 @@ test("variant with arbitrary property", () => {
 
 // with modifier
 test("variant no value with modifier", () => {
-  expect(parseTailwindClasses("md:flex lg:dark:rounded"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("md:flex lg:dark:rounded")).toMatchInlineSnapshot(`
       [
         {
           "className": "md:flex",
@@ -160,8 +154,7 @@ test("variant no value with modifier", () => {
 });
 
 test("variant with value with modifier", () => {
-  expect(parseTailwindClasses("md:flex-1 lg:dark:bg-slate-100"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("md:flex-1 lg:dark:bg-slate-100")).toMatchInlineSnapshot(`
       [
         {
           "className": "md:flex-1",
@@ -189,8 +182,8 @@ test("variant with value with modifier", () => {
 test("variant with arbitrary value with modifier", () => {
   expect(
     parseTailwindClasses(
-      "md:w-[1ch] lg:dark:opacity-[.08] focus:top-[117px] invalid:bg-[#bada55] hover:text-[22px] before:content-['Festivus']"
-    )
+      "md:w-[1ch] lg:dark:opacity-[.08] focus:top-[117px] invalid:bg-[#bada55] hover:text-[22px] before:content-['Festivus']",
+    ),
   ).toMatchInlineSnapshot(`
     [
       {
@@ -259,9 +252,7 @@ test("variant with arbitrary value with modifier", () => {
 });
 
 test("variant with arbitrary property with modifier", () => {
-  expect(
-    parseTailwindClasses("hover:[mask-type:alpha] lg:[--scroll-offset:44px]")
-  ).toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("hover:[mask-type:alpha] lg:[--scroll-offset:44px]")).toMatchInlineSnapshot(`
     [
       {
         "className": "hover:[mask-type:alpha]",
@@ -290,8 +281,7 @@ test("variant with arbitrary property with modifier", () => {
 // group/peer
 // https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-parent-state
 test("styling based on parent state", () => {
-  expect(parseTailwindClasses("group-hover:stroke-white"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("group-hover:stroke-white")).toMatchInlineSnapshot(`
       [
         {
           "className": "group-hover:stroke-white",
@@ -308,8 +298,7 @@ test("styling based on parent state", () => {
 
 // https://tailwindcss.com/docs/hover-focus-and-other-states#differentiating-nested-groups
 test("differenciating nested groups", () => {
-  expect(parseTailwindClasses("group-hover/edit:translate-x-0.5"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("group-hover/edit:translate-x-0.5")).toMatchInlineSnapshot(`
       [
         {
           "className": "group-hover/edit:translate-x-0.5",
@@ -326,11 +315,7 @@ test("differenciating nested groups", () => {
 
 // https://tailwindcss.com/docs/hover-focus-and-other-states#arbitrary-groups
 test("arbitrary groups", () => {
-  expect(
-    parseTailwindClasses(
-      "group-[.is-published]:block group-[:nth-of-type(3)_&]:block"
-    )
-  ).toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("group-[.is-published]:block group-[:nth-of-type(3)_&]:block")).toMatchInlineSnapshot(`
     [
       {
         "className": "group-[.is-published]:block",
@@ -356,8 +341,7 @@ test("arbitrary groups", () => {
 
 // https://tailwindcss.com/docs/hover-focus-and-other-states#arbitrary-peers
 test("arbitrary peers", () => {
-  expect(parseTailwindClasses("peer-[.is-dirty]:peer-required:block"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("peer-[.is-dirty]:peer-required:block")).toMatchInlineSnapshot(`
       [
         {
           "className": "peer-[.is-dirty]:peer-required:block",
@@ -375,9 +359,7 @@ test("arbitrary peers", () => {
 
 // https://tailwindcss.com/docs/hover-focus-and-other-states#before-and-after
 test("before and after", () => {
-  expect(
-    parseTailwindClasses("after:content-['*'] after:ml-0.5 after:text-red-500")
-  ).toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("after:content-['*'] after:ml-0.5 after:text-red-500")).toMatchInlineSnapshot(`
     [
       {
         "className": "after:content-['*']",
@@ -413,8 +395,7 @@ test("before and after", () => {
 
 // https://tailwindcss.com/docs/hover-focus-and-other-states#using-arbitrary-variants
 test("arbitrary variant", () => {
-  expect(parseTailwindClasses("lg:[&:nth-child(3)]:hover:underline [&_p]:mt-4"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("lg:[&:nth-child(3)]:hover:underline [&_p]:mt-4")).toMatchInlineSnapshot(`
       [
         {
           "className": "lg:[&:nth-child(3)]:hover:underline",
@@ -478,8 +459,7 @@ test("targeting a single breakpoint", () => {
 
 // https://tailwindcss.com/docs/responsive-design#arbitrary-values
 test("arbitrary breakpoint", () => {
-  expect(parseTailwindClasses("min-[320px]:text-center max-[600px]:bg-sky-300"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("min-[320px]:text-center max-[600px]:bg-sky-300")).toMatchInlineSnapshot(`
       [
         {
           "className": "min-[320px]:text-center",
@@ -505,8 +485,7 @@ test("arbitrary breakpoint", () => {
 
 // https://tailwindcss.com/docs/adding-custom-styles#handling-whitespace
 test("handling whitespace", () => {
-  expect(parseTailwindClasses("grid grid-cols-[1fr_500px_2fr]"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("grid grid-cols-[1fr_500px_2fr]")).toMatchInlineSnapshot(`
       [
         {
           "className": "grid",
@@ -528,8 +507,7 @@ test("handling whitespace", () => {
 });
 
 test("handling url", () => {
-  expect(parseTailwindClasses("bg-[url('/what_a_rush.png')]"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("bg-[url('/what_a_rush.png')]")).toMatchInlineSnapshot(`
       [
         {
           "className": "bg-[url('/what_a_rush.png')]",
@@ -547,8 +525,8 @@ test("handling url", () => {
 test("resolving ambiguities", () => {
   expect(
     parseTailwindClasses(
-      "text-[22px] text-[#bada55] text-[var(--my-var)] text-[length:var(--my-var)] text-[color:var(--my-var)]"
-    )
+      "text-[22px] text-[#bada55] text-[var(--my-var)] text-[length:var(--my-var)] text-[color:var(--my-var)]",
+    ),
   ).toMatchInlineSnapshot(`
     [
       {
@@ -653,8 +631,7 @@ test("variant with dot", () => {
 });
 
 test("variant with important", () => {
-  expect(parseTailwindClasses("flex! underline! min-w-4! text-white/40!"))
-    .toMatchInlineSnapshot(`
+  expect(parseTailwindClasses("flex! underline! min-w-4! text-white/40!")).toMatchInlineSnapshot(`
       [
         {
           "className": "flex!",

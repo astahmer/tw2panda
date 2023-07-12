@@ -4,16 +4,14 @@ import { initialInputList } from "../../../demo-code-sample";
 
 describe("tw-eval-theme", () => {
   test("Playground themeCode", () => {
-    expect(
-      evalTheme(initialInputList["tailwind.config.js"])
-    ).toMatchInlineSnapshot(
+    expect(evalTheme(initialInputList["tailwind.config.js"])).toMatchInlineSnapshot(
       `
       {
         "theme": {
           "extend": {},
         },
       }
-    `
+    `,
     );
   });
 });

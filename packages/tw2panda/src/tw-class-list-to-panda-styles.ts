@@ -9,11 +9,7 @@ import { findRuleProps } from "./postcss-find-rule-props";
 /**
  * Takes a list of Tailwind class names and convert them to a list of Panda style objects
  */
-export const twClassListToPandaStyles = (
-  classList: Set<string>,
-  tailwind: TailwindContext,
-  panda: PandaContext
-) => {
+export const twClassListToPandaStyles = (classList: Set<string>, tailwind: TailwindContext, panda: PandaContext) => {
   const styles = [] as StyleObject[];
   const matchingTokens = [] as MatchingToken[];
 
@@ -34,7 +30,7 @@ export const twClassListToPandaStyles = (
 
           return { [conditionValue]: acc } as any;
         },
-        { [propName]: tokenName }
+        { [propName]: tokenName },
       );
       styles.push(nested);
     });
@@ -43,11 +39,7 @@ export const twClassListToPandaStyles = (
   return { styles, matchingTokens };
 };
 
-function getMatchingTwCandidates(
-  className: string,
-  tailwind: TailwindContext,
-  panda: PandaContext
-) {
+function getMatchingTwCandidates(className: string, tailwind: TailwindContext, panda: PandaContext) {
   const tokens = [] as MatchingToken[];
   const classInfo = parseTwClassName(className);
   if (!classInfo) return tokens;

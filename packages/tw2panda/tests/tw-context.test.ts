@@ -43,7 +43,7 @@ describe("tw-context", () => {
         "safelist",
         "blocklist",
       ]
-    `
+    `,
     );
   });
 });

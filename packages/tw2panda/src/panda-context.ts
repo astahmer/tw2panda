@@ -20,13 +20,7 @@ import type {
   TSConfig,
 } from "@pandacss/types";
 import type { UnwrapExtend } from "@pandacss/types/dist/shared";
-import type {
-  Conditions,
-  Utility,
-  Recipes,
-  StylesheetOptions,
-  Stylesheet,
-} from "@pandacss/core";
+import type { Conditions, Utility, Recipes, StylesheetOptions, Stylesheet } from "@pandacss/core";
 import type { TokenDictionary } from "@pandacss/token-dictionary";
 import type { Root } from "postcss";
 
@@ -74,10 +68,7 @@ export interface PandaContext extends ReturnType<typeof createPandaContext> {}
 
 type Generator = {
   getArtifacts: () => Artifact[];
-  getCss: (options: {
-    files: string[];
-    resolve?: boolean | undefined;
-  }) => string;
+  getCss: (options: { files: string[]; resolve?: boolean | undefined }) => string;
   getParserCss: (result: ParserResultType) => string | undefined;
   messages: {
     artifactsGenerated: () => string;
@@ -168,9 +159,7 @@ type Generator = {
   recipes: Recipes;
   conditions: Conditions;
   createSheetContext: () => StylesheetContext;
-  createSheet: (
-    options?: Pick<StylesheetOptions, "content"> | undefined
-  ) => Stylesheet;
+  createSheet: (options?: Pick<StylesheetOptions, "content"> | undefined) => Stylesheet;
   hooks: PandaHookable;
   path: string;
   config: UnwrapExtend<RequiredBy<Config, "include" | "outdir" | "cwd">>;

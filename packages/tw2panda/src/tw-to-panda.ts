@@ -6,10 +6,7 @@ import { createTailwindContext } from "./tw-context";
 import { twClassListToPandaStyles } from "./tw-class-list-to-panda-styles";
 import { initialInputList } from "../../../demo-code-sample";
 
-export function twClassListToPanda(
-  classListString: string,
-  useShorthands?: boolean
-) {
+export function twClassListToPanda(classListString: string, useShorthands?: boolean) {
   const classList = new Set(classListString.split(" "));
 
   const tw = createTailwindContext(initialInputList["tailwind.config.js"]);

@@ -11,13 +11,10 @@ import type { TailwindContext, TailwindMatch } from "./tw-types";
 
 const createContext = createContextRaw as (config: Config) => TailwindContext;
 
-export const createTailwindContext = (
-  themeContentOrConfig: string | Config
-) => {
+export const createTailwindContext = (themeContentOrConfig: string | Config) => {
   let userConfig: Config;
   if (typeof themeContentOrConfig === "string" || !themeContentOrConfig) {
-    const evaluatedTheme =
-      (themeContentOrConfig ? evalTheme(themeContentOrConfig) : {}) ?? {};
+    const evaluatedTheme = (themeContentOrConfig ? evalTheme(themeContentOrConfig) : {}) ?? {};
     userConfig = {
       ...evaluatedTheme,
       corePlugins: {
@@ -37,5 +34,5 @@ export const createTailwindContext = (
 
 export const resolveMatches = resolveMatchesRaw as (
   candidate: string,
-  context: TailwindContext
+  context: TailwindContext,
 ) => Iterable<TailwindMatch>;

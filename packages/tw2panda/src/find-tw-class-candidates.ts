@@ -6,10 +6,7 @@ import { PandaContext } from "./panda-context";
 export function findTwClassCandidates(content: string, panda: PandaContext) {
   const nodes = new Set<StringLiteral>();
 
-  const sourceFile = panda.project.addSourceFile(
-    "App.tsx",
-    content
-  ) as any as SourceFile;
+  const sourceFile = panda.project.addSourceFile("App.tsx", content) as any as SourceFile;
 
   sourceFile.forEachDescendant((node, traversal) => {
     // quick win

@@ -16,7 +16,7 @@ export function rewriteTwFileContentToPanda(
   content: string,
   tailwind: TailwindContext,
   panda: PandaContext,
-  mergeCss: (...styles: StyleObject[]) => StyleObject
+  mergeCss: (...styles: StyleObject[]) => StyleObject,
 ) {
   const { sourceFile, nodes } = findTwClassCandidates(content, panda);
 

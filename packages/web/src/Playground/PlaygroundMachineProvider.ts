@@ -3,6 +3,4 @@ import { InterpreterFrom } from "xstate";
 import { playgroundMachine } from "./Playground.machine";
 
 export const [PlaygroundMachineProvider, usePlaygroundContext] =
-  createContextWithHook<InterpreterFrom<typeof playgroundMachine>>(
-    "PlaygroundMachineContext"
-  );
+  createContextWithHook<InterpreterFrom<typeof playgroundMachine>>("PlaygroundMachineContext");

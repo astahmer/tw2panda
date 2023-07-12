@@ -12,10 +12,7 @@ import { twClassListToPanda } from "./tw-to-panda";
 const cli = cac("tw2panda");
 
 cli
-  .command(
-    "rewrite <file>",
-    "Output the given file converted to panda, doesn't actually write to disk"
-  )
+  .command("rewrite <file>", "Output the given file converted to panda, doesn't actually write to disk")
   .action((file) => {
     const content = readFileSync(join(process.cwd(), file), "utf-8");
 
@@ -23,19 +20,14 @@ cli
     const panda = createPandaContext();
     const { mergeCss } = createMergeCss(Object.assign(panda, { hash: false }));
 
-    const result = rewriteTwFileContentToPanda(
-      content,
-      tw.context,
-      panda,
-      mergeCss
-    );
+    const result = rewriteTwFileContentToPanda(content, tw.context, panda, mergeCss);
     console.log(result.output);
   });
 
 cli
   .command(
     "extract <file>",
-    "Extract each tailwind candidate and show its converted output, doesn't actually write to disk"
+    "Extract each tailwind candidate and show its converted output, doesn't actually write to disk",
   )
   .action((file) => {
     console.log({ file });
@@ -49,10 +41,7 @@ cli
   });
 
 cli
-  .command(
-    "convert <classList>",
-    "Example: inline-flex disabled:pointer-events-none underline-offset-4"
-  )
+  .command("convert <classList>", "Example: inline-flex disabled:pointer-events-none underline-offset-4")
   .action((classList) => {
     const result = twClassListToPanda(classList);
     console.log("input:", classList);

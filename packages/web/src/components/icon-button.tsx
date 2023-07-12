@@ -1,8 +1,7 @@
 import { css, cx } from "panda/css";
 import { SystemStyleObject } from "panda/types";
 
-interface IconButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   css?: SystemStyleObject;
 }
@@ -32,7 +31,7 @@ export function IconButton(props: IconButtonProps) {
             },
           },
         }),
-        css(cssProp ?? {})
+        css(cssProp ?? {}),
       )}
     >
       {children}

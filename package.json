@@ -10,7 +10,7 @@
   "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "format": "prettier --write \"./{src,tests}/**/*\""
+    "format": "prettier --write \"./packages/*/{src,tests}/**/*\""
   },
   "devDependencies": {
     "prettier": "^3.0.0"

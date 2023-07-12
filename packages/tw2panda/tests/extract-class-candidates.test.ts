@@ -11,8 +11,7 @@ describe("extract-class-candidates", () => {
     const { sourceFile, nodes } = extractClassCandidates(buttonRaw, panda);
 
     expect(sourceFile.getFilePath()).toMatchInlineSnapshot('"/App.tsx"');
-    expect(Array.from(nodes).map((node) => node.getLiteralText()))
-      .toMatchInlineSnapshot(`
+    expect(Array.from(nodes).map((node) => node.getLiteralText())).toMatchInlineSnapshot(`
         [
           "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -35,14 +34,10 @@ describe("extract-class-candidates", () => {
 
   test("Playground defaultCode", () => {
     const panda = createPandaContext();
-    const { sourceFile, nodes } = extractClassCandidates(
-      initialInputList["tw-App.tsx"],
-      panda
-    );
+    const { sourceFile, nodes } = extractClassCandidates(initialInputList["tw-App.tsx"], panda);
 
     expect(sourceFile.getFilePath()).toMatchInlineSnapshot('"/App.tsx"');
-    expect(Array.from(nodes).map((node) => node.getLiteralText()))
-      .toMatchInlineSnapshot(`
+    expect(Array.from(nodes).map((node) => node.getLiteralText())).toMatchInlineSnapshot(`
         [
           "md:flex bg-slate-100 rounded-xl p-8 md:p-0 dark:bg-slate-800",
           "w-24 h-24 md:w-48 md:h-auto md:rounded-none rounded-full mx-auto",

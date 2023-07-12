@@ -2,18 +2,13 @@ import type * as P from "postcss";
 import type { Config } from "tailwindcss";
 
 export type TailwindContext = {
-  getClassOrder: (
-    classes: string[]
-  ) => Array<[className: string, order: bigint]>;
+  getClassOrder: (classes: string[]) => Array<[className: string, order: bigint]>;
   candidateRuleMap: Map<string, Candidate[]>;
   variantMap: Array<Record<string, never>>;
   tailwindConfig: Config;
 };
 
-export type Candidate = [
-  data: { layer: string },
-  rule: P.Rule | P.AtRule | P.Declaration
-];
+export type Candidate = [data: { layer: string }, rule: P.Rule | P.AtRule | P.Declaration];
 
 export type TailwindMatchOptions = {
   preserveSource?: boolean;
@@ -21,10 +16,7 @@ export type TailwindMatchOptions = {
   respectImportant?: boolean;
   values?: Record<string, string>;
 };
-export type TailwindMatch = [
-  TailwindMatchInfos,
-  P.Rule | P.AtRule | P.Declaration
-];
+export type TailwindMatch = [TailwindMatchInfos, P.Rule | P.AtRule | P.Declaration];
 
 interface TailwindMatchInfos {
   sort: {

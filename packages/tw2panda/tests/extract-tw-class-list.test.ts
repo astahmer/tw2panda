@@ -11,9 +11,7 @@ import tailwindConfigRaw from "../samples/tailwind.config";
 
 describe("extract-tw-class-list", () => {
   test("samples/button.ts", () => {
-    const tailwind = createTailwindContext(
-      initialInputList["tailwind.config.js"]
-    );
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
     const panda = createPandaContext();
     const { mergeCss } = createMergeCss({
       utility: panda.utility,
@@ -21,12 +19,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { resultList } = extractTwFileClassList(
-      buttonRaw,
-      tailwind.context,
-      panda,
-      mergeCss
-    );
+    const { resultList } = extractTwFileClassList(buttonRaw, tailwind.context, panda, mergeCss);
 
     expect(resultList).toMatchInlineSnapshot(`
       [
@@ -164,12 +157,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { resultList } = extractTwFileClassList(
-      buttonRaw,
-      tailwind.context,
-      panda,
-      mergeCss
-    );
+    const { resultList } = extractTwFileClassList(buttonRaw, tailwind.context, panda, mergeCss);
 
     expect(resultList).toMatchInlineSnapshot(`
       [
@@ -364,9 +352,7 @@ describe("extract-tw-class-list", () => {
   });
 
   test("Playground defaultCode", () => {
-    const tailwind = createTailwindContext(
-      initialInputList["tailwind.config.js"]
-    );
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
     const panda = createPandaContext();
     const { mergeCss } = createMergeCss({
       utility: panda.utility,
@@ -374,12 +360,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { resultList } = extractTwFileClassList(
-      initialInputList["tw-App.tsx"],
-      tailwind.context,
-      panda,
-      mergeCss
-    );
+    const { resultList } = extractTwFileClassList(initialInputList["tw-App.tsx"], tailwind.context, panda, mergeCss);
 
     expect(resultList).toMatchInlineSnapshot(`
       [

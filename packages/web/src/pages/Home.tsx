@@ -26,10 +26,7 @@ export const Home = () => {
                 Tailwind to Panda (tw2panda)
               </styled.h1>
               <HStack alignItems="center" ml="auto">
-                <styled.a
-                  target="blank"
-                  href="https://github.com/astahmer/tw2panda"
-                >
+                <styled.a target="blank" href="https://github.com/astahmer/tw2panda">
                   <IconButton title="Github">
                     <GithubIcon />
                   </IconButton>
