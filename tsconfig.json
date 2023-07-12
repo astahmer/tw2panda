@@ -1,26 +1,30 @@
 {
+  // https://github.com/tsconfig/bases/blob/141d65201924bae1c70a0a4e18d05f42fbf93a9a/bases/strictest.json
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+      "strict": true,
+      "allowUnusedLabels": false,
+      "allowUnreachableCode": false,
+      "exactOptionalPropertyTypes": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitOverride": true,
+      "noImplicitReturns": true,
+      "noPropertyAccessFromIndexSignature": true,
+      "noUncheckedIndexedAccess": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": false,
-    "noEmit": true,
-    "jsx": "react-jsx",
+      "verbatimModuleSyntax": false,
+      "checkJs": true,
 
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "panda/*": ["./styled-system/*"]
-    }
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      //
+      "isolatedModules": true, // https://preconstruct.tools/guides/building-typescript-packages
+      "noEmit": true
   },
-  "include": ["src", "styled-system", "scripts", "tests"]
+  "types": ["node", "vitest/importMeta"],
+  //
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Strictest"
 }
