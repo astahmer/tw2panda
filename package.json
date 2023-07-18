@@ -10,7 +10,7 @@
   "author": "Alexandre Stahmer <alexandre.stahmer@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "pnpm -r run build",
+    "build": "cd packages/tw2panda && pnpm build",
     "format": "prettier --write \"./packages/*/{src,tests}/**/*\"",
     "release-dev": "changeset version --snapshot dev && changeset publish --tag dev",
     "test": "cd packages/tw2panda && pnpm run test"
