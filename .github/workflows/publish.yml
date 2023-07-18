@@ -38,11 +38,21 @@ jobs:
         working-directory: ./packages/tw2panda
         run: pnpm test
 
+      - name: Release to dev tag
+        if: steps.changesets.outputs.published != 'true'
+        run: |
+          git checkout main
+          pnpm changeset version --snapshot dev
+          pnpm changeset publish --tag dev
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm release
+          publish: pnpm changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
