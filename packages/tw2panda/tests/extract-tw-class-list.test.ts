@@ -19,7 +19,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { resultList } = extractTwFileClassList(buttonRaw, tailwind.context, panda, mergeCss);
+    const resultList = extractTwFileClassList(buttonRaw, tailwind.context, panda, mergeCss);
 
     expect(resultList).toMatchInlineSnapshot(`
       [
@@ -157,7 +157,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { resultList } = extractTwFileClassList(buttonRaw, tailwind.context, panda, mergeCss);
+    const resultList = extractTwFileClassList(buttonRaw, tailwind.context, panda, mergeCss);
 
     expect(resultList).toMatchInlineSnapshot(`
       [
@@ -360,7 +360,7 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { resultList } = extractTwFileClassList(initialInputList["tw-App.tsx"], tailwind.context, panda, mergeCss);
+    const resultList = extractTwFileClassList(initialInputList["tw-App.tsx"], tailwind.context, panda, mergeCss);
 
     expect(resultList).toMatchInlineSnapshot(`
       [

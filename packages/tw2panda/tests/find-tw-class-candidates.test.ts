@@ -1,14 +1,14 @@
 import { describe, test, expect } from "vitest";
 import { createPandaContext } from "../src/panda-context";
-import { extractClassCandidates } from "../src/extract-class-candidates";
+import { findTwClassCandidates } from "../src/find-tw-class-candidates";
 import { initialInputList } from "../../../demo-code-sample";
 // @ts-expect-error
 import buttonRaw from "../samples/button?raw";
 
-describe("extract-class-candidates", () => {
+describe("find-tw-class-candidates", () => {
   test("samples/button.ts", () => {
     const panda = createPandaContext();
-    const { sourceFile, nodes } = extractClassCandidates(buttonRaw, panda);
+    const { sourceFile, nodes } = findTwClassCandidates(buttonRaw, panda);
 
     expect(sourceFile.getFilePath()).toMatchInlineSnapshot('"/App.tsx"');
     expect(Array.from(nodes).map((node) => node.getLiteralText())).toMatchInlineSnapshot(`
@@ -34,7 +34,7 @@ describe("extract-class-candidates", () => {
 
   test("Playground defaultCode", () => {
     const panda = createPandaContext();
-    const { sourceFile, nodes } = extractClassCandidates(initialInputList["tw-App.tsx"], panda);
+    const { sourceFile, nodes } = findTwClassCandidates(initialInputList["tw-App.tsx"], panda);
 
     expect(sourceFile.getFilePath()).toMatchInlineSnapshot('"/App.tsx"');
     expect(Array.from(nodes).map((node) => node.getLiteralText())).toMatchInlineSnapshot(`
