@@ -11,11 +11,12 @@ import { twClassListToPanda } from "./tw-to-panda";
 import { z } from "zod";
 import { bundle } from "./bundle";
 
-const cli = cac("tw2panda");
-
-// TODO fix conditions (prefix with _, convert to camelCase, etc.)
+// @ts-expect-error
+import { name, version } from "../package.json";
 
 const withTw = z.object({ tailwind: z.string() }).partial();
+
+const cli = cac(name);
 
 cli
   .command("rewrite <file>", "Output the given file converted to panda, doesn't actually write to disk")
@@ -73,4 +74,5 @@ cli
   });
 
 cli.help();
+cli.version(version);
 cli.parse();
