@@ -20,7 +20,7 @@ export const twClassListToPandaStyles = (classList: Set<string>, tailwind: Tailw
       // dark:text-sky-400=-> { dark: { color: "sky.400" } }
       const nested = classInfo.modifiers?.reduce(
         (acc, modifier) => {
-          const prefixed = "_" + modifier;
+          const prefixed = "_" + kebabToCamel(modifier);
           const condition = panda.conditions.values[prefixed];
 
           const conditionValue = condition ? prefixed : modifier;

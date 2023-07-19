@@ -41,7 +41,7 @@ describe("extract-tw-class-list", () => {
           transitionProperty: 'color, background-color, border-color, text-decoration-color, fill, stroke',
           transitionTimingFunction: 'colors',
           transitionDuration: 'colors',
-          'focus-visible': { ring: 'none', ringOffset: 'none', shadow: '2' },
+          _focusVisible: { ring: 'none', ringOffset: 'none', shadow: '2' },
           _disabled: { pointerEvents: 'none', opacity: '0.5' },
         },
         variants: {
@@ -116,7 +116,7 @@ describe("extract-tw-class-list", () => {
           transitionProperty: 'color, background-color, border-color, text-decoration-color, fill, stroke',
           transitionTimingFunction: 'colors',
           transitionDuration: 'colors',
-          'focus-visible': { ring: 'none', ringOffset: 'none', shadow: '2' },
+          _focusVisible: { ring: 'none', ringOffset: 'none', shadow: '2' },
           _disabled: { pointerEvents: 'none', opacity: '0.5' },
         },
         variants: {

@@ -11,7 +11,7 @@ import tailwindConfigRaw from "../samples/tailwind.config.cjs";
 import { twClassListToPandaStyles } from "../src/tw-class-list-to-panda-styles";
 
 describe("extract-tw-class-list", () => {
-  test.only("minimal", () => {
+  test("minimal", () => {
     const classList = new Set([
       "inline-flex",
       "items-center",
@@ -210,7 +210,7 @@ describe("extract-tw-class-list", () => {
             "tokenName": "none",
           },
           "styles": {
-            "focus-visible": {
+            "_focusVisible": {
               "outline": "none",
             },
           },
@@ -230,7 +230,7 @@ describe("extract-tw-class-list", () => {
             "tokenName": "none",
           },
           "styles": {
-            "focus-visible": {
+            "_focusVisible": {
               "outlineOffset": "none",
             },
           },
@@ -250,7 +250,7 @@ describe("extract-tw-class-list", () => {
             "tokenName": "2",
           },
           "styles": {
-            "focus-visible": {
+            "_focusVisible": {
               "boxShadow": "2",
             },
           },
@@ -335,13 +335,13 @@ describe("extract-tw-class-list", () => {
               "opacity": "0.5",
               "pointerEvents": "none",
             },
-            "alignItems": "center",
-            "display": "inline-flex",
-            "focus-visible": {
+            "_focusVisible": {
               "ring": "none",
               "ringOffset": "none",
               "shadow": "2",
             },
+            "alignItems": "center",
+            "display": "inline-flex",
             "fontSize": "sm",
             "fontWeight": "medium",
             "justifyContent": "center",
@@ -473,13 +473,13 @@ describe("extract-tw-class-list", () => {
               "opacity": "0.5",
               "pointerEvents": "none",
             },
-            "alignItems": "center",
-            "display": "inline-flex",
-            "focus-visible": {
+            "_focusVisible": {
               "ring": "none",
               "ringOffset": "none",
               "shadow": "2",
             },
+            "alignItems": "center",
+            "display": "inline-flex",
             "fontSize": "sm",
             "fontWeight": "medium",
             "justifyContent": "center",
