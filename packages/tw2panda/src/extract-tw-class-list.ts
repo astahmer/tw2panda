@@ -17,11 +17,11 @@ export const extractTwFileClassList = (
   panda: PandaContext,
   mergeCss: (...styles: StyleObject[]) => StyleObject,
 ) => {
-  const { candidates } = findTwClassCandidates(content, panda);
+  const { nodes } = findTwClassCandidates(content, panda);
   const resultList = [] as TwResultItem[];
-  if (!candidates.size) return resultList;
+  if (!nodes.size) return resultList;
 
-  candidates.forEach(({ node }) => {
+  nodes.forEach((node) => {
     const string = node.getLiteralText();
     const classList = new Set(string.split(" "));
 
