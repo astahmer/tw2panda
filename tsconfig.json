@@ -23,6 +23,7 @@
       "isolatedModules": true, // https://preconstruct.tools/guides/building-typescript-packages
       "noEmit": true
   },
+  "exclude": ["node_modules", ".changeset", ".github", "dist"],
   "types": ["node", "vitest/importMeta"],
   //
   "$schema": "https://json.schemastore.org/tsconfig",

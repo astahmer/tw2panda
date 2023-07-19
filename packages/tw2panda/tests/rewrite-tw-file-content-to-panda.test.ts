@@ -7,7 +7,7 @@ import { initialInputList } from "../../../demo-code-sample";
 
 // @ts-expect-error
 import buttonRaw from "../samples/button?raw";
-import tailwindConfigRaw from "../samples/tailwind.config";
+import tailwindConfigRaw from "../samples/tailwind.config.cjs";
 
 describe("extract-tw-class-list", () => {
   test("samples/button.ts", () => {
@@ -29,8 +29,8 @@ describe("extract-tw-class-list", () => {
       import { cva, type VariantProps } from 'class-variance-authority'
       import { cn } from '@/lib/utils'
 
-      const buttonVariants = cva(
-        css({
+      const buttonVariants = cva({
+        base: {
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -38,35 +38,33 @@ describe("extract-tw-class-list", () => {
           fontSize: 'sm',
           lineHeight: 'sm',
           fontWeight: 'medium',
-          transitionProperty: 'colors',
+          transitionProperty: 'color, background-color, border-color, text-decoration-color, fill, stroke',
           transitionTimingFunction: 'colors',
           transitionDuration: 'colors',
           'focus-visible': { ring: 'none', ringOffset: 'none', shadow: '2' },
           _disabled: { pointerEvents: 'none', opacity: '0.5' },
-        }),
-        {
-          variants: {
-            variant: {
-              default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-              destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-              outline: css({ borderWidth: '1px' }),
-              secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-              ghost: 'hover:bg-accent hover:text-accent-foreground',
-              link: css({ textUnderlineOffset: '4px', _hover: { textDecorationLine: 'underline' } }),
-            },
-            size: {
-              default: css({ h: '10', pl: '4', pr: '4', pt: '2', pb: '2' }),
-              sm: css({ h: '9', rounded: 'md', pl: '3', pr: '3' }),
-              lg: css({ h: '11', rounded: 'md', pl: '8', pr: '8' }),
-              icon: css({ h: '10', w: '10' }),
-            },
+        },
+        variants: {
+          variant: {
+            default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+            destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+            outline: { borderWidth: '1px' },
+            secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+            ghost: 'hover:bg-accent hover:text-accent-foreground',
+            link: { textUnderlineOffset: '4px', _hover: { textDecorationLine: 'underline' } },
           },
-          defaultVariants: {
-            variant: 'default',
-            size: 'default',
+          size: {
+            default: { h: '10', pl: '4', pr: '4', pt: '2', pb: '2' },
+            sm: { h: '9', rounded: 'md', pl: '3', pr: '3' },
+            lg: { h: '11', rounded: 'md', pl: '8', pr: '8' },
+            icon: { h: '10', w: '10' },
           },
         },
-      )
+        defaultVariants: {
+          variant: 'default',
+          size: 'default',
+        },
+      })
 
       export interface ButtonProps
         extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -106,8 +104,8 @@ describe("extract-tw-class-list", () => {
       import { cva, type VariantProps } from 'class-variance-authority'
       import { cn } from '@/lib/utils'
 
-      const buttonVariants = cva(
-        css({
+      const buttonVariants = cva({
+        base: {
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -115,44 +113,38 @@ describe("extract-tw-class-list", () => {
           fontSize: 'sm',
           lineHeight: 'sm',
           fontWeight: 'medium',
-          transitionProperty: 'colors',
+          transitionProperty: 'color, background-color, border-color, text-decoration-color, fill, stroke',
           transitionTimingFunction: 'colors',
           transitionDuration: 'colors',
           'focus-visible': { ring: 'none', ringOffset: 'none', shadow: '2' },
           _disabled: { pointerEvents: 'none', opacity: '0.5' },
-        }),
-        {
-          variants: {
-            variant: {
-              default: css({ bgColor: 'primary', color: 'primary.foreground', _hover: { bgColor: 'primary/90' } }),
-              destructive: css({
-                bgColor: 'destructive',
-                color: 'destructive.foreground',
-                _hover: { bgColor: 'destructive/90' },
-              }),
-              outline: css({
-                borderWidth: '1px',
-                borderColor: 'input',
-                bgColor: 'background',
-                _hover: { bgColor: 'accent', color: 'accent.foreground' },
-              }),
-              secondary: css({ bgColor: 'secondary', color: 'secondary.foreground', _hover: { bgColor: 'secondary/80' } }),
-              ghost: css({ _hover: { bgColor: 'accent', color: 'accent.foreground' } }),
-              link: css({ color: 'primary', textUnderlineOffset: '4px', _hover: { textDecorationLine: 'underline' } }),
+        },
+        variants: {
+          variant: {
+            default: { bgColor: 'primary', color: 'primary.foreground', _hover: { bgColor: 'primary/90' } },
+            destructive: { bgColor: 'destructive', color: 'destructive.foreground', _hover: { bgColor: 'destructive/90' } },
+            outline: {
+              borderWidth: '1px',
+              borderColor: 'input',
+              bgColor: 'background',
+              _hover: { bgColor: 'accent', color: 'accent.foreground' },
             },
-            size: {
-              default: css({ h: '10', pl: '4', pr: '4', pt: '2', pb: '2' }),
-              sm: css({ h: '9', rounded: 'md', pl: '3', pr: '3' }),
-              lg: css({ h: '11', rounded: 'md', pl: '8', pr: '8' }),
-              icon: css({ h: '10', w: '10' }),
-            },
+            secondary: { bgColor: 'secondary', color: 'secondary.foreground', _hover: { bgColor: 'secondary/80' } },
+            ghost: { _hover: { bgColor: 'accent', color: 'accent.foreground' } },
+            link: { color: 'primary', textUnderlineOffset: '4px', _hover: { textDecorationLine: 'underline' } },
           },
-          defaultVariants: {
-            variant: 'default',
-            size: 'default',
+          size: {
+            default: { h: '10', pl: '4', pr: '4', pt: '2', pb: '2' },
+            sm: { h: '9', rounded: 'md', pl: '3', pr: '3' },
+            lg: { h: '11', rounded: 'md', pl: '8', pr: '8' },
+            icon: { h: '10', w: '10' },
           },
         },
-      )
+        defaultVariants: {
+          variant: 'default',
+          size: 'default',
+        },
+      })
 
       export interface ButtonProps
         extends React.ButtonHTMLAttributes<HTMLButtonElement>,

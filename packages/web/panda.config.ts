@@ -8,7 +8,7 @@ export default defineConfig({
   include: ["./src/**/*.{tsx,jsx}", "./pages/**/*.{jsx,tsx}"],
   exclude: [],
   jsxFramework: "react",
-  presets: [pandaPreset, themePreset],
+  presets: [pandaPreset as any, themePreset],
   conditions: {
     // next-themes
     dark: '.dark &, [data-theme="dark"] &',

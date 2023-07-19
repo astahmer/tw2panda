@@ -7,7 +7,7 @@ import { initialInputList } from "../../../demo-code-sample";
 
 // @ts-expect-error
 import buttonRaw from "../samples/button?raw";
-import tailwindConfigRaw from "../samples/tailwind.config";
+import tailwindConfigRaw from "../samples/tailwind.config.cjs";
 
 describe("extract-tw-class-list", () => {
   test("samples/button.ts", () => {
@@ -59,7 +59,7 @@ describe("extract-tw-class-list", () => {
             "lineHeight": "sm",
             "rounded": "md",
             "transitionDuration": "colors",
-            "transitionProperty": "colors",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
             "transitionTimingFunction": "colors",
           },
         },
@@ -197,7 +197,7 @@ describe("extract-tw-class-list", () => {
             "lineHeight": "sm",
             "rounded": "md",
             "transitionDuration": "colors",
-            "transitionProperty": "colors",
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
             "transitionTimingFunction": "colors",
           },
         },
