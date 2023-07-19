@@ -40,6 +40,18 @@ export function rewriteTwFileContentToPanda(
       if (moduleSpecifier === "class-variance-authority") {
         const moduleSpecifierNode = node.getModuleSpecifier();
         magicStr.update(moduleSpecifierNode.getStart(), moduleSpecifierNode.getEnd(), "'styled-system/css'");
+
+        const importClause = node.getImportClause();
+        if (importClause) {
+          const namedBindings = importClause.getNamedBindings();
+          if (Node.isNamedImports(namedBindings)) {
+            const elements = namedBindings.getElements();
+            const VariantPropsNode = elements.find((e) => e.getName() === "VariantProps");
+            if (VariantPropsNode) {
+              magicStr.update(VariantPropsNode.getStart(), VariantPropsNode.getEnd(), "type RecipeVariantProps");
+            }
+          }
+        }
       }
     }
 
