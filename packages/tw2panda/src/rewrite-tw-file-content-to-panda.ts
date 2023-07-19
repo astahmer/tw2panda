@@ -72,10 +72,10 @@ export function rewriteTwFileContentToPanda(
       const classList = new Set(string.split(" ").filter((t) => t.trim()));
       if (!classList.size) return;
 
-      const { styles } = twClassListToPandaStyles(classList, tailwind, panda);
+      const styles = twClassListToPandaStyles(classList, tailwind, panda);
       if (!styles.length) return;
 
-      const merged = mapToShorthands(mergeCss(...styles), panda);
+      const merged = mapToShorthands(mergeCss(...styles.map((s) => s.styles)), panda);
       resultList.push({ classList: new Set(classList), styles: merged, node });
 
       const parent = node.getParent();

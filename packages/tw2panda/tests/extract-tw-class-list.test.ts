@@ -8,8 +8,297 @@ import { initialInputList } from "../../../demo-code-sample";
 // @ts-expect-error
 import buttonRaw from "../samples/button?raw";
 import tailwindConfigRaw from "../samples/tailwind.config.cjs";
+import { twClassListToPandaStyles } from "../src/tw-class-list-to-panda-styles";
 
 describe("extract-tw-class-list", () => {
+  test.only("minimal", () => {
+    const classList = new Set([
+      "inline-flex",
+      "items-center",
+      "justify-center",
+      "rounded-md",
+      "text-sm",
+      "font-medium",
+      "ring-offset-background",
+      "transition-colors",
+      "focus-visible:outline-none",
+      "focus-visible:ring-2",
+      "focus-visible:ring-ring",
+      "focus-visible:ring-offset-2",
+      "disabled:pointer-events-none",
+      "disabled:opacity-50",
+    ]);
+
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
+    const panda = createPandaContext();
+
+    const stylesList = twClassListToPandaStyles(classList, tailwind.context, panda);
+    expect(stylesList).toMatchInlineSnapshot(`
+      [
+        {
+          "match": {
+            "classInfo": {
+              "className": "inline-flex",
+              "modifiers": [],
+              "utility": "inline",
+              "value": "flex",
+              "variant": "inline-flex",
+            },
+            "propName": "display",
+            "tokenName": "inline-flex",
+          },
+          "styles": {
+            "display": "inline-flex",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "items-center",
+              "modifiers": [],
+              "utility": "items-center",
+              "value": "items-center",
+              "variant": "items-center",
+            },
+            "propName": "alignItems",
+            "tokenName": "center",
+          },
+          "styles": {
+            "alignItems": "center",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "justify-center",
+              "modifiers": [],
+              "utility": "justify-center",
+              "value": "justify-center",
+              "variant": "justify-center",
+            },
+            "propName": "justifyContent",
+            "tokenName": "center",
+          },
+          "styles": {
+            "justifyContent": "center",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "rounded-md",
+              "modifiers": [],
+              "utility": "rounded",
+              "value": "md",
+              "variant": "rounded-md",
+            },
+            "propName": "borderRadius",
+            "tokenName": "md",
+          },
+          "styles": {
+            "borderRadius": "md",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "text-sm",
+              "modifiers": [],
+              "utility": "text",
+              "value": "sm",
+              "variant": "text-sm",
+            },
+            "propName": "fontSize",
+            "tokenName": "sm",
+          },
+          "styles": {
+            "fontSize": "sm",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "text-sm",
+              "modifiers": [],
+              "utility": "text",
+              "value": "sm",
+              "variant": "text-sm",
+            },
+            "propName": "lineHeight",
+            "tokenName": "sm",
+          },
+          "styles": {
+            "lineHeight": "sm",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "font-medium",
+              "modifiers": [],
+              "utility": "font",
+              "value": "medium",
+              "variant": "font-medium",
+            },
+            "propName": "fontWeight",
+            "tokenName": "medium",
+          },
+          "styles": {
+            "fontWeight": "medium",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "transition-colors",
+              "modifiers": [],
+              "utility": "transition",
+              "value": "colors",
+              "variant": "transition-colors",
+            },
+            "propName": "transitionProperty",
+            "tokenName": "color, background-color, border-color, text-decoration-color, fill, stroke",
+          },
+          "styles": {
+            "transitionProperty": "color, background-color, border-color, text-decoration-color, fill, stroke",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "transition-colors",
+              "modifiers": [],
+              "utility": "transition",
+              "value": "colors",
+              "variant": "transition-colors",
+            },
+            "propName": "transitionTimingFunction",
+            "tokenName": "colors",
+          },
+          "styles": {
+            "transitionTimingFunction": "colors",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "transition-colors",
+              "modifiers": [],
+              "utility": "transition",
+              "value": "colors",
+              "variant": "transition-colors",
+            },
+            "propName": "transitionDuration",
+            "tokenName": "colors",
+          },
+          "styles": {
+            "transitionDuration": "colors",
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "focus-visible:outline-none",
+              "modifiers": [
+                "focus-visible",
+              ],
+              "utility": "outline",
+              "value": "none",
+              "variant": "outline-none",
+            },
+            "propName": "outline",
+            "tokenName": "none",
+          },
+          "styles": {
+            "focus-visible": {
+              "outline": "none",
+            },
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "focus-visible:outline-none",
+              "modifiers": [
+                "focus-visible",
+              ],
+              "utility": "outline",
+              "value": "none",
+              "variant": "outline-none",
+            },
+            "propName": "outlineOffset",
+            "tokenName": "none",
+          },
+          "styles": {
+            "focus-visible": {
+              "outlineOffset": "none",
+            },
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "focus-visible:ring-2",
+              "modifiers": [
+                "focus-visible",
+              ],
+              "utility": "ring",
+              "value": "2",
+              "variant": "ring-2",
+            },
+            "propName": "boxShadow",
+            "tokenName": "2",
+          },
+          "styles": {
+            "focus-visible": {
+              "boxShadow": "2",
+            },
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "disabled:pointer-events-none",
+              "modifiers": [
+                "disabled",
+              ],
+              "utility": "pointer-events-none",
+              "value": "pointer-events-none",
+              "variant": "pointer-events-none",
+            },
+            "propName": "pointerEvents",
+            "tokenName": "none",
+          },
+          "styles": {
+            "_disabled": {
+              "pointerEvents": "none",
+            },
+          },
+        },
+        {
+          "match": {
+            "classInfo": {
+              "className": "disabled:opacity-50",
+              "modifiers": [
+                "disabled",
+              ],
+              "utility": "opacity",
+              "value": "50",
+              "variant": "opacity-50",
+            },
+            "propName": "opacity",
+            "tokenName": "0.5",
+          },
+          "styles": {
+            "_disabled": {
+              "opacity": "0.5",
+            },
+          },
+        },
+      ]
+    `);
+  });
+
   test("samples/button.ts", () => {
     const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
     const panda = createPandaContext();

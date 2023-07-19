@@ -19,9 +19,9 @@ export function twClassListToPanda(classListString: string, useShorthands?: bool
     hash: false,
   });
 
-  const { styles } = twClassListToPandaStyles(classList, tailwind, panda);
+  const styles = twClassListToPandaStyles(classList, tailwind, panda);
   if (!styles.length) return;
 
-  const merged = mergeCss(...styles);
+  const merged = mergeCss(...styles.map((s) => s.styles));
   return useShorthands ? mapToShorthands(merged, panda) : merged;
 }

@@ -25,10 +25,10 @@ export const extractTwFileClassList = (
     const string = node.getLiteralText();
     const classList = new Set(string.split(" "));
 
-    const { styles } = twClassListToPandaStyles(classList, tailwind, panda);
+    const styles = twClassListToPandaStyles(classList, tailwind, panda);
     if (!styles.length) return;
 
-    const merged = mapToShorthands(mergeCss(...styles), panda);
+    const merged = mapToShorthands(mergeCss(...styles.map((s) => s.styles)), panda);
     resultList.push({ classList: new Set(classList), styles: merged, node });
   });
 

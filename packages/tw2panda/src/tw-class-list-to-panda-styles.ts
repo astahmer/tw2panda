@@ -10,15 +10,12 @@ import { findRuleProps } from "./postcss-find-rule-props";
  * Takes a list of Tailwind class names and convert them to a list of Panda style objects
  */
 export const twClassListToPandaStyles = (classList: Set<string>, tailwind: TailwindContext, panda: PandaContext) => {
-  const styles = [] as StyleObject[];
-  const matchingTokens = [] as MatchingToken[];
+  const styles = [] as Array<{ match: MatchingToken; styles: StyleObject }>;
 
   classList.forEach((className) => {
     const tokens = getMatchingTwCandidates(className, tailwind, panda);
 
     tokens.forEach((match) => {
-      matchingTokens.push(match);
-
       const { propName, tokenName, classInfo } = match;
       // dark:text-sky-400=-> { dark: { color: "sky.400" } }
       const nested = classInfo.modifiers?.reduce(
@@ -32,11 +29,11 @@ export const twClassListToPandaStyles = (classList: Set<string>, tailwind: Tailw
         },
         { [propName]: tokenName },
       );
-      styles.push(nested);
+      styles.push({ match, styles: nested });
     });
   });
 
-  return { styles, matchingTokens };
+  return styles;
 };
 
 function getMatchingTwCandidates(className: string, tailwind: TailwindContext, panda: PandaContext) {
