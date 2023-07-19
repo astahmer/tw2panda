@@ -1,8 +1,8 @@
 import { createGenerator } from "@pandacss/generator";
 import { mergeConfigs } from "@pandacss/config";
 import { createProject } from "@pandacss/parser";
-import presetBase from "@pandacss/preset-base";
-import presetTheme from "@pandacss/preset-panda";
+import { preset as presetBase } from "@pandacss/preset-base";
+import { preset as presetTheme } from "@pandacss/preset-panda";
 import { createHooks } from "hookable";
 
 import type {
@@ -56,12 +56,13 @@ export const createPandaContext = (conf?: Partial<ConfigResultWithHooks>) => {
     hooks: createHooks() as any,
     dependencies: [],
     path: "",
+    ...conf,
     config: {
       cwd: "",
       include: [],
       outdir: "styled-system",
+      ...conf?.config,
     },
-    ...conf,
   });
 };
 export interface PandaContext extends ReturnType<typeof createPandaContext> {}
