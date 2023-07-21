@@ -7,6 +7,11 @@
   "bin": {
     "tw2panda": "bin.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/astahmer/tw2panda.git",
+    "directory": "packages/tw2panda"
+  },
   "scripts": {
     "start": "node ./dist/cli.cjs",
     "dev": "tsup --watch",
