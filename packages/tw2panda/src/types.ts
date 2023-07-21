@@ -25,3 +25,5 @@ export type MatchingToken = {
   tokenName: string;
   classInfo: TailwindClass;
 };
+
+export type RewriteOptions = { shorthands?: boolean | undefined };

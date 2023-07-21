@@ -5,8 +5,9 @@ import { mapToShorthands } from "./panda-map-to-shorthands";
 import { createTailwindContext } from "./tw-context";
 import { twClassListToPandaStyles } from "./tw-class-list-to-panda-styles";
 import { initialInputList } from "../../../demo-code-sample";
+import { RewriteOptions } from "./types";
 
-export function twClassListToPanda(classListString: string, useShorthands?: boolean) {
+export function twClassListToPanda(classListString: string, options: RewriteOptions = { shorthands: true }) {
   const classList = new Set(classListString.split(" "));
 
   const tw = createTailwindContext(initialInputList["tailwind.config.js"]);
@@ -23,5 +24,5 @@ export function twClassListToPanda(classListString: string, useShorthands?: bool
   if (!styles.length) return;
 
   const merged = mergeCss(...styles.map((s) => s.styles));
-  return useShorthands ? mapToShorthands(merged, panda) : merged;
+  return options?.shorthands ? mapToShorthands(merged, panda) : merged;
 }

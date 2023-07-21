@@ -1,6 +1,6 @@
 import type { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import { Node, SourceFile } from "ts-morph";
+import { SourceFile } from "ts-morph";
 import { assign, createMachine } from "xstate";
 import { choose } from "xstate/lib/actions";
 import { initialInputList, initialOutputList } from "../../../../demo-code-sample";
@@ -14,7 +14,6 @@ type PlaygroundContext = {
   inputEditor: editor.IStandaloneCodeEditor | null;
   outputEditor: editor.IStandaloneCodeEditor | null;
   sourceFile: SourceFile | null;
-  extracted: Node[];
   resultList: TwResultItem[];
   inputList: Record<string, string>;
   selectedInput: string;
@@ -39,7 +38,6 @@ const initialContext: PlaygroundContext = {
   inputEditor: null,
   outputEditor: null,
   sourceFile: null,
-  extracted: [],
   resultList: [],
   inputList: initialInputList,
   selectedInput: "tw-App.tsx",
@@ -139,7 +137,7 @@ export const playgroundMachine = createMachine(
         });
 
         const result = rewriteTwFileContentToPanda(value, tailwind, panda, mergeCss);
-        const { sourceFile, nodes, output, resultList = [] } = result;
+        const { sourceFile, output, resultList = [] } = result;
 
         const outputList = {
           ["App.tsx"]: output,
@@ -163,7 +161,6 @@ export const playgroundMachine = createMachine(
         return {
           ...ctx,
           sourceFile,
-          extracted: nodes as any,
           resultList,
           outputList,
         };

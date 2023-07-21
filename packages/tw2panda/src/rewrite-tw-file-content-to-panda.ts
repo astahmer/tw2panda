@@ -3,7 +3,7 @@ import { TailwindContext } from "./tw-types";
 import { maybePretty } from "./maybe-pretty";
 import MagicString from "magic-string";
 import { CallExpression, Node, SourceFile, ts } from "ts-morph";
-import { StyleObject, TwResultItem } from "./types";
+import { RewriteOptions, StyleObject, TwResultItem } from "./types";
 import { twClassListToPandaStyles } from "./tw-class-list-to-panda-styles";
 import { mapToShorthands } from "./panda-map-to-shorthands";
 
@@ -18,6 +18,7 @@ export function rewriteTwFileContentToPanda(
   tailwind: TailwindContext,
   panda: PandaContext,
   mergeCss: (...styles: StyleObject[]) => StyleObject,
+  options: RewriteOptions = { shorthands: true },
 ) {
   const sourceFile = panda.project.addSourceFile("App.tsx", content) as any as SourceFile;
 
@@ -75,11 +76,12 @@ export function rewriteTwFileContentToPanda(
       const styles = twClassListToPandaStyles(classList, tailwind, panda);
       if (!styles.length) return;
 
-      const merged = mapToShorthands(mergeCss(...styles.map((s) => s.styles)), panda);
-      resultList.push({ classList: new Set(classList), styles: merged, node });
+      const merged = mergeCss(...styles.map((s) => s.styles));
+      const styleObject = options?.shorthands ? mapToShorthands(merged, panda) : merged;
+      resultList.push({ classList: new Set(classList), styles: styleObject, node });
 
       const parent = node.getParent();
-      const serializedStyles = JSON.stringify(merged, null);
+      const serializedStyles = JSON.stringify(styleObject, null);
 
       const isInsideCva = cvaNode && node.getStart() > cvaNode.start && node.getEnd() < cvaNode.end;
 
