@@ -1,6 +1,6 @@
 # tw2panda
 
-Easily migrate code from tailwin to Panda CSS
+Easily migrate code from tailwind to Panda CSS
 
 ## Features
 
@@ -9,6 +9,9 @@ Easily migrate code from tailwin to Panda CSS
   file
 - also rewrites [`class-variance-authority`](https://cva.style/docs) to panda's
   [`cva`](https://panda-css.com/docs/concepts/recipes#atomic-recipe-or-cva) function
+
+You can look at this file for an example of what it can do:
+[example](./packages/tw2panda/tests/rewrite-tw-file-content-to-panda.test.ts)
 
 ## VSCode extension
 
