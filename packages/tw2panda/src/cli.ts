@@ -56,6 +56,7 @@ cli
     const { mergeCss } = createMergeCss(Object.assign(panda, { hash: false }));
 
     const result = rewriteTwFileContentToPanda(content, tw.context, panda, mergeCss, options as RewriteOptions);
+
     if (options.write) {
       return await writeFile(join(cwd, file), result.output);
     }
