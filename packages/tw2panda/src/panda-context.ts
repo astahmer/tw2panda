@@ -51,6 +51,11 @@ const createContext = (conf: ConfigResultWithHooks) => {
   };
 };
 
+/**
+ * This is a lightweight/in-memory version of the panda context, that doesn't require filesystem access
+ * For a more feature-complete version, use `loadConfigAndCreateContext` from `@pandacss/node`
+ * Mostly used for testing, also used for the `convert` command in the CLI with `twClassListToPanda`
+ */
 export const createPandaContext = (conf?: Partial<ConfigResultWithHooks>) => {
   return createContext({
     hooks: createHooks() as any,
