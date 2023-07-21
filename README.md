@@ -1,7 +1,24 @@
-## 🧞 Commands
+```sh
+npx tw2panda -h
+```
 
-All commands are run from the root of the project, from a terminal:
+```sh
+tw2panda/0.0.1
 
-| Command                   | Action |
-| :------------------------ | :----- |
-| `vite-node src/cli.ts -h` | Help   |
+Usage:
+  $ tw2panda <command> [options]
+
+Commands:
+  rewrite <glob>       Output the given file converted to panda, doesn't actually write to disk unless using -w
+  extract <file>       Extract each tailwind candidate and show its converted output, doesn't actually write to disk
+  convert <classList>  Example: inline-flex disabled:pointer-events-none underline-offset-4
+
+For more info, run any command with the `--help` flag:
+  $ tw2panda rewrite --help
+  $ tw2panda extract --help
+  $ tw2panda convert --help
+
+Options:
+  -h, --help     Display this message
+  -v, --version  Display version number
+```
