@@ -31,7 +31,7 @@ const extractFlags = withWrite.merge(withTw).merge(rewriteOptions).partial().mer
 const cli = cac(name);
 
 cli
-  .command("rewrite <glob>", "Output the given file converted to panda, doesn't actually write to disk unless using -w")
+  .command("rewrite <file>", "Output the given file converted to panda, doesn't actually write to disk unless using -w")
   .option("--tw, --tailwind <file>", "Path to tailwind.config.js")
   .option("-w, --write", "Write to disk instead of stdout")
   .option("-s, --shorthands", "Use shorthands instead of longhand properties")
