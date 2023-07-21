@@ -13,6 +13,7 @@
     "build": "cd packages/tw2panda && pnpm build",
     "build:all": "pnpm -r run build",
     "format": "prettier --write \"./packages/*/{src,tests}/**/*\"",
+    "release": "changeset publish",
     "release-dev": "changeset version --snapshot dev && changeset publish --tag dev",
     "test": "cd packages/tw2panda && pnpm run test"
   },
