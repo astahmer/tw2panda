@@ -42,8 +42,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "tw2panda-vscode.restart",
-        "title": "Restart Panda Server",
+        "command": "tw2panda-vscode.rewrite-tw-selection",
+        "title": "Rewrite tailwind selection to Panda CSS",
         "category": "tw2panda"
       }
     ]
@@ -54,7 +54,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup src/index.ts",
+    "dev": "tsup --watch src/index.ts",
     "clean": "rimraf dist node_modules",
     "typecheck": "tsc --noEmit",
     "rewrite-deps": "tsx ./scripts/rewrite-workspace-dependencies.ts",
@@ -67,6 +67,7 @@
     "@pandacss/preset-base": "0.7.0",
     "@pandacss/preset-panda": "0.7.0",
     "pathe": "1.1.1",
+    "perfect-debounce": "^1.0.0",
     "tw2panda": "workspace:^"
   },
   "bundledDependencies": [
@@ -76,7 +77,6 @@
     "pathe"
   ],
   "devDependencies": {
-    "@pandacss/language-server": "0.7.0",
     "@pandacss/vsix-builder": "0.7.0",
     "@pnpm/find-workspace-dir": "^6.0.2",
     "@pnpm/find-workspace-packages": "^6.0.9",
@@ -89,7 +89,6 @@
     "semver": "^7.5.4",
     "tsup": "7.1.0",
     "typescript": "^5.1.6",
-    "vscode": "^1.1.37",
-    "vscode-languageclient": "^8.1.0"
+    "vscode": "^1.1.37"
   }
 }

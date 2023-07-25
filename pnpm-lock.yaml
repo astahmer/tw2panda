@@ -114,13 +114,13 @@ importers:
       pathe:
         specifier: 1.1.1
         version: 1.1.1
+      perfect-debounce:
+        specifier: ^1.0.0
+        version: 1.0.0
       tw2panda:
         specifier: workspace:^
         version: link:../tw2panda
     devDependencies:
-      '@pandacss/language-server':
-        specifier: 0.7.0
-        version: 0.7.0
       '@pandacss/vsix-builder':
         specifier: 0.7.0
         version: 0.7.0
@@ -153,16 +153,13 @@ importers:
         version: 7.5.4
       tsup:
         specifier: 7.1.0
-        version: 7.1.0(postcss@8.4.26)(typescript@5.1.6)
+        version: 7.1.0(postcss@8.4.25)(typescript@5.1.6)
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
       vscode:
         specifier: ^1.1.37
         version: 1.1.37
-      vscode-languageclient:
-        specifier: ^8.1.0
-        version: 8.1.0
 
   packages/web:
     dependencies:
@@ -1850,12 +1847,6 @@ packages:
   /@pandacss/is-valid-prop@0.7.0:
     resolution: {integrity: sha512-1dHy8QEUDF25vtLqfp5SftilC2JAREKgh1l65A+21fZcIDUz7QuNk9PYpS4cjQK80xjVAFK8WJtI4OwGBMUQCw==}
     dev: false
-
-  /@pandacss/language-server@0.7.0:
-    resolution: {integrity: sha512-l2ReCPx1JUBKzCFlTLraSGdARhQQr15W9RmAfaXODoSwDqK1p5y26u40d74Mwq5Lh7wsUB3aMVDMBQLtLrzsFg==}
-    dependencies:
-      fast-glob: 3.3.0
-    dev: true
 
   /@pandacss/logger@0.6.0:
     resolution: {integrity: sha512-c5lWgUVzkQBSGRfDNmqXArEd7qvIMIblHFrMDHH4khXQpY+bEcGBnHpd4j9KZII/udj1Cj5eb5YFmEpxqE5F6w==}
@@ -8254,6 +8245,23 @@ packages:
       yaml: 2.3.1
     dev: true
 
+  /postcss-load-config@4.0.1(postcss@8.4.25):
+    resolution: {integrity: sha512-vEJIc8RdiBRu3oRAI0ymerOn+7rPuMvRXslTvZUKZonDHFIczxztIyJ1urxM1x9JXEikvpWWTUUqal5j/8QgvA==}
+    engines: {node: '>= 14'}
+    peerDependencies:
+      postcss: '>=8.0.9'
+      ts-node: '>=9.0.0'
+    peerDependenciesMeta:
+      postcss:
+        optional: true
+      ts-node:
+        optional: true
+    dependencies:
+      lilconfig: 2.1.0
+      postcss: 8.4.25
+      yaml: 2.3.1
+    dev: true
+
   /postcss-load-config@4.0.1(postcss@8.4.26):
     resolution: {integrity: sha512-vEJIc8RdiBRu3oRAI0ymerOn+7rPuMvRXslTvZUKZonDHFIczxztIyJ1urxM1x9JXEikvpWWTUUqal5j/8QgvA==}
     engines: {node: '>= 14'}
@@ -9738,6 +9746,43 @@ packages:
       - ts-node
     dev: true
 
+  /tsup@7.1.0(postcss@8.4.25)(typescript@5.1.6):
+    resolution: {integrity: sha512-mazl/GRAk70j8S43/AbSYXGgvRP54oQeX8Un4iZxzATHt0roW0t6HYDVZIXMw0ZQIpvr1nFMniIVnN5186lW7w==}
+    engines: {node: '>=16.14'}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': ^1
+      postcss: ^8.4.12
+      typescript: '>=4.1.0'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      postcss:
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      bundle-require: 4.0.1(esbuild@0.18.14)
+      cac: 6.7.14
+      chokidar: 3.5.3
+      debug: 4.3.4
+      esbuild: 0.18.14
+      execa: 5.1.1
+      globby: 11.1.0
+      joycon: 3.1.1
+      postcss: 8.4.25
+      postcss-load-config: 4.0.1(postcss@8.4.25)
+      resolve-from: 5.0.0
+      rollup: 3.26.3
+      source-map: 0.8.0-beta.0
+      sucrase: 3.33.0
+      tree-kill: 1.2.2
+      typescript: 5.1.6
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+    dev: true
+
   /tsup@7.1.0(postcss@8.4.26)(typescript@5.1.6):
     resolution: {integrity: sha512-mazl/GRAk70j8S43/AbSYXGgvRP54oQeX8Un4iZxzATHt0roW0t6HYDVZIXMw0ZQIpvr1nFMniIVnN5186lW7w==}
     engines: {node: '>=16.14'}
@@ -10421,21 +10466,14 @@ packages:
   /vscode-jsonrpc@8.1.0:
     resolution: {integrity: sha512-6TDy/abTQk+zDGYazgbIPc+4JoXdwC8NHU9Pbn4UJP1fehUyZmM4RHp5IthX7A6L5KS30PRui+j+tbbMMMafdw==}
     engines: {node: '>=14.0.0'}
-
-  /vscode-languageclient@8.1.0:
-    resolution: {integrity: sha512-GL4QdbYUF/XxQlAsvYWZRV3V34kOkpRlvV60/72ghHfsYFnS/v2MANZ9P6sHmxFcZKOse8O+L9G7Czg0NUWing==}
-    engines: {vscode: ^1.67.0}
-    dependencies:
-      minimatch: 5.1.6
-      semver: 7.5.4
-      vscode-languageserver-protocol: 3.17.3
-    dev: true
+    dev: false
 
   /vscode-languageserver-protocol@3.17.3:
     resolution: {integrity: sha512-924/h0AqsMtA5yK22GgMtCYiMdCOtWTSGgUOkgEDX+wk2b0x4sAfLiO4NxBxqbiVtz7K7/1/RgVrVI0NClZwqA==}
     dependencies:
       vscode-jsonrpc: 8.1.0
       vscode-languageserver-types: 3.17.3
+    dev: false
 
   /vscode-languageserver-textdocument@1.0.8:
     resolution: {integrity: sha512-1bonkGqQs5/fxGT5UchTgjGVnfysL0O8v1AYMBjqTbWQTFn721zaPGDYFkOKtfDgFiSgXM3KwaG3FMGfW4Ed9Q==}
@@ -10443,6 +10481,7 @@ packages:
 
   /vscode-languageserver-types@3.17.3:
     resolution: {integrity: sha512-SYU4z1dL0PyIMd4Vj8YOqFvHu7Hz/enbWtpfnVbJHU4Nd1YNYx8u0ennumc6h48GQNeOLxmwySmnADouT/AuZA==}
+    dev: false
 
   /vscode-languageserver@8.1.0:
     resolution: {integrity: sha512-eUt8f1z2N2IEUDBsKaNapkz7jl5QpskN2Y0G01T/ItMxBxw1fJwvtySGB9QMecatne8jFIWJGWI61dWjyTLQsw==}
