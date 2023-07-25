@@ -12,7 +12,7 @@ const isTailwindConfig = (file: string) => tailwindConfigRegex.test(file);
 
 export type ConfigFileOptions = {
   cwd: string;
-  file?: string;
+  file?: string | undefined;
 };
 
 export function findPandaConfig({ cwd, file }: ConfigFileOptions) {

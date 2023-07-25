@@ -43,7 +43,7 @@
     "commands": [
       {
         "command": "tw2panda-vscode.rewrite-tw-selection",
-        "title": "Rewrite tailwind selection to Panda CSS",
+        "title": "Rewrite tw to Panda CSS",
         "category": "tw2panda"
       }
     ]
@@ -66,6 +66,7 @@
     "@pandacss/dev": "0.7.0",
     "@pandacss/preset-base": "0.7.0",
     "@pandacss/preset-panda": "0.7.0",
+    "fast-glob": "^3.3.1",
     "pathe": "1.1.1",
     "perfect-debounce": "^1.0.0",
     "tw2panda": "workspace:^"
@@ -84,7 +85,6 @@
     "@types/vscode": "^1.80.0",
     "@vscode/vsce": "^2.19.0",
     "dotenv": "^16.3.1",
-    "execa": "7.1.1",
     "fs-extra": "11.1.1",
     "semver": "^7.5.4",
     "tsup": "7.1.0",
