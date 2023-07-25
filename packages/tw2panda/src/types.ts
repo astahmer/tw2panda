@@ -26,4 +26,4 @@ export type MatchingToken = {
   classInfo: TailwindClass;
 };
 
-export type RewriteOptions = { shorthands?: boolean | undefined };
+export type RewriteOptions = { shorthands?: boolean | undefined; range?: { start: number; end: number } };

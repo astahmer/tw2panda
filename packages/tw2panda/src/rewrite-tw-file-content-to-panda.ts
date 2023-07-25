@@ -1,6 +1,6 @@
 import { PandaContext } from "./panda-context";
 import { TailwindContext } from "./tw-types";
-import { maybePretty } from "./maybe-pretty";
+import { prettify } from "./maybe-pretty";
 import MagicString from "magic-string";
 import { CallExpression, Node, SourceFile, ts } from "ts-morph";
 import { RewriteOptions, StyleObject, TwResultItem } from "./types";
@@ -27,15 +27,21 @@ export function rewriteTwFileContentToPanda(
   const resultList = [] as TwResultItem[];
 
   let cvaNode: undefined | CvaNode;
-  const cvaTransforms = [] as (() => void)[];
 
   sourceFile.forEachDescendant((node, traversal) => {
+    if (options.range) {
+      if (options.range.start > node.getStart() && node.getEnd() > options.range.end) {
+        return;
+      }
+    }
+
     // quick win
     if (Node.isExportDeclaration(node)) {
       traversal.skip();
       return;
     }
 
+    // Replace `import { VariantProps } from "class-variance-authority"` with `import { RecipeVariantProps } from "styled-system/css"`
     if (Node.isImportDeclaration(node)) {
       const moduleSpecifier = node.getModuleSpecifierValue();
       if (moduleSpecifier === "class-variance-authority") {
@@ -103,41 +109,20 @@ export function rewriteTwFileContentToPanda(
       const variantsConfig = cvaNode.variantsConfig;
       if (!Node.isObjectLiteralExpression(variantsConfig)) return;
 
-      cvaTransforms.push(() => {
-        const prev = variantsConfig.getPreviousSibling();
+      const prev = variantsConfig.getPreviousSibling();
 
-        // rm trailing comma
-        if (prev && prev.getKind() === ts.SyntaxKind.CommaToken) {
-          magicStr.remove(prev.getStart(), prev.getEnd());
-        }
+      // rm trailing comma
+      if (prev && prev.getKind() === ts.SyntaxKind.CommaToken) {
+        magicStr.remove(prev.getStart(), prev.getEnd());
+      }
 
-        // merge 1st arg of `class-variance-authority` with its 2nd arg, move 1st arg inside panda's cva `base` key
-        magicStr.update(
-          variantsConfig.getStart(),
-          variantsConfig.getEnd(),
-          `{ base: ${serializedStyles}, ${magicStr.slice(variantsConfig.getStart() + 1, variantsConfig.getEnd() - 1)}}`,
-        );
-      });
+      // merge 1st arg of `class-variance-authority` with its 2nd arg, move 1st arg inside panda's cva `base` key
+      magicStr.appendLeft(variantsConfig.getStart() + 1, `base: ${serializedStyles}, `);
 
       // rm trailing comma
       magicStr.remove(node.getStart(), node.getEnd());
     }
   });
 
-  // those have to be done after all other transforms
-  // otherwise magic-string throws with: `Cannot split a chunk that has already been edited`
-  cvaTransforms.forEach((t) => t());
-
-  const output = maybePretty(magicStr.toString(), {
-    singleQuote: true,
-    printWidth: 120,
-    bracketSpacing: true,
-    jsxSingleQuote: false,
-    proseWrap: "always",
-    semi: false,
-    tabWidth: 2,
-    trailingComma: "all",
-  });
-
-  return { sourceFile, output, resultList };
+  return { sourceFile, output: prettify(magicStr.toString()), resultList, magicStr };
 }
