@@ -5,9 +5,10 @@ on:
 
   push:
     paths:
-      - "packages/**"
+      - "packages/vscode/**"
     branches:
       - main
+      - feat/vscode-extension
 
 jobs:
   create_timestamp:
