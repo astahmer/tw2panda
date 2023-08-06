@@ -21,5 +21,8 @@
     "@changesets/cli": "^2.26.2",
     "prettier": "^3.0.0"
   },
-  "packageManager": "pnpm@8.6.6"
+  "packageManager": "pnpm@8.6.6",
+  "workspaces": [
+    "packages/*"
+  ]
 }

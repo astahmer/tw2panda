@@ -71,7 +71,7 @@
     "pathe": "1.1.1",
     "perfect-debounce": "^1.0.0",
     "prettier": "^3.0.0",
-    "tw2panda": "workspace:^"
+    "tw2panda": "workspace:*"
   },
   "bundledDependencies": [
     "@pandacss/dev",
@@ -92,5 +92,8 @@
     "tsup": "7.1.0",
     "typescript": "^5.1.6",
     "vscode": "^1.1.37"
+  },
+  "overrides": {
+    "esbuild": "npm:esbuild-wasm@latest"
   }
 }
