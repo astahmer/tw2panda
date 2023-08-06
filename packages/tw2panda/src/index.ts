@@ -1,6 +1,5 @@
 export * from "./extract-tw-class-list";
 export * from "./find-tw-class-candidates";
-export * from "./load-context";
 export * from "./maybe-pretty";
 export * from "./panda-context";
 export * from "./rewrite-tw-file-content-to-panda";

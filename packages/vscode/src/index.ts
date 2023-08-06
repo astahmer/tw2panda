@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { debounce } from "perfect-debounce";
-import { PandaContext, loadPandaContext, loadTailwindContext, rewriteTwFileContentToPanda, prettify } from "tw2panda";
+import { PandaContext, rewriteTwFileContentToPanda, prettify } from "tw2panda";
+import { loadPandaContext, loadTailwindContext } from "tw2panda/config";
 import { createMergeCss } from "@pandacss/shared";
 import { dirname } from "pathe";
 import glob from "fast-glob";

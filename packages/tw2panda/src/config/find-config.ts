@@ -1,5 +1,5 @@
 import findUp from "escalade/sync";
-import { resolve } from "path";
+import { resolve } from "pathe";
 
 // Adapted from https://github.com/chakra-ui/panda/blob/b58daf4276e47aaad536b8327c7a27f48a4cdc2e/packages/config/src/find-config.ts#L4
 

@@ -1,8 +1,8 @@
 import { loadConfigAndCreateContext } from "@pandacss/node";
+import { PandaContext, createPandaContext } from "../panda-context";
 import { ConfigFileOptions, findPandaConfig, findTailwindConfig } from "./find-config";
-import { PandaContext, createPandaContext } from "./panda-context";
-import { createTailwindContext } from "./tw-context";
-import { bundle } from "./bundle";
+import { createTailwindContext } from "../tw-context";
+import { bundle } from "../bundle";
 
 export async function loadTailwindContext(options: ConfigFileOptions) {
   const filePath = findTailwindConfig(options);

@@ -2,11 +2,24 @@
   "name": "tw2panda",
   "type": "module",
   "version": "0.1.0",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "bin": {
     "tw2panda": "bin.js"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "require": "./dist/config.cjs",
+      "import": "./dist/config.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/astahmer/tw2panda.git",
