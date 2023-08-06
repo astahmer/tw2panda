@@ -49,8 +49,8 @@
     ]
   },
   "repository": {
-    "url": "https://github.com/chakra-ui/panda",
-    "directory": "packages/extension/vscode"
+    "url": "https://github.com/astahmer/tw2panda",
+    "directory": "packages/vscode"
   },
   "scripts": {
     "build": "tsup",
@@ -66,6 +66,7 @@
     "@pandacss/dev": "0.7.0",
     "@pandacss/preset-base": "0.7.0",
     "@pandacss/preset-panda": "0.7.0",
+    "@pandacss/shared": "^0.7.0",
     "fast-glob": "^3.3.1",
     "pathe": "1.1.1",
     "perfect-debounce": "^1.0.0",
