@@ -55,7 +55,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch src/index.ts",
-    "clean": "rimraf dist node_modules",
+    "clean": "pnpm rimraf dist node_modules",
     "clean:windows": "node ./scripts/clean.cjs",
     "typecheck": "tsc --noEmit",
     "rewrite-deps": "tsx ./scripts/rewrite-workspace-dependencies.ts",
