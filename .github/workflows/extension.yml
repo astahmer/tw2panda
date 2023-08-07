@@ -12,7 +12,7 @@ on:
 
 jobs:
   create_timestamp:
-    if: steps.changesets.outputs.published != 'true'
+    if: github.event.pull_request.merged != true
     runs-on: ubuntu-latest
 
     outputs:
@@ -24,8 +24,8 @@ jobs:
         run: |
           echo "::set-output name=timestamp::$(date +'%s')"
   release-extension:
-    if: steps.changesets.outputs.published != 'true'
     name: VSCode Marketplace
+    if: github.event.pull_request.merged != true
     needs: create_timestamp
     runs-on: ${{ matrix.os }}
     strategy:
