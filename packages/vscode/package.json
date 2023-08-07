@@ -55,7 +55,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch src/index.ts",
-    "clean": "npx --ignore-existing --quiet rimraf dist node_modules",
+    "clean": "npx --quiet rimraf dist node_modules",
     "typecheck": "tsc --noEmit",
     "rewrite-deps": "tsx ./scripts/rewrite-workspace-dependencies.ts",
     "override-esbuild": "tsx ./scripts/override-esbuild-with-wasm.ts",
