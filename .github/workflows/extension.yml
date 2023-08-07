@@ -6,6 +6,7 @@ on:
   push:
     paths:
       - "packages/vscode/**"
+      - ".github/workflows/extension.yml"
     branches:
       - main
       - feat/vscode-extension
@@ -21,7 +22,7 @@ jobs:
       - name: Set Timestamp
         id: set_timestamp
         run: |
-          echo "::set-output name=timestamp::$(date +'%s' | cut -c1-8)"
+          echo "::set-output name=timestamp::$(date +'%s')"
   release:
     name: VSCode Marketplace
     needs: create_timestamp
@@ -63,35 +64,46 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install
-        uses: ./.github/composite-actions/install
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - name: Setup Git User
+        shell: bash
+        run: |
+          git config --global user.email "alexandre.stahmer@gmail.com"
+          git config --global user.name "Alexandre Stahmer"
+
+      - name: Install dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
 
       - name: Build packages
         run: pnpm build
 
       - name: Set Environment Variable
-        run: echo "VSCE_RELEASE_VERSION=$(date +'%s' | cut -c1-8)" >> $GITHUB_ENV
-
-      # - name: Prepare npm install
-      #   working-directory: ./packages/vscode
-      #   run: pnpm rewrite-deps && pnpm clean
-
-      - name: Setup bun
-        uses: oven-sh/setup-bun@v1
-
-      - name: Install with bun
-        working-directory: ./packages/vscode
-        run: bun install
+        run: echo "VSCE_RELEASE_VERSION=$(date +'%s')" >> $GITHUB_ENV
 
       - name: Overrides esbuild
         working-directory: ./packages/vscode
         if: contains(matrix.target, 'darwin-arm64')
         run: pnpm override-esbuild
 
+      - name: Prepare pnpm workspace-less install
+        working-directory: ./packages/vscode
+        run: pnpm rewrite-deps && pnpm clean
+
       - name: Install with npm
         working-directory: ./packages/vscode
         run: |
-          npm i --ignore-scripts
+          pnpm i --ignore-scripts --no-frozen-lockfile --ignore-workspace
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
 

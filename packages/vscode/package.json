@@ -3,7 +3,7 @@
   "name": "tw2panda-vscode",
   "displayName": "tw2panda 🐼",
   "description": "Easily migrate code from tailwind to Panda CSS",
-  "version": "0.0.1",
+  "version": "0.2.2",
   "private": true,
   "engines": {
     "vscode": "^1.67.0"
@@ -55,12 +55,12 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch src/index.ts",
-    "clean": "rimraf dist node_modules",
+    "clean": "npx rimraf dist node_modules",
     "typecheck": "tsc --noEmit",
     "rewrite-deps": "tsx ./scripts/rewrite-workspace-dependencies.ts",
     "override-esbuild": "tsx ./scripts/override-esbuild-with-wasm.ts",
     "release": "pnpm build --silent && tsx ./scripts/publish.ts",
-    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && npm i --ignore-scripts && pnpm build && pnpm vsix-builder package"
+    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && pnpm i --ignore-scripts --ignore-workspace && pnpm build && pnpm vsix-builder package"
   },
   "dependencies": {
     "@pandacss/dev": "0.7.0",
@@ -68,10 +68,9 @@
     "@pandacss/preset-panda": "0.7.0",
     "@pandacss/shared": "^0.7.0",
     "fast-glob": "^3.3.1",
-    "pathe": "1.1.1",
     "perfect-debounce": "^1.0.0",
     "prettier": "2.8.4",
-    "tw2panda": "workspace:*"
+    "tw2panda": "link:../tw2panda"
   },
   "bundledDependencies": [
     "@pandacss/dev",
@@ -83,13 +82,18 @@
     "@pandacss/vsix-builder": "0.7.0",
     "@pnpm/find-workspace-dir": "^6.0.2",
     "@pnpm/find-workspace-packages": "^6.0.9",
+    "@pnpm/types": "^9.2.0",
     "@types/node": "20.4.1",
-    "@types/vscode": "^1.80.0",
+    "@types/semver": "^7.5.0",
+    "@types/vscode": "^1.67.0",
     "@vscode/vsce": "^2.19.0",
     "dotenv": "^16.3.1",
     "fs-extra": "11.1.1",
+    "pathe": "1.1.1",
+    "rimraf": "^5.0.1",
     "semver": "^7.5.4",
     "tsup": "7.1.0",
+    "tsx": "^3.12.7",
     "typescript": "^5.1.6",
     "vscode": "^1.1.37"
   },

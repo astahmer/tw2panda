@@ -1,13 +1,13 @@
-import type { PackageManifest } from '@pnpm/types'
-import fs from 'fs'
-import path, { dirname } from 'path'
-import { fileURLToPath } from 'url'
+import type { PackageManifest } from "@pnpm/types";
+import fs from "fs";
+import path, { dirname } from "pathe";
+import { fileURLToPath } from "url";
 
-const _dirname = dirname(fileURLToPath(import.meta.url))
+const _dirname = dirname(fileURLToPath(import.meta.url));
 
 const main = async () => {
-  const pkgJsonPath = path.join(_dirname, '../package.json')
-  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as PackageManifest
+  const pkgJsonPath = path.join(_dirname, "../package.json");
+  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8")) as PackageManifest;
 
   // Github runners dont support arm64 on macos
   // https://github.com/actions/runner-images/issues/2187
@@ -24,9 +24,9 @@ const main = async () => {
 
   // @ts-expect-error
   pkgJson.overrides = {
-    esbuild: 'npm:esbuild-wasm@latest',
-  }
+    esbuild: "npm:esbuild-wasm@latest",
+  };
 
-  fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2))
-}
-main()
+  fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2));
+};
+main();

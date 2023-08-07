@@ -120,9 +120,6 @@ importers:
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.1
-      pathe:
-        specifier: 1.1.1
-        version: 1.1.1
       perfect-debounce:
         specifier: ^1.0.0
         version: 1.0.0
@@ -130,7 +127,7 @@ importers:
         specifier: 2.8.4
         version: 2.8.4
       tw2panda:
-        specifier: workspace:*
+        specifier: link:../tw2panda
         version: link:../tw2panda
     devDependencies:
       '@pandacss/vsix-builder':
@@ -142,11 +139,17 @@ importers:
       '@pnpm/find-workspace-packages':
         specifier: ^6.0.9
         version: 6.0.9(@pnpm/logger@5.0.0)
+      '@pnpm/types':
+        specifier: ^9.2.0
+        version: 9.2.0
       '@types/node':
         specifier: 20.4.1
         version: 20.4.1
+      '@types/semver':
+        specifier: ^7.5.0
+        version: 7.5.0
       '@types/vscode':
-        specifier: ^1.80.0
+        specifier: ^1.67.0
         version: 1.80.0
       '@vscode/vsce':
         specifier: ^2.19.0
@@ -157,12 +160,21 @@ importers:
       fs-extra:
         specifier: 11.1.1
         version: 11.1.1
+      pathe:
+        specifier: 1.1.1
+        version: 1.1.1
+      rimraf:
+        specifier: ^5.0.1
+        version: 5.0.1
       semver:
         specifier: ^7.5.4
         version: 7.5.4
       tsup:
         specifier: 7.1.0
         version: 7.1.0(postcss@8.4.25)(typescript@5.1.6)
+      tsx:
+        specifier: ^3.12.7
+        version: 3.12.7
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
@@ -8847,6 +8859,14 @@ packages:
     hasBin: true
     dependencies:
       glob: 7.1.6
+    dev: true
+
+  /rimraf@5.0.1:
+    resolution: {integrity: sha512-OfFZdwtd3lZ+XZzYP/6gTACubwFcHdLRqS9UX3UwpU2dnGQYkPFISRwvM3w9IiB2w7bW5qGo/uAwE4SmXXSKvg==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      glob: 10.3.3
     dev: true
 
   /rollup-plugin-dts@5.3.0(rollup@3.26.3)(typescript@5.1.6):
