@@ -7,11 +7,11 @@ const execaSync = childProcess.execSync;
 const { version } = require("../package.json");
 
 const releaseType = process.env["VSCE_RELEASE_TYPE"];
-const target = process.env["VSCE_TARGET"];
+const target = process.env["VSCE_TARGET"] ?? "";
 
 const tokens = {
-  vscode: releaseType === "dry-run" ? "dry-run" : process.env["VSCE_TOKEN"],
-  openvsx: releaseType === "dry-run" ? "dry-run" : process.env["OVSX_TOKEN"],
+  vscode: process.env["VSCE_TOKEN"],
+  openvsx: process.env["OVSX_TOKEN"],
 };
 
 const hasTokens = tokens.vscode !== undefined;
@@ -19,8 +19,9 @@ if (!hasTokens) {
   throw new Error("Cannot publish extension without tokens.");
 }
 
-const now = process.env["VSCE_RELEASE_VERSION"] ?? new Date().getTime();
+const now = (process.env["VSCE_RELEASE_VERSION"] ?? new Date().getTime()).toString().slice(0, 8);
 const currentVersion = semver.valid(version);
+console.log({ releaseType });
 
 if (!currentVersion) {
   throw new Error("Cannot get the current version number from package.json");
@@ -35,20 +36,21 @@ const withTarget = target ? `--target ${target}` : "";
 
 const commands = {
   vscode_package: `pnpm vsix-builder package ${rcVersion} ${withTarget} -o panda.vsix`,
-  vscode_publish: `pnpm vsce publish --packagePath panda.vsix --pat ${process.env["VSCE_TOKEN"]}`,
+  vscode_publish: `pnpm vsce publish --packagePath panda.vsix -p ${process.env["VSCE_TOKEN"]}`,
   // rc release: publish to VS Code Marketplace with today's date as patch number
   vscode_package_rc: `pnpm vsix-builder package ${rcVersion} --pre-release ${withTarget} -o panda.vsix`,
-  vscode_rc: `pnpm vsce publish --pre-release --packagePath panda.vsix --pat ${process.env["VSCE_TOKEN"]}`,
+  vscode_publish_rc: `pnpm vsce publish --pre-release --packagePath panda.vsix -p ${process.env["VSCE_TOKEN"]}`,
   // To publish to the open-vsx registry
-  openvsx_publish: `npx ovsx publish panda.vsix --pat ${process.env["OVSX_TOKEN"]}`,
+  openvsx_publish: `npx ovsx publish panda.vsix -p ${process.env["OVSX_TOKEN"]}`,
 };
 
-console.log("[vsce:package]", commands.vscode_package_rc, target);
 switch (releaseType) {
   case "rc":
+    console.log("[vsce:package]", commands.vscode_package_rc, target);
     execaSync(commands.vscode_package_rc, { stdio: "inherit" });
     break;
   case "stable":
+    console.log("[vsce:package]", commands.vscode_package, target);
     execaSync(commands.vscode_package, { stdio: "inherit" });
     break;
   default:
@@ -61,11 +63,11 @@ switch (releaseType) {
     if (!rcVersion || !semver.valid(rcVersion) || semver.valid(rcVersion) === currentVersion) {
       throw new Error("Cannot publish rc build with an invalid version number: " + rcVersion);
     }
-    execaSync(commands.vscode_rc, { stdio: "inherit" });
+    execaSync(commands.vscode_publish_rc, { stdio: "inherit" });
     break;
 
   case "stable":
-    execaSync(commands.vscode_rc, { stdio: "inherit" });
+    execaSync(commands.vscode_publish, { stdio: "inherit" });
     execaSync(commands.openvsx_publish, { stdio: "inherit" });
     break;
 

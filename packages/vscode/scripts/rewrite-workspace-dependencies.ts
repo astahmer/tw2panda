@@ -21,7 +21,7 @@ const main = async () => {
     ([name, version]: [name: string, version: string]) => {
       const pkg = workspacePkgs.find((pkg) => pkg.manifest.name === name);
       if (pkg && version.includes("workspace:")) {
-        depsMap![name] = `link:${relative(pkgDir, pkg.dir)}`;
+        depsMap![name] = `file:${relative(pkgDir, pkg.dir)}`;
         console.log(`Rewrote ${name} to ${depsMap![name]}`);
       }
     };

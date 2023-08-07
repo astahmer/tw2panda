@@ -66,6 +66,7 @@
   },
   "files": [
     "bin.js",
+    "config.d.ts",
     "src",
     "dist",
     "cli",
