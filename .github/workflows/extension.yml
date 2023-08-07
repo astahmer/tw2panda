@@ -23,7 +23,7 @@ jobs:
         id: set_timestamp
         run: |
           echo "::set-output name=timestamp::$(date +'%s')"
-  release:
+  release-extension:
     name: VSCode Marketplace
     needs: create_timestamp
     runs-on: ${{ matrix.os }}

@@ -58,3 +58,108 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create_timestamp:
+    runs-on: ubuntu-latest
+
+    outputs:
+      timestamp: ${{ steps.set_timestamp.outputs.timestamp }}
+
+    steps:
+      - name: Set Timestamp
+        id: set_timestamp
+        run: |
+          echo "::set-output name=timestamp::$(date +'%s')"
+  release-extension:
+    name: VSCode Marketplace
+    needs: create_timestamp
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: win32-x64
+            npm_config_arch: x64
+          - os: windows-latest
+            target: win32-ia32
+            npm_config_arch: ia32
+          - os: windows-latest
+            target: win32-arm64
+            npm_config_arch: arm
+          - os: ubuntu-latest
+            target: linux-x64
+            npm_config_arch: x64
+          - os: ubuntu-latest
+            target: linux-arm64
+            npm_config_arch: arm64
+          - os: ubuntu-latest
+            target: linux-armhf
+            npm_config_arch: arm
+          - os: ubuntu-latest
+            target: alpine-x64
+            npm_config_arch: x64
+          - os: macos-latest
+            target: darwin-x64
+            npm_config_arch: x64
+          - os: macos-latest
+            target: darwin-arm64
+            npm_config_arch: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - name: Setup Git User
+        shell: bash
+        run: |
+          git config --global user.email "alexandre.stahmer@gmail.com"
+          git config --global user.name "Alexandre Stahmer"
+
+      - name: Install dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Set Environment Variable
+        run: echo "VSCE_RELEASE_VERSION=$(date +'%s')" >> $GITHUB_ENV
+
+      - name: Overrides esbuild
+        working-directory: ./packages/vscode
+        if: contains(matrix.target, 'darwin-arm64')
+        run: pnpm override-esbuild
+
+      - name: Prepare pnpm workspace-less install
+        working-directory: ./packages/vscode
+        run: pnpm rewrite-deps && pnpm clean
+
+      - name: Install with npm
+        working-directory: ./packages/vscode
+        run: |
+          pnpm i --ignore-scripts --no-frozen-lockfile --ignore-workspace
+        env:
+          npm_config_arch: ${{ matrix.npm_config_arch }}
+
+      - name: Publish RC
+        working-directory: ./packages/vscode
+        run: |
+          pnpm release
+        env:
+          VSCE_TOKEN: ${{secrets.VSCE_TOKEN}}
+          VSCE_RELEASE_VERSION: ${{ needs.create_timestamp.outputs.timestamp }}
+          VSCE_RELEASE_TYPE: stable
+          VSCE_TARGET: ${{ matrix.target }}
