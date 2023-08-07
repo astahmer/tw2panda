@@ -1,10 +1,8 @@
 import childProcess from "child_process";
 import * as semver from "semver";
-import { config } from "dotenv";
+import "dotenv/config";
 
 const execaSync = childProcess.execSync;
-
-config();
 
 const { version } = require("../package.json");
 
@@ -28,16 +26,18 @@ if (!currentVersion) {
   throw new Error("Cannot get the current version number from package.json");
 }
 
-const rcVersion = semver.inc(currentVersion, "minor")?.replace(/\.\d+$/, `.${now}`);
+const rcVersion = semver.inc(currentVersion, "patch")?.replace(/\.\d+$/, `.${now}`);
 if (!rcVersion) {
   throw new Error("Could not populate the current version number for rc's build.");
 }
 
+const withTarget = target ? `--target ${target}` : "";
+
 const commands = {
-  vscode_package: `pnpm vsix-builder package ${rcVersion} --target ${target} -o panda.vsix`,
+  vscode_package: `pnpm vsix-builder package ${rcVersion} ${withTarget} -o panda.vsix`,
   vscode_publish: `pnpm vsce publish --packagePath panda.vsix --pat ${process.env["VSCE_TOKEN"]}`,
   // rc release: publish to VS Code Marketplace with today's date as patch number
-  vscode_package_rc: `pnpm vsix-builder package ${rcVersion} --pre-release --target ${target} -o panda.vsix`,
+  vscode_package_rc: `pnpm vsix-builder package ${rcVersion} --pre-release ${withTarget} -o panda.vsix`,
   vscode_rc: `pnpm vsce publish --pre-release --packagePath panda.vsix --pat ${process.env["VSCE_TOKEN"]}`,
   // To publish to the open-vsx registry
   openvsx_publish: `npx ovsx publish panda.vsix --pat ${process.env["OVSX_TOKEN"]}`,

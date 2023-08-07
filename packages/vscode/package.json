@@ -3,7 +3,7 @@
   "name": "tw2panda-vscode",
   "displayName": "tw2panda 🐼",
   "description": "Easily migrate code from tailwind to Panda CSS",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": true,
   "engines": {
     "vscode": "^1.67.0"
@@ -60,8 +60,8 @@
     "rewrite-deps": "tsx ./scripts/rewrite-workspace-dependencies.ts",
     "override-esbuild": "tsx ./scripts/override-esbuild-with-wasm.ts",
     "release": "pnpm build --silent && tsx ./scripts/publish.ts",
-    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && pnpm i --ignore-scripts --ignore-workspace && pnpm build && pnpm vsix-builder package",
-    "local:publish": "VSCE_RELEASE_VERSION=$(date +'%s') VSCE_RELEASE_TYPE=stable && pnpm release"
+    "local:package": "VSCE_RELEASE_VERSION=$(date +'%s') VSCE_RELEASE_TYPE=rc pnpm release",
+    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && pnpm i --ignore-scripts --ignore-workspace && pnpm local:package"
   },
   "dependencies": {
     "@pandacss/dev": "0.7.0",
@@ -82,6 +82,7 @@
     "@pnpm/find-workspace-dir": "^6.0.2",
     "@pnpm/find-workspace-packages": "^6.0.9",
     "@pnpm/types": "^9.2.0",
+    "@types/dotenv": "^8.2.0",
     "@types/node": "20.4.1",
     "@types/semver": "^7.5.0",
     "@types/vscode": "^1.67.0",
