@@ -100,7 +100,7 @@ jobs:
         working-directory: ./packages/vscode
         run: pnpm rewrite-deps && pnpm clean
 
-      - name: Install with npm
+      - name: Install with workspace-less
         working-directory: ./packages/vscode
         run: |
           pnpm i --ignore-scripts --no-frozen-lockfile --ignore-workspace
