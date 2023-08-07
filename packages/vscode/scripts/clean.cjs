@@ -1,5 +1,5 @@
-import { rimraf } from "rimraf";
-import { join } from "path";
+const { rimraf } = require("rimraf");
+const { join } = require("path");
 
 async function main() {
   try {
