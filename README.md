@@ -2,6 +2,8 @@
 
 Easily migrate code from tailwind to Panda CSS
 
+![Screenshot 2023-08-08 at 01 34 49](https://github.com/astahmer/tw2panda/assets/47224540/47992889-6330-47fa-8e15-a0ccd2e4ae02)
+
 ## Features
 
 - `rewrite`, `extract` and `convert` CLI commands
