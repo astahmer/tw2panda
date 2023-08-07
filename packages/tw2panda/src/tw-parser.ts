@@ -17,9 +17,17 @@ export const parseTwClassName = (
   let value;
   let valueStart;
   let variantStart = 0;
+  let isImportant = false;
 
   while (index < className.length) {
     char = className[index];
+
+    if (char === "!") {
+      current = "";
+      index++;
+      isImportant = true;
+      continue;
+    }
 
     // start of arbitrary value|modifier
     if (char === "[") {
@@ -140,11 +148,6 @@ export const parseTwClassName = (
     value,
   } as TailwindClass;
 
-  // "flex!": important
-  if (char === "!") {
-    item.isImportant = true;
-  }
-
   // "top-[117px]" -> kind = "arbitrary-value"
   if (kind) {
     item.kind = kind;
@@ -158,6 +161,11 @@ export const parseTwClassName = (
     // "md:max-lg:flex" -> utility = "flex"
     item.utility = current;
     item.value = current;
+  }
+
+  // "!flex": important
+  if (isImportant) {
+    item.isImportant = true;
   }
 
   return item;

@@ -68,6 +68,10 @@ function getMatchingTwCandidates(className: string, tailwind: TailwindContext, p
       }
       if (!value) return;
 
+      if (classInfo.isImportant) {
+        value += "!";
+      }
+
       tokens.push({ propName, tokenName: value, classInfo });
     });
   });

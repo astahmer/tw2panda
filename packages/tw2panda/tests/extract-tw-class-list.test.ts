@@ -437,6 +437,59 @@ describe("extract-tw-class-list", () => {
     `);
   });
 
+  test("!important modifiers (with custom tailwind.config)", () => {
+    const tailwind = createTailwindContext(tailwindConfigRaw);
+    const panda = createPandaContext();
+    const { mergeCss } = createMergeCss({
+      utility: panda.utility,
+      conditions: panda.conditions,
+      hash: false,
+    });
+
+    const resultList = extractTwFileClassList(
+      `
+    const buttonVariants = cva(
+      "flex !inline-flex !text-destructive-foreground !text-primary-foreground bg-secondary-foreground focus-visible:!outline-none disabled:!opacity-50",
+      {
+        variants: {}
+      }
+    )
+    `,
+      tailwind.context,
+      panda,
+      mergeCss,
+    );
+
+    expect(resultList).toMatchInlineSnapshot(`
+      [
+        {
+          "classList": Set {
+            "flex",
+            "!inline-flex",
+            "!text-destructive-foreground",
+            "!text-primary-foreground",
+            "bg-secondary-foreground",
+            "focus-visible:!outline-none",
+            "disabled:!opacity-50",
+          },
+          "node": StringLiteral,
+          "styles": {
+            "_disabled": {
+              "opacity": "0.5!",
+            },
+            "_focusVisible": {
+              "ring": "none!",
+              "ringOffset": "none!",
+            },
+            "bgColor": "secondary.foreground",
+            "color": "primary.foreground!",
+            "display": "inline-flex!",
+          },
+        },
+      ]
+    `);
+  });
+
   test("samples/button.ts with custom tailwind.config", () => {
     const tailwind = createTailwindContext(tailwindConfigRaw);
     const panda = createPandaContext();

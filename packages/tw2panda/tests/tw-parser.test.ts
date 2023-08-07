@@ -631,40 +631,40 @@ test("variant with dot", () => {
 });
 
 test("variant with important", () => {
-  expect(parseTailwindClasses("flex! underline! min-w-4! text-white/40!")).toMatchInlineSnapshot(`
-      [
-        {
-          "className": "flex!",
-          "isImportant": true,
-          "modifiers": [],
-          "utility": "flex!",
-          "value": "flex!",
-          "variant": "flex!",
-        },
-        {
-          "className": "underline!",
-          "isImportant": true,
-          "modifiers": [],
-          "utility": "underline!",
-          "value": "underline!",
-          "variant": "underline!",
-        },
-        {
-          "className": "min-w-4!",
-          "isImportant": true,
-          "modifiers": [],
-          "utility": "min-w",
-          "value": "4!",
-          "variant": "min-w-4!",
-        },
-        {
-          "className": "text-white/40!",
-          "isImportant": true,
-          "modifiers": [],
-          "utility": "text",
-          "value": "white/40!",
-          "variant": "text-white/40!",
-        },
-      ]
-    `);
+  expect(parseTailwindClasses("!flex !underline !min-w-4 !text-white/40")).toMatchInlineSnapshot(`
+    [
+      {
+        "className": "!flex",
+        "isImportant": true,
+        "modifiers": [],
+        "utility": "flex",
+        "value": "flex",
+        "variant": "!flex",
+      },
+      {
+        "className": "!underline",
+        "isImportant": true,
+        "modifiers": [],
+        "utility": "underline",
+        "value": "underline",
+        "variant": "!underline",
+      },
+      {
+        "className": "!min-w-4",
+        "isImportant": true,
+        "modifiers": [],
+        "utility": "min-w",
+        "value": "4",
+        "variant": "!min-w-4",
+      },
+      {
+        "className": "!text-white/40",
+        "isImportant": true,
+        "modifiers": [],
+        "utility": "text",
+        "value": "white/40",
+        "variant": "!text-white/40",
+      },
+    ]
+  `);
 });
