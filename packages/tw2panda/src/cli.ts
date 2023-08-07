@@ -26,7 +26,7 @@ const rewriteOptions = z.object({ shorthands: z.boolean() }).partial();
 const configOptions = z.object({ config: z.string().optional(), cwd: z.string().default(cwd) });
 
 const rewriteFlags = withWrite.merge(withTw).merge(rewriteOptions).partial().merge(configOptions);
-const extractFlags = withWrite.merge(withTw).merge(rewriteOptions).partial().merge(configOptions);
+const extractFlags = withTw.merge(rewriteOptions).partial().merge(configOptions);
 
 const cli = cac(name);
 
@@ -70,6 +70,8 @@ cli
   )
   .option("--tw, --tailwind <file>", "Path to tailwind.config.js")
   .option("-s, --shorthands", "Use shorthands instead of longhand properties")
+  .option("-c, --config <path>", "Path to panda config file")
+  .option("--cwd <cwd>", "Current working directory", { default: cwd })
   .action(async (file, _options) => {
     const options = extractFlags.parse(_options);
     const content = readFileSync(join(cwd, file), "utf-8");

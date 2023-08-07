@@ -1,64 +1,16 @@
-name: Release
+name: Publish VSCode extension
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".changeset/**"
-      - "packages/tw2panda/**"
+  workflow_dispatch:
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+  push:
+    paths:
+      - "packages/vscode/**"
+      - ".github/workflows/extension.yml"
+    branches:
+      - main
 
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js 16.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        working-directory: ./packages/tw2panda
-        run: pnpm build
-
-      - name: Test
-        working-directory: ./packages/tw2panda
-        run: pnpm test
-
-      # - name: Release to dev tag
-      #   if: steps.changesets.outputs.published != 'true'
-      #   run: |
-      #     git checkout main
-      #     pnpm changeset version --snapshot dev
-      #     pnpm changeset publish --tag dev
-      #   env:
-      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #     NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          publish: pnpm release
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   create_timestamp:
     runs-on: ubuntu-latest
 
@@ -147,7 +99,7 @@ jobs:
         working-directory: ./packages/vscode
         run: pnpm rewrite-deps && pnpm clean
 
-      - name: Install with npm
+      - name: Install with workspace-less
         working-directory: ./packages/vscode
         run: |
           pnpm i --ignore-scripts --no-frozen-lockfile --ignore-workspace
@@ -161,5 +113,5 @@ jobs:
         env:
           VSCE_TOKEN: ${{secrets.VSCE_TOKEN}}
           VSCE_RELEASE_VERSION: ${{ needs.create_timestamp.outputs.timestamp }}
-          VSCE_RELEASE_TYPE: stable
+          VSCE_RELEASE_TYPE: rc
           VSCE_TARGET: ${{ matrix.target }}
