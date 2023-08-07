@@ -9,7 +9,6 @@ on:
       - ".github/workflows/extension.yml"
     branches:
       - main
-      - feat/vscode-extension
 
 jobs:
   create_timestamp:
