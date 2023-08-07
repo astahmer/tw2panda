@@ -55,7 +55,8 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch src/index.ts",
-    "clean": "npx --quiet rimraf dist node_modules",
+    "clean": "rimraf dist node_modules",
+    "clean:windows": "tsx ./scripts/clean.ts",
     "typecheck": "tsc --noEmit",
     "rewrite-deps": "tsx ./scripts/rewrite-workspace-dependencies.ts",
     "override-esbuild": "tsx ./scripts/override-esbuild-with-wasm.ts",
@@ -87,6 +88,7 @@
     "@pnpm/types": "^9.2.0",
     "@types/dotenv": "^8.2.0",
     "@types/node": "20.4.1",
+    "@types/rimraf": "^4.0.5",
     "@types/semver": "^7.5.0",
     "@types/vscode": "^1.67.0",
     "@vscode/vsce": "^2.20.0",

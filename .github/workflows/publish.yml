@@ -143,9 +143,18 @@ jobs:
         if: contains(matrix.target, 'darwin-arm64')
         run: pnpm override-esbuild
 
-      - name: Prepare pnpm workspace-less install
+      - name: Rewrite workspace deps
         working-directory: ./packages/vscode
-        run: pnpm rewrite-deps && pnpm clean
+        run: pnpm rewrite-deps
+
+      - name: Clean node_modules
+        working-directory: ./packages/vscode
+        if: contains(matrix.target, 'win')
+        run: pnpm clean:windows
+
+      - name: Clean node_modules
+        working-directory: ./packages/vscode
+        run: pnpm clean
 
       - name: Install with npm
         working-directory: ./packages/vscode

@@ -15,8 +15,8 @@ You can look at this file for an example of what it can do:
 
 ## VSCode extension
 
-Not yet implemented, but it's planned ! In the meantime you can use it as described in
-[this awesome video](https://youtu.be/fKSemrudovo?t=329) by [jherr](https://github.com/jherr)
+Select the text you want to convert and run the `tw2panda: Rewrite tw to Panda CSS` command.
+https://marketplace.visualstudio.com/items?itemName=astahmer.tw2panda-vscode
 
 ## Install & usage
 
