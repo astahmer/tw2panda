@@ -1,5 +1,11 @@
 # tw2panda
 
+## 0.1.2
+
+### Patch Changes
+
+- b200c33: fix !important modifier
+
 ## 0.1.1
 
 ### Patch Changes
