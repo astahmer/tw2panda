@@ -7,8 +7,11 @@ import { RewriteOptions, StyleObject, TwResultItem } from "./types";
 import { twClassListToPandaStyles } from "./tw-class-list-to-panda-styles";
 import { mapToShorthands } from "./panda-map-to-shorthands";
 import { getStringLiteralText, isStringLike } from "./find-tw-class-candidates";
+import { join, relative } from "pathe";
 
 type CvaNode = { node: CallExpression; start: number; end: number; base: Node | undefined; variantsConfig: Node };
+
+const importFrom = (values: string[], mod: string) => `import { ${values.join(", ")} } from '${mod}';`;
 
 /**
  * Parse a file content, replace Tailwind classes with Panda styles object
@@ -16,12 +19,13 @@ type CvaNode = { node: CallExpression; start: number; end: number; base: Node | 
  */
 export function rewriteTwFileContentToPanda(
   content: string,
+  filePath: string,
   tailwind: TailwindContext,
   panda: PandaContext,
   mergeCss: (...styles: StyleObject[]) => StyleObject,
   options: RewriteOptions = { shorthands: true },
 ) {
-  const sourceFile = panda.project.addSourceFile("App.tsx", content) as any as SourceFile;
+  const sourceFile = panda.project.addSourceFile(filePath, content) as any as SourceFile;
 
   const code = sourceFile.getFullText();
   const magicStr = new MagicString(code);
@@ -29,6 +33,8 @@ export function rewriteTwFileContentToPanda(
 
   let cvaNode: undefined | CvaNode;
   let isInsideCx = false;
+
+  const imports = new Set(["css"]);
 
   sourceFile.forEachDescendant((node, traversal) => {
     // out of selection range, ignore
@@ -93,6 +99,7 @@ export function rewriteTwFileContentToPanda(
 
       magicStr.update(node.getStart(), node.getEnd(), `cx(css(${serializedStyles}),`);
       isInsideCx = true;
+      imports.add("cx");
     }
 
     if (isInsideCx && Node.isTemplateTail(node)) {
@@ -152,6 +159,13 @@ export function rewriteTwFileContentToPanda(
       magicStr.remove(node.getStart(), node.getEnd());
     }
   });
+
+  if (imports.size) {
+    const relativeFile = relative(panda.config.cwd, filePath);
+    const outdirCssPath = join(panda.config.cwd, `${panda.config.outdir}/css`);
+    const from = relative(relativeFile, outdirCssPath);
+    magicStr.prepend(importFrom(Array.from(imports), from) + "\n\n");
+  }
 
   return { sourceFile, output: prettify(magicStr.toString()), resultList, magicStr };
 }

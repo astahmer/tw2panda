@@ -9,7 +9,7 @@ import { initialInputList } from "../../../demo-code-sample";
 import buttonRaw from "../samples/button?raw";
 import tailwindConfigRaw from "../samples/tailwind.config.cjs";
 
-describe("extract-tw-class-list", () => {
+describe("rewrite-tw-file-content-to-panda", () => {
   test("samples/button.ts", () => {
     const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
     const panda = createPandaContext();
@@ -19,10 +19,12 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(buttonRaw, tailwind.context, panda, mergeCss);
+    const { output } = rewriteTwFileContentToPanda(buttonRaw, "samples/button.ts", tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
-      "/** @see https://github.com/shadcn/ui/blob/ac5c727fc966a8cf859ced4a4074ddf9a31da922/apps/www/registry/default/ui/button.tsx#L12 */
+      "import { css } from '../../styled-system/css'
+
+      /** @see https://github.com/shadcn/ui/blob/ac5c727fc966a8cf859ced4a4074ddf9a31da922/apps/www/registry/default/ui/button.tsx#L12 */
 
       import * as React from 'react'
       import { Slot } from '@radix-ui/react-slot'
@@ -94,10 +96,12 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(buttonRaw, tailwind.context, panda, mergeCss);
+    const { output } = rewriteTwFileContentToPanda(buttonRaw, "samples/button.ts", tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
-      "/** @see https://github.com/shadcn/ui/blob/ac5c727fc966a8cf859ced4a4074ddf9a31da922/apps/www/registry/default/ui/button.tsx#L12 */
+      "import { css } from '../../styled-system/css'
+
+      /** @see https://github.com/shadcn/ui/blob/ac5c727fc966a8cf859ced4a4074ddf9a31da922/apps/www/registry/default/ui/button.tsx#L12 */
 
       import * as React from 'react'
       import { Slot } from '@radix-ui/react-slot'
@@ -174,10 +178,18 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(initialInputList["tw-App.tsx"], tailwind.context, panda, mergeCss);
+    const { output } = rewriteTwFileContentToPanda(
+      initialInputList["tw-App.tsx"],
+      "tw-App.tsx",
+      tailwind.context,
+      panda,
+      mergeCss,
+    );
 
     expect(output).toMatchInlineSnapshot(`
-      "const App = () => {
+      "import { css } from '../styled-system/css'
+
+      const App = () => {
         return (
           <>
             <figure
@@ -232,26 +244,24 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(
-      `
-    const App = () => {
-      return (
-        <>
-          <header
-            className={'header top-0 left-0 z-40 flex w-full items-center bg-transparent'}
-            class={('text-red-400') as any}
-          />
-        </>
-      )
-    }
-    `,
-      tailwind.context,
-      panda,
-      mergeCss,
-    );
+    const input = `
+      const App = () => {
+        return (
+          <>
+            <header
+              className={'header top-0 left-0 z-40 flex w-full items-center bg-transparent'}
+              class={('text-red-400') as any}
+            />
+          </>
+        )
+      }
+      `;
+    const { output } = rewriteTwFileContentToPanda(input, "App.tsx", tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
-      "const App = () => {
+      "import { css } from '../styled-system/css'
+
+      const App = () => {
         return (
           <>
             <header
@@ -282,23 +292,22 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(
-      `
-    const App = () => {
-      return (
-        <>
-          <div class={\`text-blue-400\`} />
-        </>
-      )
-    }
-    `,
-      tailwind.context,
-      panda,
-      mergeCss,
-    );
+    const input = `
+      const App = () => {
+        return (
+          <>
+            <div class={\`text-blue-400\`} />
+          </>
+        )
+      }
+      `;
+
+    const { output } = rewriteTwFileContentToPanda(input, "App.tsx", tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
-      "const App = () => {
+      "import { css } from '../styled-system/css'
+
+      const App = () => {
         return (
           <>
             <div class={css({ color: 'blue.400' })} />
@@ -318,23 +327,21 @@ describe("extract-tw-class-list", () => {
       hash: false,
     });
 
-    const { output } = rewriteTwFileContentToPanda(
-      `
-    const App = () => {
-      return (
-        <>
-          <div class={\`text-yellow-400 dark:!bg-yellow-100 $\{\sticky ? 'bg-yellow-200 text-yellow-300' : "bg-yellow-400 text-yellow-500"} \`} />
-        </>
-      )
-    }
-    `,
-      tailwind.context,
-      panda,
-      mergeCss,
-    );
+    const input = `
+      const App = () => {
+        return (
+          <>
+            <div class={\`text-yellow-400 dark:!bg-yellow-100 $\{\sticky ? 'bg-yellow-200 text-yellow-300' : "bg-yellow-400 text-yellow-500"} \`} />
+          </>
+        )
+      }
+      `;
+    const { output } = rewriteTwFileContentToPanda(input, "App.tsx", tailwind.context, panda, mergeCss);
 
     expect(output).toMatchInlineSnapshot(`
-      "const App = () => {
+      "import { css, cx } from '../styled-system/css'
+
+      const App = () => {
         return (
           <>
             <div

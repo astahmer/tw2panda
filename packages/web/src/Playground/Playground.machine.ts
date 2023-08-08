@@ -136,7 +136,7 @@ export const playgroundMachine = createMachine(
           hash: false,
         });
 
-        const result = rewriteTwFileContentToPanda(value, tailwind, panda, mergeCss);
+        const result = rewriteTwFileContentToPanda(value, "App.tsx", tailwind, panda, mergeCss);
         const { sourceFile, output, resultList = [] } = result;
 
         const outputList = {

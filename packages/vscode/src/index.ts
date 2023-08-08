@@ -163,6 +163,7 @@ export async function activate(context: vscode.ExtensionContext) {
       // TODO pass RewriteOptions from settings
       const update = rewriteTwFileContentToPanda(
         currentEditor.document.getText(),
+        currentEditor.document.uri.fsPath,
         current.tailwind,
         current.panda,
         mergeCss,
