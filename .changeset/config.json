@@ -7,5 +7,5 @@
   "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["tw2panda-web", "tw2panda-vscode"]
+  "ignore": ["tw2panda-web"]
 }

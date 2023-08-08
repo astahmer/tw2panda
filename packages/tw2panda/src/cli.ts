@@ -4,19 +4,17 @@ import { readFileSync } from "fs";
 import { join, resolve } from "pathe";
 import { initialInputList } from "../../../demo-code-sample";
 import { extractTwFileClassList } from "./extract-tw-class-list";
-import { PandaContext, createPandaContext } from "./panda-context";
 import { rewriteTwFileContentToPanda } from "./rewrite-tw-file-content-to-panda";
 import { createTailwindContext } from "./tw-context";
 import { twClassListToPanda } from "./tw-to-panda";
 import { z } from "zod";
 import { bundle } from "./bundle";
 
-import { loadConfigAndCreateContext } from "@pandacss/node";
-
 // @ts-expect-error
 import { name, version } from "../package.json";
 import { writeFile } from "fs/promises";
 import { RewriteOptions } from "./types";
+import { loadPandaContext } from "./config/load-context";
 
 const cwd = process.cwd();
 
@@ -56,9 +54,8 @@ cli
     const tw = createTailwindContext(twConfig);
     const configPath = options.config;
 
-    const panda = configPath
-      ? ((await loadConfigAndCreateContext({ configPath, cwd })) as any as PandaContext)
-      : createPandaContext();
+    const ctx = await loadPandaContext({ cwd, configPath, file });
+    const panda = ctx.context;
     const { mergeCss } = createMergeCss(Object.assign(panda, { hash: false }));
 
     const result = rewriteTwFileContentToPanda(content, tw.context, panda, mergeCss, options as RewriteOptions);
@@ -92,9 +89,8 @@ cli
     const tw = createTailwindContext(twConfig);
     const configPath = options.config;
 
-    const panda = configPath
-      ? ((await loadConfigAndCreateContext({ configPath, cwd })) as any as PandaContext)
-      : createPandaContext();
+    const ctx = await loadPandaContext({ cwd, configPath, file });
+    const panda = ctx.context;
     const { mergeCss } = createMergeCss(Object.assign(panda, { hash: false }));
 
     const list = extractTwFileClassList(content, tw.context, panda, mergeCss, options as RewriteOptions);

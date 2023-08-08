@@ -1,5 +1,4 @@
 import findUp from "escalade/sync";
-import { resolve } from "pathe";
 
 // Adapted from https://github.com/chakra-ui/panda/blob/b58daf4276e47aaad536b8327c7a27f48a4cdc2e/packages/config/src/find-config.ts#L4
 
@@ -13,18 +12,17 @@ const isTailwindConfig = (file: string) => tailwindConfigRegex.test(file);
 export type ConfigFileOptions = {
   cwd: string;
   file?: string | undefined;
+  configPath?: string | undefined;
 };
 
-export function findPandaConfig({ cwd, file }: ConfigFileOptions) {
-  if (file) return resolve(cwd, file);
-  return findUp(cwd, (_dir, paths) => {
+export function findPandaConfig({ from }: { from: string }) {
+  return findUp(from, (_dir, paths) => {
     return paths.find(isPandaConfig);
   });
 }
 
-export function findTailwindConfig({ cwd, file }: ConfigFileOptions) {
-  if (file) return resolve(cwd, file);
-  return findUp(cwd, (_dir, paths) => {
+export function findTailwindConfig({ from }: { from: string }) {
+  return findUp(from, (_dir, paths) => {
     return paths.find(isTailwindConfig);
   });
 }

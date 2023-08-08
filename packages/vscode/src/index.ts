@@ -14,7 +14,7 @@ const debug = true;
  * Cache config paths by file path.
  * ---
  * Does not actually cache context by file path, because it might change and we don't want to start a file watcher.
- * Instead, re-resolving context on every file change only cost 100ms.
+ * Instead, re-resolving context on every command request "only" cost 100ms.
  */
 class ContextResolver {
   private pandaConfigPathByFilepath = new Map<string, string>();
@@ -40,16 +40,6 @@ class ContextResolver {
     });
   }
 
-  async loadTailwindContext({ cwd, file }: { cwd: string; file?: string }) {
-    const result = await loadTailwindContext({ cwd, file });
-    return result.context;
-  }
-
-  async loadPandaContext({ cwd, file }: { cwd: string; file?: string }) {
-    const result = await loadPandaContext({ cwd, file });
-    return result.context;
-  }
-
   async get(filePath: string) {
     let pandaConfigPath: string | undefined;
     let twConfigPath: string | undefined;
@@ -68,8 +58,8 @@ class ContextResolver {
     });
 
     const [tailwind, panda] = await Promise.all([
-      this.loadTailwindContext({ cwd, file: twConfigPath! }),
-      this.loadPandaContext({ cwd, file: pandaConfigPath! }),
+      (await loadTailwindContext({ cwd, file: filePath, configPath: twConfigPath! })).context,
+      (await loadPandaContext({ cwd, file: filePath, configPath: pandaConfigPath! })).context,
     ]);
 
     this.twConfigPathByFilepath.set(filePath, twConfigPath!);
