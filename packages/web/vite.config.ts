@@ -43,7 +43,7 @@ export default defineConfig({
     alias: {
       module: path.join(dirname, "./module.shim.ts"),
       path: "path-browserify",
-      pathe: "path-browserify",
+      // pathe: "path-browserify",
       esbuild: "esbuild-wasm",
       "fs/promises": path.join(dirname, "./fs.shim.ts"),
       fs: path.join(dirname, "./fs.shim.ts"),
