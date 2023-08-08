@@ -7,7 +7,7 @@ import { dirname } from "pathe";
 import glob from "fast-glob";
 import { resolveConfigFile, resolveConfig, Options } from "prettier";
 
-const debug = true;
+const debug = false;
 
 /**
  * Resolve Tailwind and Panda context for a file.

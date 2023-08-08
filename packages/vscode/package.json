@@ -38,7 +38,7 @@
     "README.md",
     "LICENSE"
   ],
-  "preview": true,
+  "preview": false,
   "contributes": {
     "commands": [
       {
