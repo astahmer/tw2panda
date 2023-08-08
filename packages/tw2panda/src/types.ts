@@ -1,11 +1,11 @@
-import { StringLiteral } from "ts-morph";
+import { NoSubstitutionTemplateLiteral, StringLiteral } from "ts-morph";
 
 export type StyleObject = Record<string, any>;
 
 export type TwResultItem = {
   classList: Set<string>;
   styles: StyleObject;
-  node: StringLiteral;
+  node: StringLiteral | NoSubstitutionTemplateLiteral;
 };
 
 export interface TailwindClass {

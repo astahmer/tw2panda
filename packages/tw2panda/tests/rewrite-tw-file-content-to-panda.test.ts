@@ -222,4 +222,90 @@ describe("extract-tw-class-list", () => {
       "
     `);
   });
+
+  test("JSX expressions", () => {
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
+    const panda = createPandaContext();
+    const { mergeCss } = createMergeCss({
+      utility: panda.utility,
+      conditions: panda.conditions,
+      hash: false,
+    });
+
+    const { output } = rewriteTwFileContentToPanda(
+      `
+    const App = () => {
+      return (
+        <>
+          <header
+            className={'header top-0 left-0 z-40 flex w-full items-center bg-transparent'}
+            class={('text-red-400') as any}
+          />
+        </>
+      )
+    }
+    `,
+      tailwind.context,
+      panda,
+      mergeCss,
+    );
+
+    expect(output).toMatchInlineSnapshot(`
+      "const App = () => {
+        return (
+          <>
+            <header
+              className={css({
+                top: '0',
+                left: '0',
+                zIndex: '40',
+                display: 'flex',
+                w: 'full',
+                alignItems: 'center',
+                bgColor: 'transparent',
+              })}
+              class={css({ color: 'red.400' }) as any}
+            />
+          </>
+        )
+      }
+      "
+    `);
+  });
+
+  test("NoSubstitutionTemplateLiteral", () => {
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
+    const panda = createPandaContext();
+    const { mergeCss } = createMergeCss({
+      utility: panda.utility,
+      conditions: panda.conditions,
+      hash: false,
+    });
+
+    const { output } = rewriteTwFileContentToPanda(
+      `
+    const App = () => {
+      return (
+        <>
+          <div class={css({ color: 'blue.400' })} />
+        </>
+      )
+    }
+    `,
+      tailwind.context,
+      panda,
+      mergeCss,
+    );
+
+    expect(output).toMatchInlineSnapshot(`
+      "const App = () => {
+        return (
+          <>
+            <div class={css({ color: 'blue.400' })} />
+          </>
+        )
+      }
+      "
+    `);
+  });
 });

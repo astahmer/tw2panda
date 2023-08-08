@@ -1,10 +1,10 @@
-import { Node, SourceFile, StringLiteral } from "ts-morph";
+import { NoSubstitutionTemplateLiteral, Node, SourceFile, StringLiteral } from "ts-morph";
 import { PandaContext } from "./panda-context";
 
 /** Finds all tailwind class candidates in a file
  * -> returns the list of all StringLiteral AST nodes */
 export function findTwClassCandidates(content: string, panda: PandaContext) {
-  const nodes = new Set<StringLiteral>();
+  const nodes = new Set<StringLiteral | NoSubstitutionTemplateLiteral>();
 
   const sourceFile = panda.project.addSourceFile("App.tsx", content) as any as SourceFile;
 
@@ -15,7 +15,7 @@ export function findTwClassCandidates(content: string, panda: PandaContext) {
       return;
     }
 
-    if (Node.isStringLiteral(node)) {
+    if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) {
       const string = (node.getLiteralText() ?? "").trim();
       if (!string) return;
 

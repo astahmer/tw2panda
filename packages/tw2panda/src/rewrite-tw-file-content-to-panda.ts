@@ -29,6 +29,7 @@ export function rewriteTwFileContentToPanda(
   let cvaNode: undefined | CvaNode;
 
   sourceFile.forEachDescendant((node, traversal) => {
+    // out of selection range, ignore
     if (options.range) {
       if (options.range.start > node.getStart() && node.getEnd() > options.range.end) {
         return;
@@ -72,7 +73,7 @@ export function rewriteTwFileContentToPanda(
       return;
     }
 
-    if (Node.isStringLiteral(node)) {
+    if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) {
       const string = (node.getLiteralText() ?? "").trim();
       if (!string) return;
 
@@ -95,11 +96,12 @@ export function rewriteTwFileContentToPanda(
       let replacement = !isInsideCva ? `css(\n${serializedStyles})` : serializedStyles;
 
       // if the string is inside a JSX attribute or expression, wrap it in {}
-      if (Node.isJsxAttribute(parent) || Node.isJsxExpression(parent)) {
+      if (Node.isJsxAttribute(parent)) {
         replacement = `{${replacement}}`;
       }
 
       // easy way, just replace the string
+      // <div class="text-slate-700 dark:text-slate-500" /> => <div css={css({ color: "slate.700", dark: { color: "slate.500" } })} />
       if (cvaNode?.base !== node) {
         magicStr.update(node.getStart(), node.getEnd(), replacement);
         return;
