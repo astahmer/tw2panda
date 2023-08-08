@@ -1,5 +1,25 @@
 # tw2panda
 
+## 0.2.0
+
+### Minor Changes
+
+- 1ac3dd0: refactor(config): better loadContext fns
+- 1f7463a: feat(rewrite): prepend relative outdir imports
+
+### Patch Changes
+
+- 0bd82f4: feat: rewrite template literal with conditions to cx
+
+  https://github.com/astahmer/tw2panda/issues/5
+
+- 11c3afc: types: allow partial config in panda context
+- 0df8954: fix: JSX Expression / template literal rewriting
+
+  https://github.com/astahmer/tw2panda/issues/6
+
+- d3c836c: feat(cli): rewrite --silent flag
+
 ## 0.1.2
 
 ### Patch Changes
