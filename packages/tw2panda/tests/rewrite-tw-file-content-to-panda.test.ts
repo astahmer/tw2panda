@@ -287,7 +287,7 @@ describe("extract-tw-class-list", () => {
     const App = () => {
       return (
         <>
-          <div class={css({ color: 'blue.400' })} />
+          <div class={\`text-blue-400\`} />
         </>
       )
     }
