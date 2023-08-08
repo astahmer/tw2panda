@@ -8,8 +8,8 @@ import { createHooks } from "hookable";
 import type {
   Artifact,
   Config,
-  ConfigResultWithHooks,
   Dict,
+  LoadConfigResult,
   PandaHookable,
   ParserResultType,
   PatternConfig,
@@ -24,7 +24,12 @@ import type { Conditions, Utility, Recipes, StylesheetOptions, Stylesheet } from
 import type { TokenDictionary } from "@pandacss/token-dictionary";
 import type { Root } from "postcss";
 
-const createContext = (conf: ConfigResultWithHooks) => {
+interface PartialConfig extends Omit<LoadConfigResult, "config"> {
+  hooks: PandaHookable;
+  config: Config;
+}
+
+const createContext = (conf: PartialConfig) => {
   const generator = createGenerator({
     ...conf,
     config: mergeConfigs([presetBase, presetTheme as any, conf.config]),
@@ -56,7 +61,7 @@ const createContext = (conf: ConfigResultWithHooks) => {
  * For a more feature-complete version, use `loadConfigAndCreateContext` from `@pandacss/node`
  * Mostly used for testing, also used for the `convert` command in the CLI with `twClassListToPanda`
  */
-export const createPandaContext = (conf?: Partial<ConfigResultWithHooks>) => {
+export const createPandaContext = (conf?: Partial<PartialConfig>) => {
   return createContext({
     hooks: createHooks() as any,
     dependencies: [],
