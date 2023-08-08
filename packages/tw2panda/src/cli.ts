@@ -25,7 +25,12 @@ const withWrite = z.object({ write: z.boolean() });
 const rewriteOptions = z.object({ shorthands: z.boolean() }).partial();
 const configOptions = z.object({ config: z.string().optional(), cwd: z.string().default(cwd) });
 
-const rewriteFlags = withWrite.merge(withTw).merge(rewriteOptions).partial().merge(configOptions);
+const rewriteFlags = withWrite
+  .merge(withTw)
+  .merge(rewriteOptions)
+  .extend({ silent: z.boolean() })
+  .partial()
+  .merge(configOptions);
 const extractFlags = withTw.merge(rewriteOptions).partial().merge(configOptions);
 
 const cli = cac(name);
@@ -36,6 +41,7 @@ cli
   .option("-w, --write", "Write to disk instead of stdout")
   .option("-s, --shorthands", "Use shorthands instead of longhand properties")
   .option("-c, --config <path>", "Path to panda config file")
+  .option("--silent", "Do not output anything to stdout")
   .option("--cwd <cwd>", "Current working directory", { default: cwd })
   .action(async (file, _options) => {
     const options = rewriteFlags.parse(_options);
@@ -60,7 +66,9 @@ cli
       return await writeFile(join(cwd, file), result.output);
     }
 
+    if (!options.silent) {
     console.log(result.output);
+    }
   });
 
 cli
