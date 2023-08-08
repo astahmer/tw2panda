@@ -7,6 +7,9 @@ export default defineConfig({
   test: {
     setupFiles: ["tests-setup.ts"],
     hideSkippedTests: true,
+    snapshotFormat: {
+      escapeString: false,
+    },
     // snapshotFormat: { indent: 4, escapeString: false },
   },
 });

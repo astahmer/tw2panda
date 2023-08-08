@@ -1,11 +1,12 @@
-import { NoSubstitutionTemplateLiteral, StringLiteral } from "ts-morph";
+import { TemplateHead } from "ts-morph";
+import { StringLike } from "./find-tw-class-candidates";
 
 export type StyleObject = Record<string, any>;
 
 export type TwResultItem = {
   classList: Set<string>;
   styles: StyleObject;
-  node: StringLiteral | NoSubstitutionTemplateLiteral;
+  node: StringLike | TemplateHead;
 };
 
 export interface TailwindClass {

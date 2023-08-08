@@ -198,10 +198,10 @@ describe("extract-tw-class-list", () => {
                   ml: 'auto',
                   mr: 'auto',
                 })}
-                src=\\"/sarah-dayan.jpg\\"
-                alt=\\"\\"
-                width=\\"384\\"
-                height=\\"512\\"
+                src="/sarah-dayan.jpg"
+                alt=""
+                width="384"
+                height="512"
               />
               <div class={css({ pt: '6', md: { p: '8', textAlign: 'left' }, textAlign: 'center', mt: '4', mb: '4' })}>
                 <blockquote>
@@ -302,6 +302,49 @@ describe("extract-tw-class-list", () => {
         return (
           <>
             <div class={css({ color: 'blue.400' })} />
+          </>
+        )
+      }
+      "
+    `);
+  });
+
+  test("TemplateLiteral with condition", () => {
+    const tailwind = createTailwindContext(initialInputList["tailwind.config.js"]);
+    const panda = createPandaContext();
+    const { mergeCss } = createMergeCss({
+      utility: panda.utility,
+      conditions: panda.conditions,
+      hash: false,
+    });
+
+    const { output } = rewriteTwFileContentToPanda(
+      `
+    const App = () => {
+      return (
+        <>
+          <div class={\`text-yellow-400 dark:!bg-yellow-100 $\{\sticky ? 'bg-yellow-200 text-yellow-300' : "bg-yellow-400 text-yellow-500"} \`} />
+        </>
+      )
+    }
+    `,
+      tailwind.context,
+      panda,
+      mergeCss,
+    );
+
+    expect(output).toMatchInlineSnapshot(`
+      "const App = () => {
+        return (
+          <>
+            <div
+              class={cx(
+                css({ color: 'yellow.400', _dark: { bgColor: 'yellow.100!' } }),
+                sticky
+                  ? css({ bgColor: 'yellow.200', color: 'yellow.300' })
+                  : css({ bgColor: 'yellow.400', color: 'yellow.500' }),
+              )}
+            />
           </>
         )
       }

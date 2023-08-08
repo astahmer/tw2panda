@@ -6,6 +6,7 @@ import { CallExpression, Node, SourceFile, ts } from "ts-morph";
 import { RewriteOptions, StyleObject, TwResultItem } from "./types";
 import { twClassListToPandaStyles } from "./tw-class-list-to-panda-styles";
 import { mapToShorthands } from "./panda-map-to-shorthands";
+import { getStringLiteralText, isStringLike } from "./find-tw-class-candidates";
 
 type CvaNode = { node: CallExpression; start: number; end: number; base: Node | undefined; variantsConfig: Node };
 
@@ -27,6 +28,7 @@ export function rewriteTwFileContentToPanda(
   const resultList = [] as TwResultItem[];
 
   let cvaNode: undefined | CvaNode;
+  let isInsideCx = false;
 
   sourceFile.forEachDescendant((node, traversal) => {
     // out of selection range, ignore
@@ -73,11 +75,36 @@ export function rewriteTwFileContentToPanda(
       return;
     }
 
-    if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) {
-      const string = (node.getLiteralText() ?? "").trim();
+    if (Node.isTemplateHead(node)) {
+      const string = getStringLiteralText(node);
       if (!string) return;
 
-      const classList = new Set(string.split(" ").filter((t) => t.trim()));
+      const classList = new Set(string.split(" "));
+      if (!classList.size) return;
+
+      const styles = twClassListToPandaStyles(classList, tailwind, panda);
+      if (!styles.length) return;
+
+      const merged = mergeCss(...styles.map((s) => s.styles));
+      const styleObject = options?.shorthands ? mapToShorthands(merged, panda) : merged;
+      resultList.push({ classList: new Set(classList), styles: styleObject, node });
+
+      const serializedStyles = JSON.stringify(styleObject, null);
+
+      magicStr.update(node.getStart(), node.getEnd(), `cx(css(${serializedStyles}),`);
+      isInsideCx = true;
+    }
+
+    if (isInsideCx && Node.isTemplateTail(node)) {
+      magicStr.update(node.getStart(), node.getEnd(), ")");
+      isInsideCx = false;
+    }
+
+    if (isStringLike(node)) {
+      const string = getStringLiteralText(node);
+      if (!string) return;
+
+      const classList = new Set(string.split(" "));
       if (!classList.size) return;
 
       const styles = twClassListToPandaStyles(classList, tailwind, panda);
@@ -93,10 +120,10 @@ export function rewriteTwFileContentToPanda(
       const isInsideCva = cvaNode && node.getStart() > cvaNode.start && node.getEnd() < cvaNode.end;
 
       // if the string is inside a cva call, omit the `css()` call
-      let replacement = !isInsideCva ? `css(\n${serializedStyles})` : serializedStyles;
+      let replacement = !isInsideCva ? `css(${serializedStyles})` : serializedStyles;
 
       // if the string is inside a JSX attribute or expression, wrap it in {}
-      if (Node.isJsxAttribute(parent)) {
+      if (!isInsideCx && Node.isJsxAttribute(parent)) {
         replacement = `{${replacement}}`;
       }
 

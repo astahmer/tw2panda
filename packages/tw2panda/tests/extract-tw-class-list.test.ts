@@ -449,7 +449,7 @@ describe("extract-tw-class-list", () => {
     const resultList = extractTwFileClassList(
       `
     const buttonVariants = cva(
-      "flex !inline-flex !text-destructive-foreground !text-primary-foreground bg-secondary-foreground focus-visible:!outline-none disabled:!opacity-50",
+      "flex !inline-flex !text-destructive-foreground !text-primary-foreground bg-secondary-foreground focus-visible:!outline-none disabled:!opacity-50 dark:!bg-primary",
       {
         variants: {}
       }
@@ -471,9 +471,13 @@ describe("extract-tw-class-list", () => {
             "bg-secondary-foreground",
             "focus-visible:!outline-none",
             "disabled:!opacity-50",
+            "dark:!bg-primary",
           },
           "node": StringLiteral,
           "styles": {
+            "_dark": {
+              "bgColor": "primary!",
+            },
             "_disabled": {
               "opacity": "0.5!",
             },
