@@ -56,9 +56,6 @@ importers:
       magic-string:
         specifier: ^0.30.1
         version: 0.30.1
-      pastable:
-        specifier: ^2.2.0
-        version: 2.2.0
       pathe:
         specifier: ^1.1.1
         version: 1.1.1
@@ -108,9 +105,18 @@ importers:
 
   packages/vscode:
     dependencies:
-      '@pandacss/dev':
-        specifier: 0.7.0
-        version: 0.7.0(@internationalized/date@3.3.0)(@types/node@20.4.1)(@types/react-dom@18.2.7)(@types/react@18.2.15)(astro@2.8.4)(typescript@5.1.6)
+      '@pandacss/config':
+        specifier: ^0.7.0
+        version: 0.7.0
+      '@pandacss/generator':
+        specifier: ^0.7.0
+        version: 0.7.0
+      '@pandacss/node':
+        specifier: ^0.7.0
+        version: 0.7.0(typescript@5.1.6)
+      '@pandacss/parser':
+        specifier: ^0.7.0
+        version: 0.7.0(typescript@5.1.6)
       '@pandacss/preset-base':
         specifier: 0.7.0
         version: 0.7.0
@@ -123,6 +129,12 @@ importers:
       prettier:
         specifier: 2.8.4
         version: 2.8.4
+      tailwindcss:
+        specifier: ^3.3.3
+        version: 3.3.3
+      ts-morph:
+        specifier: 18.0.0
+        version: 18.0.0
       tw2panda:
         specifier: workspace:*
         version: link:../tw2panda
@@ -180,7 +192,7 @@ importers:
         version: 7.5.4
       tsup:
         specifier: 7.1.0
-        version: 7.1.0(postcss@8.4.25)(typescript@5.1.6)
+        version: 7.1.0(postcss@8.4.26)(typescript@5.1.6)
       tsx:
         specifier: ^3.12.7
         version: 3.12.7
@@ -286,7 +298,7 @@ importers:
         version: 0.12.5
       vite:
         specifier: ^4.4.4
-        version: 4.4.4(@types/node@20.4.1)
+        version: 4.4.4(@types/node@20.4.2)
       vite-plugin-react-click-to-component:
         specifier: ^2.0.0
         version: 2.0.0(react@18.2.0)(vite@4.4.4)
@@ -410,36 +422,13 @@ packages:
       - supports-color
     dev: false
 
-  /@astrojs/markdown-remark@2.2.1(astro@2.8.0):
-    resolution: {integrity: sha512-VF0HRv4GpC1XEMLnsKf6jth7JSmlt9qpqP0josQgA2eSpCIAC/Et+y94mgdBIZVBYH/yFnMoIxgKVe93xfO2GA==}
-    peerDependencies:
-      astro: ^2.5.0
-    dependencies:
-      '@astrojs/prism': 2.1.2
-      astro: 2.8.0(@types/node@20.4.1)
-      github-slugger: 1.5.0
-      import-meta-resolve: 2.2.2
-      rehype-raw: 6.1.1
-      rehype-stringify: 9.0.3
-      remark-gfm: 3.0.1
-      remark-parse: 10.0.2
-      remark-rehype: 10.1.0
-      remark-smartypants: 2.0.0
-      shiki: 0.14.3
-      unified: 10.1.2
-      unist-util-visit: 4.1.2
-      vfile: 5.3.7
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /@astrojs/markdown-remark@2.2.1(astro@2.8.4):
     resolution: {integrity: sha512-VF0HRv4GpC1XEMLnsKf6jth7JSmlt9qpqP0josQgA2eSpCIAC/Et+y94mgdBIZVBYH/yFnMoIxgKVe93xfO2GA==}
     peerDependencies:
       astro: ^2.5.0
     dependencies:
       '@astrojs/prism': 2.1.2
-      astro: 2.8.4(@types/node@20.4.1)
+      astro: 2.8.4
       github-slugger: 1.5.0
       import-meta-resolve: 2.2.2
       rehype-raw: 6.1.1
@@ -1620,23 +1609,7 @@ packages:
       astro: '>=2.x'
     dependencies:
       '@pandacss/postcss': 0.6.0(typescript@5.1.6)
-      astro: 2.8.4(@types/node@20.4.1)
-      autoprefixer: 10.4.14(postcss@8.4.26)
-      postcss: 8.4.26
-      postcss-load-config: 4.0.1(postcss@8.4.26)
-    transitivePeerDependencies:
-      - jsdom
-      - ts-node
-      - typescript
-    dev: false
-
-  /@pandacss/astro@0.7.0(astro@2.8.4)(typescript@5.1.6):
-    resolution: {integrity: sha512-1/bJpWKw32Dw9hxMN3h9cQZX10MebKnXm4uIxw6fvRgWCXd0F/FTCB4bePD9PkozAc3IFx9A6MDngz4/tnK6ZA==}
-    peerDependencies:
-      astro: '>=2.x'
-    dependencies:
-      '@pandacss/postcss': 0.7.0(typescript@5.1.6)
-      astro: 2.8.4(@types/node@20.4.1)
+      astro: 2.8.4
       autoprefixer: 10.4.14(postcss@8.4.26)
       postcss: 8.4.26
       postcss-load-config: 4.0.1(postcss@8.4.26)
@@ -1739,49 +1712,7 @@ packages:
       '@pandacss/studio': 0.6.0(@internationalized/date@3.3.0)(@types/react-dom@18.2.7)(@types/react@18.2.15)(typescript@5.1.6)
       '@pandacss/token-dictionary': 0.6.0
       '@pandacss/types': 0.6.0
-      astro: 2.8.4(@types/node@20.4.1)
-      cac: 6.7.14
-      pathe: 1.1.1
-      perfect-debounce: 1.0.0
-    transitivePeerDependencies:
-      - '@internationalized/date'
-      - '@types/node'
-      - '@types/react'
-      - '@types/react-dom'
-      - jsdom
-      - less
-      - lightningcss
-      - sass
-      - sharp
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - ts-node
-      - typescript
-    dev: false
-
-  /@pandacss/dev@0.7.0(@internationalized/date@3.3.0)(@types/node@20.4.1)(@types/react-dom@18.2.7)(@types/react@18.2.15)(astro@2.8.4)(typescript@5.1.6):
-    resolution: {integrity: sha512-FST+ttrGdCapp8frGf/otOAa+MmYbvxsVQqtwThZe2OwzACcGRKrYeDXF5hT2XV1DLE299DM8YuD3kxg8bA7QQ==}
-    hasBin: true
-    peerDependencies:
-      astro: '*'
-    peerDependenciesMeta:
-      astro:
-        optional: true
-    dependencies:
-      '@pandacss/astro': 0.7.0(astro@2.8.4)(typescript@5.1.6)
-      '@pandacss/config': 0.7.0
-      '@pandacss/error': 0.7.0
-      '@pandacss/logger': 0.7.0
-      '@pandacss/node': 0.7.0(typescript@5.1.6)
-      '@pandacss/postcss': 0.7.0(typescript@5.1.6)
-      '@pandacss/preset-panda': 0.7.0
-      '@pandacss/shared': 0.7.0
-      '@pandacss/studio': 0.7.0(@internationalized/date@3.3.0)(@types/node@20.4.1)(@types/react-dom@18.2.7)(@types/react@18.2.15)(typescript@5.1.6)
-      '@pandacss/token-dictionary': 0.7.0
-      '@pandacss/types': 0.7.0
-      astro: 2.8.4(@types/node@20.4.1)
+      astro: 2.8.4
       cac: 6.7.14
       pathe: 1.1.1
       perfect-debounce: 1.0.0
@@ -1945,7 +1876,7 @@ packages:
       '@pandacss/token-dictionary': 0.7.0
       '@pandacss/types': 0.7.0
       chokidar: 3.5.3
-      fast-glob: 3.3.0
+      fast-glob: 3.3.1
       file-size: 1.0.0
       filesize: 10.0.7
       fs-extra: 11.1.1
@@ -2015,16 +1946,6 @@ packages:
       - typescript
     dev: false
 
-  /@pandacss/postcss@0.7.0(typescript@5.1.6):
-    resolution: {integrity: sha512-U4JKMV2l7iwwSTQJ6Ufv1R5MzA5hpMth0PHIZSQYPNWEM+dHbHPlN/npH0jO94hQ+T5KRbsxzIJs5+mxU8cbqw==}
-    dependencies:
-      '@pandacss/node': 0.7.0(typescript@5.1.6)
-      postcss: 8.4.26
-    transitivePeerDependencies:
-      - jsdom
-      - typescript
-    dev: false
-
   /@pandacss/preset-base@0.6.0:
     resolution: {integrity: sha512-xaLhl4LAfe3/Nrx4yBwGrL6XIyKFn2y+yQvdgUm8fH9Bah/FDW4m4izIQ7pW9Fn1xAb2bSKxNBDkTJLdLdGzBA==}
     dependencies:
@@ -2070,39 +1991,6 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       vite: 4.3.9
-    transitivePeerDependencies:
-      - '@internationalized/date'
-      - '@types/node'
-      - '@types/react'
-      - '@types/react-dom'
-      - jsdom
-      - less
-      - lightningcss
-      - sass
-      - sharp
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - typescript
-    dev: false
-
-  /@pandacss/studio@0.7.0(@internationalized/date@3.3.0)(@types/node@20.4.1)(@types/react-dom@18.2.7)(@types/react@18.2.15)(typescript@5.1.6):
-    resolution: {integrity: sha512-hoDllsdpOv6UIHdt9myuY6oDFXGiuSwA6H5px4H2GcL6Xim9xv82c3yGAb/E3wQCV2tjTaFH2CaslI891ckgCA==}
-    dependencies:
-      '@ark-ui/react': 0.7.2(@internationalized/date@3.3.0)(react-dom@18.2.0)(react@18.2.0)
-      '@astrojs/react': 2.2.1(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
-      '@pandacss/config': 0.7.0
-      '@pandacss/logger': 0.7.0
-      '@pandacss/node': 0.7.0(typescript@5.1.6)
-      '@pandacss/shared': 0.7.0
-      '@pandacss/token-dictionary': 0.7.0
-      '@pandacss/types': 0.7.0
-      astro: 2.8.0(@types/node@20.4.1)
-      javascript-stringify: 2.1.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      vite: 4.4.2(@types/node@20.4.1)
     transitivePeerDependencies:
       - '@internationalized/date'
       - '@types/node'
@@ -2190,7 +2078,7 @@ packages:
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
     dependencies:
       cross-spawn: 7.0.3
-      fast-glob: 3.3.0
+      fast-glob: 3.3.1
       is-glob: 4.0.3
       open: 9.1.0
       picocolors: 1.0.0
@@ -3107,10 +2995,10 @@ packages:
 
   /@types/node@20.4.1:
     resolution: {integrity: sha512-JIzsAvJeA/5iY6Y/OxZbv1lUcc8dNSE77lb2gnBH+/PJ3lFR1Ccvgwl5JWnHAkNHcRsT0TbpVOsiMKZ1F/yyJg==}
+    dev: true
 
   /@types/node@20.4.2:
     resolution: {integrity: sha512-Dd0BYtWgnWJKwO1jkmTrzofjK2QXXcai0dmtzvIBhcA+RsG5h8R3xlyta0kGOZRNfL9GuRtb1knmPEhQrePCEw==}
-    dev: true
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -3191,7 +3079,7 @@ packages:
       vite: ^4
     dependencies:
       '@swc/core': 1.3.68
-      vite: 4.4.4(@types/node@20.4.1)
+      vite: 4.4.4(@types/node@20.4.2)
     transitivePeerDependencies:
       - '@swc/helpers'
     dev: true
@@ -4145,82 +4033,6 @@ packages:
       esbuild: 0.17.19
       estree-walker: 3.0.0
       execa: 6.1.0
-      fast-glob: 3.3.0
-      github-slugger: 2.0.0
-      gray-matter: 4.0.3
-      html-escaper: 3.0.3
-      js-yaml: 4.1.0
-      kleur: 4.1.5
-      magic-string: 0.27.0
-      mime: 3.0.0
-      ora: 6.3.1
-      p-limit: 4.0.0
-      path-to-regexp: 6.2.1
-      preferred-pm: 3.0.3
-      prompts: 2.4.2
-      rehype: 12.0.1
-      semver: 7.5.4
-      server-destroy: 1.0.1
-      shiki: 0.14.3
-      string-width: 5.1.2
-      strip-ansi: 7.1.0
-      tsconfig-resolver: 3.0.1
-      typescript: 5.1.6
-      unist-util-visit: 4.1.2
-      vfile: 5.3.7
-      vite: 4.4.4(@types/node@20.4.1)
-      vitefu: 0.2.4(vite@4.4.4)
-      yargs-parser: 21.1.1
-      zod: 3.21.4
-    transitivePeerDependencies:
-      - '@types/node'
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-    dev: false
-
-  /astro@2.8.0(@types/node@20.4.1):
-    resolution: {integrity: sha512-bqdhE9039dzi0mqaWGO9rMk5HKxTn5TckxFmRPUdsV1qmbpghXtwuERHblfJu5etQofV6WVEyTrouG+BLRkqfA==}
-    engines: {node: '>=16.12.0', npm: '>=6.14.0'}
-    hasBin: true
-    peerDependencies:
-      sharp: '>=0.31.0'
-    peerDependenciesMeta:
-      sharp:
-        optional: true
-    dependencies:
-      '@astrojs/compiler': 1.5.7
-      '@astrojs/internal-helpers': 0.1.1
-      '@astrojs/language-server': 1.0.8
-      '@astrojs/markdown-remark': 2.2.1(astro@2.8.0)
-      '@astrojs/telemetry': 2.1.1
-      '@astrojs/webapi': 2.2.0
-      '@babel/core': 7.22.9
-      '@babel/generator': 7.22.9
-      '@babel/parser': 7.22.7
-      '@babel/plugin-transform-react-jsx': 7.22.5(@babel/core@7.22.9)
-      '@babel/traverse': 7.22.8
-      '@babel/types': 7.22.5
-      '@types/babel__core': 7.20.1
-      '@types/yargs-parser': 21.0.0
-      acorn: 8.10.0
-      boxen: 6.2.1
-      chokidar: 3.5.3
-      ci-info: 3.8.0
-      common-ancestor-path: 1.0.1
-      cookie: 0.5.0
-      debug: 4.3.4
-      deepmerge-ts: 4.3.0
-      devalue: 4.3.2
-      diff: 5.1.0
-      es-module-lexer: 1.3.0
-      esbuild: 0.17.19
-      estree-walker: 3.0.0
-      execa: 6.1.0
       fast-glob: 3.3.1
       github-slugger: 2.0.0
       gray-matter: 4.0.3
@@ -4244,9 +4056,8 @@ packages:
       typescript: 5.1.6
       unist-util-visit: 4.1.2
       vfile: 5.3.7
-      vite: 4.4.4(@types/node@20.4.1)
+      vite: 4.4.4(@types/node@20.4.2)
       vitefu: 0.2.4(vite@4.4.4)
-      which-pm: 2.0.0
       yargs-parser: 21.1.1
       zod: 3.21.4
     transitivePeerDependencies:
@@ -4260,7 +4071,7 @@ packages:
       - terser
     dev: false
 
-  /astro@2.8.4(@types/node@20.4.1):
+  /astro@2.8.4:
     resolution: {integrity: sha512-XTfMN6MszrkePcaLt19eQl5BA3Mg8Jqvb7wDWBYoQAJQwU0YE3BBbAwFgWosA1rBv4wClWIne8CKq5iBDklrOQ==}
     engines: {node: '>=16.12.0', npm: '>=6.14.0'}
     hasBin: true
@@ -4321,7 +4132,7 @@ packages:
       typescript: 5.1.6
       unist-util-visit: 4.1.2
       vfile: 5.3.7
-      vite: 4.4.4(@types/node@20.4.1)
+      vite: 4.4.4(@types/node@20.4.2)
       vitefu: 0.2.4(vite@4.4.4)
       which-pm: 2.0.0
       yargs-parser: 21.1.1
@@ -4531,7 +4342,7 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001515
+      caniuse-lite: 1.0.30001516
       electron-to-chromium: 1.4.455
       node-releases: 2.0.13
       update-browserslist-db: 1.0.11(browserslist@4.21.9)
@@ -4661,9 +4472,6 @@ packages:
       caniuse-lite: 1.0.30001516
       lodash.memoize: 4.1.2
       lodash.uniq: 4.5.0
-
-  /caniuse-lite@1.0.30001515:
-    resolution: {integrity: sha512-eEFDwUOZbE24sb+Ecsx3+OvNETqjWIdabMy52oOkIgcUtAsQifjUG9q4U9dgTHJM2mfk4uEPxc0+xuFdJ629QA==}
 
   /caniuse-lite@1.0.30001516:
     resolution: {integrity: sha512-Wmec9pCBY8CWbmI4HsjBeQLqDTqV91nFVR83DnZpYyRnPI1wePDsTg0bGLPC5VU/3OIZV1fmxEea1b+tFKe86g==}
@@ -5576,6 +5384,7 @@ packages:
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.5
+    dev: false
 
   /fast-glob@3.3.1:
     resolution: {integrity: sha512-kNFPyjhh5cKjrUltxs+wFx+ZkbRaxxmZ+X0ZU31SOsxCEtP9VPgtq2teZw1DebupL5GmDaNQ6yKMMVcM41iqDg==}
@@ -5896,7 +5705,7 @@ packages:
     dependencies:
       array-union: 2.1.0
       dir-glob: 3.0.1
-      fast-glob: 3.3.0
+      fast-glob: 3.3.1
       ignore: 5.2.4
       merge2: 1.4.1
       slash: 3.0.0
@@ -8027,25 +7836,6 @@ packages:
       entities: 4.5.0
     dev: true
 
-  /pastable@2.2.0:
-    resolution: {integrity: sha512-VW3BlFr4aqazNaHOdf2Yg/GY8JRiMDnGExFCHXN+dm6yz8b5uZk9WuJk3YwhRPyzFjuZPnoxt8aFe5fX4gAStw==}
-    engines: {node: '>=14.x'}
-    peerDependencies:
-      react: '>=17'
-      xstate: '>=4.32.1'
-    peerDependenciesMeta:
-      react:
-        optional: true
-      xstate:
-        optional: true
-    dependencies:
-      '@babel/core': 7.22.9
-      ts-toolbelt: 9.6.0
-      type-fest: 3.13.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /pastable@2.2.0(react@18.2.0)(xstate@4.38.1):
     resolution: {integrity: sha512-VW3BlFr4aqazNaHOdf2Yg/GY8JRiMDnGExFCHXN+dm6yz8b5uZk9WuJk3YwhRPyzFjuZPnoxt8aFe5fX4gAStw==}
     engines: {node: '>=14.x'}
@@ -8245,23 +8035,6 @@ packages:
     dependencies:
       lilconfig: 2.1.0
       postcss: 8.4.24
-      yaml: 2.3.1
-    dev: true
-
-  /postcss-load-config@4.0.1(postcss@8.4.25):
-    resolution: {integrity: sha512-vEJIc8RdiBRu3oRAI0ymerOn+7rPuMvRXslTvZUKZonDHFIczxztIyJ1urxM1x9JXEikvpWWTUUqal5j/8QgvA==}
-    engines: {node: '>= 14'}
-    peerDependencies:
-      postcss: '>=8.0.9'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      postcss:
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      lilconfig: 2.1.0
-      postcss: 8.4.25
       yaml: 2.3.1
     dev: true
 
@@ -9752,43 +9525,6 @@ packages:
       - ts-node
     dev: true
 
-  /tsup@7.1.0(postcss@8.4.25)(typescript@5.1.6):
-    resolution: {integrity: sha512-mazl/GRAk70j8S43/AbSYXGgvRP54oQeX8Un4iZxzATHt0roW0t6HYDVZIXMw0ZQIpvr1nFMniIVnN5186lW7w==}
-    engines: {node: '>=16.14'}
-    hasBin: true
-    peerDependencies:
-      '@swc/core': ^1
-      postcss: ^8.4.12
-      typescript: '>=4.1.0'
-    peerDependenciesMeta:
-      '@swc/core':
-        optional: true
-      postcss:
-        optional: true
-      typescript:
-        optional: true
-    dependencies:
-      bundle-require: 4.0.1(esbuild@0.18.14)
-      cac: 6.7.14
-      chokidar: 3.5.3
-      debug: 4.3.4
-      esbuild: 0.18.14
-      execa: 5.1.1
-      globby: 11.1.0
-      joycon: 3.1.1
-      postcss: 8.4.25
-      postcss-load-config: 4.0.1(postcss@8.4.25)
-      resolve-from: 5.0.0
-      rollup: 3.26.3
-      source-map: 0.8.0-beta.0
-      sucrase: 3.33.0
-      tree-kill: 1.2.2
-      typescript: 5.1.6
-    transitivePeerDependencies:
-      - supports-color
-      - ts-node
-    dev: true
-
   /tsup@7.1.0(postcss@8.4.26)(typescript@5.1.6):
     resolution: {integrity: sha512-mazl/GRAk70j8S43/AbSYXGgvRP54oQeX8Un4iZxzATHt0roW0t6HYDVZIXMw0ZQIpvr1nFMniIVnN5186lW7w==}
     engines: {node: '>=16.14'}
@@ -10216,7 +9952,7 @@ packages:
       vite: ^2 || ^3 || ^4
     dependencies:
       react: 18.2.0
-      vite: 4.4.4(@types/node@20.4.1)
+      vite: 4.4.4(@types/node@20.4.2)
     dev: true
 
   /vite-tsconfig-paths@4.2.0(typescript@5.1.6)(vite@4.4.4):
@@ -10230,7 +9966,7 @@ packages:
       debug: 4.3.4
       globrex: 0.1.2
       tsconfck: 2.1.1(typescript@5.1.6)
-      vite: 4.4.4(@types/node@20.4.1)
+      vite: 4.4.4(@types/node@20.4.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -10268,77 +10004,6 @@ packages:
       fsevents: 2.3.2
     dev: false
 
-  /vite@4.4.2(@types/node@20.4.1):
-    resolution: {integrity: sha512-zUcsJN+UvdSyHhYa277UHhiJ3iq4hUBwHavOpsNUGsTgjBeoBlK8eDt+iT09pBq0h9/knhG/SPrZiM7cGmg7NA==}
-    engines: {node: ^14.18.0 || >=16.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      '@types/node': 20.4.1
-      esbuild: 0.18.14
-      postcss: 8.4.26
-      rollup: 3.26.3
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: false
-
-  /vite@4.4.4(@types/node@20.4.1):
-    resolution: {integrity: sha512-4mvsTxjkveWrKDJI70QmelfVqTm+ihFAb6+xf4sjEU2TmUCTlVX87tmg/QooPEMQb/lM9qGHT99ebqPziEd3wg==}
-    engines: {node: ^14.18.0 || >=16.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      '@types/node': 20.4.1
-      esbuild: 0.18.14
-      postcss: 8.4.26
-      rollup: 3.26.3
-    optionalDependencies:
-      fsevents: 2.3.2
-
   /vite@4.4.4(@types/node@20.4.2):
     resolution: {integrity: sha512-4mvsTxjkveWrKDJI70QmelfVqTm+ihFAb6+xf4sjEU2TmUCTlVX87tmg/QooPEMQb/lM9qGHT99ebqPziEd3wg==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -10373,7 +10038,6 @@ packages:
       rollup: 3.26.3
     optionalDependencies:
       fsevents: 2.3.2
-    dev: true
 
   /vitefu@0.2.4(vite@4.4.4):
     resolution: {integrity: sha512-fanAXjSaf9xXtOOeno8wZXIhgia+CZury481LsDaV++lSvcU2R9Ch2bPh3PYFyoHW+w9LqAeYRISVQjUIew14g==}
@@ -10383,7 +10047,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.4.4(@types/node@20.4.1)
+      vite: 4.4.4(@types/node@20.4.2)
     dev: false
 
   /vitest@0.33.0:

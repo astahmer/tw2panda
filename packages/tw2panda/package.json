@@ -46,7 +46,6 @@
     "escalade": "^3.1.1",
     "hookable": "^5.5.3",
     "magic-string": "^0.30.1",
-    "pastable": "^2.2.0",
     "pathe": "^1.1.1",
     "postcss": "^8.4.26",
     "prettier": "2.8.4",

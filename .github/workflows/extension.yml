@@ -118,7 +118,7 @@ jobs:
       - name: Install with workspace-less
         working-directory: ./packages/vscode
         run: |
-          pnpm i --ignore-scripts --no-frozen-lockfile --ignore-workspace
+          npm i
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
 

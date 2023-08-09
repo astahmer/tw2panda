@@ -1,10 +1,11 @@
-import { kebabToCamel } from "pastable";
 import { PandaContext } from "./panda-context";
 import { resolveMatches } from "./tw-context";
 import { parseTwClassName } from "./tw-parser";
 import { TailwindContext } from "./tw-types";
 import { MatchingToken, StyleObject } from "./types";
 import { findRuleProps } from "./postcss-find-rule-props";
+
+const kebabToCamel = (str: string) => str.replace(/(-\w)/g, (group) => (group[1] ?? "").toUpperCase());
 
 /**
  * Takes a list of Tailwind class names and convert them to a list of Panda style objects

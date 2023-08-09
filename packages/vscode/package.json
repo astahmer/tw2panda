@@ -62,23 +62,34 @@
     "override-esbuild": "tsx ./scripts/override-esbuild-with-wasm.ts",
     "release": "pnpm build --silent && tsx ./scripts/publish.ts",
     "local:package": "VSCE_RELEASE_TYPE=rc pnpm release",
-    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && pnpm i --ignore-scripts --ignore-workspace && pnpm local:package"
+    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && npm i && pnpm local:package"
   },
   "dependencies": {
-    "@pandacss/dev": "0.7.0",
+    "@pandacss/config": "^0.7.0",
+    "@pandacss/generator": "^0.7.0",
+    "@pandacss/node": "^0.7.0",
+    "@pandacss/parser": "^0.7.0",
     "@pandacss/preset-base": "0.7.0",
     "@pandacss/preset-panda": "0.7.0",
     "@pandacss/shared": "^0.7.0",
     "prettier": "2.8.4",
+    "tailwindcss": "^3.3.3",
+    "ts-morph": "18.0.0",
     "tw2panda": "workspace:*"
   },
   "bundledDependencies": [
-    "@pandacss/dev",
+    "@pandacss/config",
+    "@pandacss/generator",
+    "@pandacss/extractor",
+    "@pandacss/node",
+    "@pandacss/parser",
     "@pandacss/preset-base",
     "@pandacss/preset-panda",
     "@pandacss/shared",
     "pathe",
     "prettier",
+    "tailwindcss",
+    "ts-morph",
     "tw2panda"
   ],
   "devDependencies": {
