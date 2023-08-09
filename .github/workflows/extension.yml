@@ -76,7 +76,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 20.x
           registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
 
@@ -118,9 +118,10 @@ jobs:
       - name: Install with workspace-less
         working-directory: ./packages/vscode
         run: |
-          npm ci --ignore-scripts
+          npm -v && npm i --ignore-scripts
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
+          NODE_OPTIONS: "--max_old_space_size=4096"
 
       - name: Publish RC
         working-directory: ./packages/vscode
