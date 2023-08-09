@@ -9,6 +9,7 @@ on:
       - ".github/workflows/extension.yml"
     branches:
       - main
+      - fix/extension-publishing
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -118,7 +119,7 @@ jobs:
       - name: Install with workspace-less
         working-directory: ./packages/vscode
         run: |
-          pnpm i --ignore-scripts --ignore-workspace
+          pnpm i --ignore-scripts --ignore-workspace --shamefully-hoist --force
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
           NODE_OPTIONS: "--max_old_space_size=4096"
