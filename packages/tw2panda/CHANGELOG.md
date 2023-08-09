@@ -1,5 +1,11 @@
 # tw2panda
 
+## 0.3.0
+
+### Minor Changes
+
+- cb9ebe1: Hopefully fix the extension in workspaces that do not have esbuild installed as well
+
 ## 0.2.0
 
 ### Minor Changes

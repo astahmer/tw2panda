@@ -1,5 +1,17 @@
 # tw2panda-vscode
 
+## 0.5.0
+
+### Minor Changes
+
+- cb9ebe1: Hopefully fix the extension in workspaces that do not have esbuild installed as well
+
+### Patch Changes
+
+- 05a33b8: rm preview tag / debug mode
+- Updated dependencies [cb9ebe1]
+  - tw2panda@0.3.0
+
 ## 0.4.0
 
 ### Minor Changes
