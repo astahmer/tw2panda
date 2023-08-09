@@ -159,10 +159,10 @@ jobs:
         if: "!(contains(matrix.target, 'win'))"
         run: pnpm clean
 
-      - name: Install with npm
+      - name: Install with workspace-less
         working-directory: ./packages/vscode
         run: |
-          npm ci --ignore-scripts
+          pnpm i --ignore-scripts --ignore-workspace
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
 

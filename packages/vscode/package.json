@@ -62,7 +62,7 @@
     "override-esbuild": "tsx ./scripts/override-esbuild-with-wasm.ts",
     "release": "pnpm build --silent && tsx ./scripts/publish.ts",
     "local:package": "VSCE_RELEASE_TYPE=rc pnpm release",
-    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && npm i && pnpm local:package"
+    "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && pnpm i --ignore-scripts --ignore-workspace && pnpm local:package"
   },
   "dependencies": {
     "@pandacss/config": "^0.7.0",
