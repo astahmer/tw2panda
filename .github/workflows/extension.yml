@@ -118,7 +118,7 @@ jobs:
       - name: Install with workspace-less
         working-directory: ./packages/vscode
         run: |
-          npm i
+          npm ci --ignore-scripts
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
 
