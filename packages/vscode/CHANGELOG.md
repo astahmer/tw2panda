@@ -1,5 +1,11 @@
 # tw2panda-vscode
 
+## 0.5.1
+
+### Patch Changes
+
+- 06b29bf: Fix release version of extension
+
 ## 0.5.0
 
 ### Minor Changes
