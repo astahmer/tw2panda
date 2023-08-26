@@ -8,6 +8,7 @@ import { ThemeProvider } from "../vite-themes/provider";
 import { ColorModeSwitch } from "../components/color-mode-switch";
 import { GithubIcon } from "../components/github-icon";
 import { IconButton } from "../components/icon-button";
+import { TwitterIcon } from "../components/twitter-icon";
 
 export const Home = () => {
   return (
@@ -29,6 +30,11 @@ export const Home = () => {
               <styled.a target="blank" href="https://github.com/astahmer/tw2panda">
                 <IconButton title="Github">
                   <GithubIcon />
+                </IconButton>
+              </styled.a>
+              <styled.a target="blank" href="https://twitter.com/astahmer_dev">
+                <IconButton title="Twitter" css={{ color: { base: "colorPalette.500", _dark: "colorPalette.200" } }}>
+                  <TwitterIcon />
                 </IconButton>
               </styled.a>
               <ColorModeSwitch />
