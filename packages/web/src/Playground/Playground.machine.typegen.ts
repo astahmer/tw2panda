@@ -19,6 +19,7 @@ export interface Typegen0 {
     selectOutputTab: "Select output tab";
     updateInput: "Editor Loaded" | "Select input tab" | "Update input";
     updateSelectedInput: "Editor Loaded" | "Select input tab" | "Update input";
+    updateUrl: "Editor Loaded" | "Select input tab" | "Update input";
   };
   eventsCausingDelays: {};
   eventsCausingGuards: {

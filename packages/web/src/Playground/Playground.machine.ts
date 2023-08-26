@@ -8,6 +8,7 @@ import { initialInputList, initialOutputList } from "../../../../demo-code-sampl
 import { createMergeCss } from "@pandacss/shared";
 
 import { createPandaContext, createTailwindContext, rewriteTwFileContentToPanda, type TwResultItem } from "tw2panda";
+import { UrlSaver } from "./url-saver";
 
 type PlaygroundContext = {
   monaco: Monaco | null;
@@ -33,13 +34,16 @@ type PlaygroundEvent =
   | { type: "Select output tab"; name: string }
   | { type: "Update input"; value: string };
 
+const urlSaver = new UrlSaver();
+const initialAppInput = urlSaver.getValue("input") || initialInputList["tw-App.tsx"];
+
 const initialContext: PlaygroundContext = {
   monaco: null,
   inputEditor: null,
   outputEditor: null,
   sourceFile: null,
   resultList: [],
-  inputList: initialInputList,
+  inputList: { ...initialInputList, "tw-App.tsx": initialAppInput },
   selectedInput: "tw-App.tsx",
   outputList: initialOutputList,
   selectedOutput: "App.tsx",
@@ -115,10 +119,13 @@ export const playgroundMachine = createMachine(
         }
         return { ...ctx, inputList };
       }),
+      updateUrl(context) {
+        urlSaver.setValue("input", context.inputList[context.selectedInput] ?? "");
+      },
       updateInput: choose([
         {
           cond: "isAppFile",
-          actions: ["updateSelectedInput", "extractClassList"],
+          actions: ["updateSelectedInput", "updateUrl", "extractClassList"],
         },
         { actions: ["updateSelectedInput"] },
       ]),

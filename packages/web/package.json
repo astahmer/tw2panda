@@ -18,6 +18,7 @@
     "@pandacss/shared": "^0.7.0",
     "@xstate/react": "^3.2.2",
     "esbuild-wasm": "^0.18.14",
+    "lz-string": "^1.5.0",
     "monaco-editor": "0.40.0",
     "pastable": "^2.2.0",
     "react": "^18.2.0",
