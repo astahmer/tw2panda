@@ -1,5 +1,13 @@
 # tw2panda-vscode
 
+## 0.5.2
+
+### Patch Changes
+
+- 5f46a37: Allow ejecting of base presets based on `eject: true` (in `panda.config.ts` or passed as argument)
+- Updated dependencies [5f46a37]
+  - tw2panda@0.3.1
+
 ## 0.5.1
 
 ### Patch Changes
