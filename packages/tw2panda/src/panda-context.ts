@@ -32,7 +32,7 @@ interface PartialConfig extends Omit<LoadConfigResult, "config"> {
 const createContext = (conf: PartialConfig) => {
   const generator = createGenerator({
     ...conf,
-    config: mergeConfigs([presetBase, presetTheme as any, conf.config]),
+    config: mergeConfigs(conf.config.eject ? [conf.config] : [presetBase, presetTheme as any, conf.config]),
   });
   const files = new Map<string, string>();
 
