@@ -1,5 +1,11 @@
 # tw2panda
 
+## 0.3.1
+
+### Patch Changes
+
+- 5f46a37: Allow ejecting of base presets based on `eject: true` (in `panda.config.ts` or passed as argument)
+
 ## 0.3.0
 
 ### Minor Changes
