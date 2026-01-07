@@ -12,11 +12,11 @@ const cli = cac("panda2tw");
 cli
   .command("rewrite <path>", "Rewrite Panda CSS file(s) to use Tailwind classes (supports both files and glob patterns)")
   .option("-w, --write", "Write to disk instead of stdout")
-  .action((path: string, options: { write?: boolean }) => {
+  .action(async (path: string, options: { write?: boolean }) => {
     const cwd = process.cwd();
     const resolvedPath = resolve(cwd, path);
 
-    const result = rewritePattern(resolvedPath, { write: options.write || false });
+    const result = await rewritePattern(resolvedPath, { write: options.write || false });
 
     // Check if it's a batch result (has totalFiles property)
     if ("totalFiles" in result) {

@@ -27,6 +27,7 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
+        "@pandacss/node": "^0.46.1",
         "cac": "^6.7.14",
         "escalade": "^3.1.1",
         "glob": "^10.3.10",

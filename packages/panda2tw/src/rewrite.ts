@@ -6,8 +6,9 @@ import { Project, SourceFile } from "ts-morph";
 import MagicString from "magic-string";
 import { globSync } from "glob";
 import { readFileSync, writeFileSync } from "fs";
+import type { PandaContext } from "@pandacss/node";
 import { findCssCalls, findCvaCalls, nodeToObject } from "./parser.js";
-import { extractTailwindClassesFromPandaCss } from "./css-to-tw.js";
+import { extractTailwindClassesFromPandaCss, extractTailwindClassesFromPandaCssWithContext } from "./css-to-tw.js";
 import { pandaCvaToTailwind } from "./cva-to-tw.js";
 import type { RewriteOptions } from "./types.js";
 
@@ -22,6 +23,7 @@ export interface RewriteResult {
  */
 const processSourceFile = (
   sourceFile: SourceFile,
+  pandaContext?: PandaContext,
 ): RewriteResult => {
   const code = sourceFile.getFullText();
   const magicStr = new MagicString(code);
@@ -44,7 +46,10 @@ const processSourceFile = (
   cssCalls.forEach((call) => {
     try {
       const cssObj = nodeToObject(call.argument);
-      const classes = extractTailwindClassesFromPandaCss(cssObj);
+      // Use context-aware conversion if available
+      const classes = pandaContext
+        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext)
+        : extractTailwindClassesFromPandaCss(cssObj);
 
       if (classes.length > 0) {
         const classString = classes.join(" ");
@@ -101,6 +106,7 @@ export const rewritePandaToTailwind = (
   content: string,
   filePath: string,
   _options: RewriteOptions = {},
+  pandaContext?: PandaContext,
 ): RewriteResult => {
   const project = new Project({ useInMemoryFileSystem: true });
   const sourceFile = project.createSourceFile(
@@ -108,7 +114,7 @@ export const rewritePandaToTailwind = (
     content,
   ) as SourceFile;
 
-  return processSourceFile(sourceFile);
+  return processSourceFile(sourceFile, pandaContext);
 };
 
 export interface BatchRewriteResult {
@@ -130,19 +136,30 @@ export const isGlobPattern = (input: string): boolean => {
 /**
  * Unified rewrite function that handles both single files and glob patterns
  */
-export const rewritePattern = (
+export const rewritePattern = async (
   pattern: string,
   options: RewriteOptions & { write?: boolean } = {},
-): BatchRewriteResult | RewriteResult => {
+): Promise<BatchRewriteResult | RewriteResult> => {
   const isGlob = isGlobPattern(pattern);
 
   if (isGlob) {
     return batchRewritePandaToTailwind(pattern, options);
   } else {
-    // Single file
+    // Single file - load context for smart conversion
     try {
       const content = readFileSync(pattern, "utf-8");
-      const result = rewritePandaToTailwind(content, pattern, options);
+
+      // Load Panda context if available
+      let pandaContext: PandaContext | undefined;
+      try {
+        const { loadPandaContext } = await import("./config/load-context.js");
+        const { context } = await loadPandaContext({ cwd: process.cwd() });
+        pandaContext = context;
+      } catch (e) {
+        // Context loading is optional - continue without it
+      }
+
+      const result = rewritePandaToTailwind(content, pattern, options, pandaContext);
 
       if (options.write) {
         writeFileSync(pattern, result.output);
@@ -175,10 +192,10 @@ export const rewritePattern = (
 /**
  * Batch rewrite multiple files matching a glob pattern with a shared Project instance
  */
-export const batchRewritePandaToTailwind = (
+export const batchRewritePandaToTailwind = async (
   globPattern: string,
   options: RewriteOptions & { write?: boolean } = {},
-): BatchRewriteResult => {
+): Promise<BatchRewriteResult> => {
   const files = globSync(globPattern, {
     ignore: ["**/node_modules/**", "**/dist/**", "**/.next/**"],
   });
@@ -196,6 +213,16 @@ export const batchRewritePandaToTailwind = (
     return result;
   }
 
+  // Load Panda context if available for smart token resolution
+  let pandaContext: PandaContext | undefined;
+  try {
+    const { loadPandaContext } = await import("./config/load-context.js");
+    const { context } = await loadPandaContext({ cwd: process.cwd() });
+    pandaContext = context;
+  } catch (e) {
+    // Context loading is optional - continue without it
+  }
+
   // Create a single Project instance for all files
   const project = new Project({ useInMemoryFileSystem: true });
 
@@ -206,8 +233,8 @@ export const batchRewritePandaToTailwind = (
       // Add file to the shared project
       const sourceFile = project.createSourceFile(file, content) as SourceFile;
 
-      // Process the file using the shared project
-      const rewriteResult = processSourceFile(sourceFile);
+      // Process the file using the shared project and loaded context
+      const rewriteResult = processSourceFile(sourceFile, pandaContext);
 
       if (options.write) {
         writeFileSync(file, rewriteResult.output);
