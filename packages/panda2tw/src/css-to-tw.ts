@@ -256,7 +256,7 @@ export const extractTailwindClassesFromPandaCssWithContext = (
   // Build complete Tailwind token map from config theme
   // Only use specific token categories, not all theme keys
   const tailwindTokens: Record<string, string> = {};
-  
+
   // Helper to flatten tokens without category prefix
   const flattenTokensForMatching = (
     tokens: Record<string, any>,
@@ -276,10 +276,10 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
     return flattened;
   };
-  
+
   // Only build tokens from known categories that are meaningful for conversion
   const tokenCategories = ["colors", "spacing", "sizing", "fontSizes", "fontWeights", "lineHeights", "letterSpacing", "radii", "borderWidths", "shadows"];
-  
+
   if (effectiveConfig?.theme) {
     for (const category of tokenCategories) {
       const values = effectiveConfig.theme[category];
@@ -303,6 +303,11 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
   // Helper to resolve Panda token values to Tailwind-compatible format
   const resolveToken = (prop: string, path: string): string => {
+    // Handle arbitrary tokens in square brackets (e.g., "[123px]")
+    if (path.startsWith("[") && path.endsWith("]")) {
+      return path; // Return as-is, already in Tailwind arbitrary value format
+    }
+
     if (!pandaContext) return pandaTokenToTwSuffix(path);
 
     // Try to resolve from Panda theme tokens

@@ -99,4 +99,16 @@ describe("css-to-tw", () => {
     expect(classes.some((c) => c.includes("disabled:"))).toBe(true);
     expect(classes.some((c) => c.includes("hover:"))).toBe(true);
   });
+
+  test("extractTailwindClassesFromPandaCss - arbitrary tokens in brackets", () => {
+    const cssObj = {
+      padding: "[123px]",
+      width: "[calc(100%-20px)]",
+    };
+
+    const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+    expect(classes).toContain("p-[123px]");
+    expect(classes).toContain("w-[calc(100%-20px)]");
+  });
 });
