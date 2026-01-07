@@ -4,7 +4,9 @@
 
 import { Project, SourceFile } from "ts-morph";
 import MagicString from "magic-string";
-import { findCssCalls, findCvaCalls, nodeToObject, ParsedCssCall, ParsedCvaCall } from "./parser.js";
+import { globSync } from "glob";
+import { readFileSync, writeFileSync } from "fs";
+import { findCssCalls, findCvaCalls, nodeToObject } from "./parser.js";
 import { extractTailwindClassesFromPandaCss } from "./css-to-tw.js";
 import { pandaCvaToTailwind } from "./cva-to-tw.js";
 import type { RewriteOptions } from "./types.js";
@@ -16,19 +18,11 @@ export interface RewriteResult {
 }
 
 /**
- * Rewrite a file from Panda CSS to Tailwind
+ * Internal function to process a source file
  */
-export const rewritePandaToTailwind = (
-  content: string,
-  filePath: string,
-  _options: RewriteOptions = {},
+const processSourceFile = (
+  sourceFile: SourceFile,
 ): RewriteResult => {
-  const project = new Project({ useInMemoryFileSystem: true });
-  const sourceFile = project.createSourceFile(
-    filePath,
-    content,
-  ) as any as SourceFile;
-
   const code = sourceFile.getFullText();
   const magicStr = new MagicString(code);
   const imports = new Set<string>(["className"]);
@@ -98,4 +92,87 @@ export const rewritePandaToTailwind = (
     imports,
     conversions,
   };
+};
+
+/**
+ * Rewrite a file from Panda CSS to Tailwind
+ */
+export const rewritePandaToTailwind = (
+  content: string,
+  filePath: string,
+  _options: RewriteOptions = {},
+): RewriteResult => {
+  const project = new Project({ useInMemoryFileSystem: true });
+  const sourceFile = project.createSourceFile(
+    filePath,
+    content,
+  ) as SourceFile;
+
+  return processSourceFile(sourceFile);
+};
+
+export interface BatchRewriteResult {
+  totalFiles: number;
+  successfulFiles: number;
+  failedFiles: Array<{ file: string; error: string }>;
+  totalConversions: number;
+  results: Array<{ file: string; conversions: number }>;
+}
+
+/**
+ * Batch rewrite multiple files matching a glob pattern with a shared Project instance
+ */
+export const batchRewritePandaToTailwind = (
+  globPattern: string,
+  options: RewriteOptions & { write?: boolean } = {},
+): BatchRewriteResult => {
+  const files = globSync(globPattern, {
+    ignore: ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+  });
+
+  const result: BatchRewriteResult = {
+    totalFiles: files.length,
+    successfulFiles: 0,
+    failedFiles: [],
+    totalConversions: 0,
+    results: [],
+  };
+
+  if (files.length === 0) {
+    console.warn(`⚠️  No files matched pattern: ${globPattern}`);
+    return result;
+  }
+
+  // Create a single Project instance for all files
+  const project = new Project({ useInMemoryFileSystem: true });
+
+  for (const file of files) {
+    try {
+      const content = readFileSync(file, "utf-8");
+
+      // Add file to the shared project
+      const sourceFile = project.createSourceFile(file, content) as SourceFile;
+
+      // Process the file using the shared project
+      const rewriteResult = processSourceFile(sourceFile);
+
+      if (options.write) {
+        writeFileSync(file, rewriteResult.output);
+      }
+
+      result.successfulFiles++;
+      result.totalConversions += rewriteResult.conversions.length;
+      result.results.push({
+        file,
+        conversions: rewriteResult.conversions.length,
+      });
+    } catch (e) {
+      result.failedFiles.push({
+        file,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return result;
 };
