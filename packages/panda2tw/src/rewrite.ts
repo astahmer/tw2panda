@@ -7,6 +7,7 @@ import MagicString from "magic-string";
 import { globSync } from "glob";
 import { readFileSync, writeFileSync } from "fs";
 import type { PandaContext } from "@pandacss/node";
+import type { Config } from "tailwindcss";
 import { findCssCalls, findCvaCalls, nodeToObject } from "./parser.js";
 import { extractTailwindClassesFromPandaCss, extractTailwindClassesFromPandaCssWithContext } from "./css-to-tw.js";
 import { pandaCvaToTailwind } from "./cva-to-tw.js";
@@ -24,6 +25,7 @@ export interface RewriteResult {
 const processSourceFile = (
   sourceFile: SourceFile,
   pandaContext?: PandaContext,
+  tailwindConfig?: Config,
 ): RewriteResult => {
   const code = sourceFile.getFullText();
   const magicStr = new MagicString(code);
@@ -48,7 +50,7 @@ const processSourceFile = (
       const cssObj = nodeToObject(call.argument);
       // Use context-aware conversion if available
       const classes = pandaContext
-        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext)
+        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext, tailwindConfig)
         : extractTailwindClassesFromPandaCss(cssObj);
 
       if (classes.length > 0) {
@@ -107,6 +109,7 @@ export const rewritePandaToTailwind = (
   filePath: string,
   _options: RewriteOptions = {},
   pandaContext?: PandaContext,
+  tailwindConfig?: Config,
 ): RewriteResult => {
   const project = new Project({ useInMemoryFileSystem: true });
   const sourceFile = project.createSourceFile(
@@ -114,7 +117,7 @@ export const rewritePandaToTailwind = (
     content,
   ) as SourceFile;
 
-  return processSourceFile(sourceFile, pandaContext);
+  return processSourceFile(sourceFile, pandaContext, tailwindConfig);
 };
 
 export interface BatchRewriteResult {
@@ -149,17 +152,21 @@ export const rewritePattern = async (
     try {
       const content = readFileSync(pattern, "utf-8");
 
-      // Load Panda context if available
+      // Load Panda and Tailwind contexts if available
       let pandaContext: PandaContext | undefined;
+      let tailwindConfig: Config | undefined;
       try {
-        const { loadPandaContext } = await import("./config/load-context.js");
+        const { loadPandaContext, loadTailwindContext } = await import("./config/load-context.js");
         const { context } = await loadPandaContext({ cwd: process.cwd() });
         pandaContext = context;
+
+        // Also load Tailwind context for better token matching
+        tailwindConfig = await loadTailwindContext({ cwd: process.cwd() });
       } catch (e) {
         // Context loading is optional - continue without it
       }
 
-      const result = rewritePandaToTailwind(content, pattern, options, pandaContext);
+      const result = rewritePandaToTailwind(content, pattern, options, pandaContext, tailwindConfig);
 
       if (options.write) {
         writeFileSync(pattern, result.output);
@@ -215,10 +222,14 @@ export const batchRewritePandaToTailwind = async (
 
   // Load Panda context if available for smart token resolution
   let pandaContext: PandaContext | undefined;
+  let tailwindConfig: Config | undefined;
   try {
-    const { loadPandaContext } = await import("./config/load-context.js");
+    const { loadPandaContext, loadTailwindContext } = await import("./config/load-context.js");
     const { context } = await loadPandaContext({ cwd: process.cwd() });
     pandaContext = context;
+
+    // Also load Tailwind config for all token types
+    tailwindConfig = await loadTailwindContext({ cwd: process.cwd() });
   } catch (e) {
     // Context loading is optional - continue without it
   }
@@ -233,8 +244,8 @@ export const batchRewritePandaToTailwind = async (
       // Add file to the shared project
       const sourceFile = project.createSourceFile(file, content) as SourceFile;
 
-      // Process the file using the shared project and loaded context
-      const rewriteResult = processSourceFile(sourceFile, pandaContext);
+      // Process the file using the shared project and loaded contexts
+      const rewriteResult = processSourceFile(sourceFile, pandaContext, tailwindConfig);
 
       if (options.write) {
         writeFileSync(file, rewriteResult.output);

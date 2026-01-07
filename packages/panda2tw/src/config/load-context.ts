@@ -1,4 +1,6 @@
 import { loadConfigAndCreateContext } from "@pandacss/node";
+import type { Config } from "tailwindcss";
+import resolveConfig from "tailwindcss/resolveConfig.js";
 import { findPandaConfig } from "./find-config";
 
 export interface ConfigFileOptions {
@@ -31,4 +33,26 @@ export async function loadPandaContext(options: ConfigFileOptions = {}) {
   });
 
   return { context, filePath };
+}
+
+/**
+ * Load Tailwind config to get access to theme tokens
+ * This allows matching Panda tokens against actual Tailwind tokens for all token types
+ */
+export async function loadTailwindContext(options: ConfigFileOptions = {}): Promise<Config> {
+  try {
+    // Try to dynamically import the tailwind config
+    const tailwindConfigPath = require.resolve(
+      options.configPath || "tailwind.config.js",
+      { paths: [options.cwd || process.cwd()] }
+    );
+
+    const tailwindConfig = await import(tailwindConfigPath);
+    const config = resolveConfig(tailwindConfig.default || tailwindConfig);
+
+    return config;
+  } catch (e) {
+    // Return default empty config if not found
+    return resolveConfig({});
+  }
 }

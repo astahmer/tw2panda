@@ -5,6 +5,7 @@
 
 import type { StyleObject } from "./types.js";
 import type { PandaContext } from "@pandacss/node";
+import type { Config } from "tailwindcss";
 
 // Comprehensive mapping of CSS properties to Tailwind prefix patterns
 const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
@@ -206,39 +207,53 @@ export const extractTailwindClassesFromPandaCss = (
 };
 
 /**
- * Convert Panda CSS to Tailwind classes using the Panda context for smart token resolution
- * This uses the actual Panda theme tokens to generate accurate Tailwind equivalents
+ * Convert Panda CSS to Tailwind classes using Panda and Tailwind contexts
+ * Uses actual theme tokens from both Panda and Tailwind for smart token resolution
  */
 export const extractTailwindClassesFromPandaCssWithContext = (
   cssObj: StyleObject,
   pandaContext?: PandaContext,
+  tailwindConfig?: Config,
 ): string[] => {
   const classes: string[] = [];
 
-  // Default Tailwind color palette (common colors)
-  const defaultTailwindColors: Record<string, string> = {
-    "blue-600": "#2563eb",
-    "blue-700": "#1d4ed8",
-    "red-500": "#ef4444",
-    "red-700": "#b91c1c",
-    "gray-100": "#f3f4f6",
-    "gray-200": "#e5e7eb",
-    "gray-300": "#d1d5db",
-    "gray-400": "#9ca3af",
-    "gray-500": "#6b7280",
-    "gray-600": "#4b5563",
-    "gray-700": "#374151",
-    "gray-800": "#1f2937",
-    "gray-900": "#111827",
-    white: "#ffffff",
-    black: "#000000",
+  // Build a flat map of Tailwind tokens from nested structure
+  // { blue: { 600: "#2563eb", 700: "#1d4ed8" } } -> { "blue-600": "#2563eb", "blue-700": "#1d4ed8" }
+  const flattenTokens = (
+    tokens: Record<string, any>,
+    prefix = "",
+  ): Record<string, string> => {
+    const flattened: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(tokens)) {
+      const tokenName = prefix ? `${prefix}-${key}` : key;
+
+      if (typeof value === "string") {
+        flattened[tokenName] = value;
+      } else if (typeof value === "object" && value !== null) {
+        // Recursively flatten nested token objects
+        Object.assign(flattened, flattenTokens(value, tokenName));
+      }
+    }
+
+    return flattened;
   };
 
-  // Helper to check if a resolved value matches a default Tailwind token
+  // Build complete Tailwind token map from config theme
+  const tailwindTokens: Record<string, string> = {};
+  if (tailwindConfig?.theme) {
+    for (const [category, values] of Object.entries(tailwindConfig.theme)) {
+      if (typeof values === "object" && values !== null) {
+        Object.assign(tailwindTokens, flattenTokens(values as Record<string, any>, category));
+      }
+    }
+  }
+
+  // Helper to check if a resolved value matches a Tailwind token
   const findMatchingTailwindToken = (value: string): string | null => {
     const normalizedValue = value.toLowerCase();
-    for (const [tokenName, tokenValue] of Object.entries(defaultTailwindColors)) {
-      if (tokenValue.toLowerCase() === normalizedValue) {
+    for (const [tokenName, tokenValue] of Object.entries(tailwindTokens)) {
+      if (String(tokenValue).toLowerCase() === normalizedValue) {
         return tokenName;
       }
     }

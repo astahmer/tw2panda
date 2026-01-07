@@ -110,9 +110,9 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
 
-    // Should resolve to actual hex color from context
-    expect(classes).toContain("bg-#2563eb");
-    // Padding should resolve to actual value
-    expect(classes).toContain("p-8px");
+    // blue.600 matches default TW color
+    expect(classes).toContain("bg-blue-600");
+    // 8px doesn't match any default TW spacing, so uses arbitrary syntax
+    expect(classes).toContain("p-[8px]");
   });
 });
