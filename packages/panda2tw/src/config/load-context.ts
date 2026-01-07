@@ -41,11 +41,3 @@ export async function loadPandaContext(options: ConfigFileOptions) {
     filePath,
   };
 }
-    const config = resolveConfig(tailwindConfig.default || tailwindConfig);
-
-    return config;
-  } catch (e) {
-    // Return default empty config if not found
-    return resolveConfig({});
-  }
-}

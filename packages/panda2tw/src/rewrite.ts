@@ -8,7 +8,7 @@ import { globSync } from "glob";
 import { readFileSync, writeFileSync } from "fs";
 import type { PandaContext } from "@pandacss/node";
 import type { Config } from "tailwindcss";
-import { findCssCalls, findCvaCalls, nodeToObject } from "./parser.js";
+import { findCssCalls, findCvaCalls, findJsxElementsWithPandaProps, nodeToObject } from "./parser.js";
 import { extractTailwindClassesFromPandaCss, extractTailwindClassesFromPandaCssWithContext } from "./css-to-tw.js";
 import { pandaCvaToTailwind } from "./cva-to-tw.js";
 import type { RewriteOptions } from "./types.js";
@@ -91,6 +91,62 @@ const processSourceFile = (
       });
     } catch (e) {
       console.error("Error converting cva() call:", e);
+    }
+  });
+
+  // Convert JSX props with Panda CSS
+  const jsxElements = findJsxElementsWithPandaProps(sourceFile, pandaContext);
+  jsxElements.forEach((element) => {
+    try {
+      // Build a CSS object from the Panda props
+      const cssObj: Record<string, any> = {};
+      element.pandaProps.forEach(({ name, value }) => {
+        // Try to parse the value as a JS expression if needed
+        try {
+          // If value is a simple string, use it directly; otherwise try to eval it
+          if (value.startsWith('"') || value.startsWith("'")) {
+            cssObj[name] = value.slice(1, -1);
+          } else {
+            cssObj[name] = new Function(`return (${value})`)();
+          }
+        } catch {
+          // Fall back to string value
+          cssObj[name] = value;
+        }
+      });
+
+      // Convert CSS object to Tailwind classes
+      const classes = pandaContext
+        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext, tailwindConfig)
+        : extractTailwindClassesFromPandaCss(cssObj);
+
+      if (classes.length > 0) {
+        const classString = classes.join(" ");
+
+        // Remove the Panda props from the element and add className before closing
+        let classNameAdded = false;
+        element.pandaProps.forEach(({ node }) => {
+          magicStr.remove(node.getStart(), node.getEnd());
+          // Remove the space after the attribute if it exists
+          const nextChar = code[node.getEnd()];
+          if (nextChar === " ") {
+            magicStr.remove(node.getEnd(), node.getEnd() + 1);
+          }
+
+          // Add className on the first prop removal
+          if (!classNameAdded) {
+            magicStr.appendLeft(node.getStart(), `className="${classString}" `);
+            classNameAdded = true;
+          }
+        });
+
+        conversions.push({
+          original: element.pandaProps.map(p => p.node.getText()).join(" "),
+          replacement: `className="${classString}"`,
+        });
+      }
+    } catch (e) {
+      console.error("Error converting JSX props:", e);
     }
   });
 

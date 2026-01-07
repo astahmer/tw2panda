@@ -2,7 +2,7 @@
  * Parse Panda CSS and CVA calls from TypeScript files
  */
 
-import { CallExpression, Node, SourceFile } from "ts-morph";
+import { CallExpression, JsxOpeningElement, Node, SourceFile, JsxAttribute } from "ts-morph";
 
 export interface ParsedCssCall {
   node: CallExpression;
@@ -17,6 +17,22 @@ export interface ParsedCvaCall {
   endPos: number;
   baseConfig: Node | undefined;
   variantsConfig: Node | undefined;
+}
+
+export interface ParsedJsxElement {
+  node: JsxOpeningElement;
+  startPos: number;
+  endPos: number;
+  tagName: string;
+  pandaProps: Array<{
+    name: string;
+    value: string;
+    node: JsxAttribute;
+  }>;
+  otherProps: Array<{
+    name: string;
+    node: JsxAttribute;
+  }>;
 }
 
 /**
@@ -105,4 +121,88 @@ export const extractStringLiteral = (node: Node | undefined): string => {
   }
 
   return text;
+};
+
+/**
+ * Fallback set of common Panda CSS properties when context is not available
+ */
+const DEFAULT_PANDA_PROPERTIES = new Set([
+  "display", "flexDirection", "alignItems", "justifyContent", "gap", "padding", "paddingTop",
+  "paddingRight", "paddingBottom", "paddingLeft", "margin", "marginTop", "marginRight",
+  "marginBottom", "marginLeft", "width", "height", "maxWidth", "maxHeight", "minWidth",
+  "minHeight", "color", "backgroundColor", "borderColor", "borderRadius", "fontSize",
+  "fontWeight", "lineHeight", "textAlign", "flex", "flexWrap", "flexGrow", "flexShrink",
+  "position", "top", "right", "bottom", "left", "zIndex", "opacity", "overflow",
+  "whiteSpace", "textStyle", "p", "px", "py", "pt", "pr", "pb", "pl", "m", "mx", "my", "mt", "mr", "mb", "ml",
+  "w", "h", "minW", "minH", "maxW", "maxH", "bg", "textColor",
+  "rounded", "border", "shadow", "cursor", "pointerEvents", "userSelect", "transform",
+  "transition", "duration", "ease", "delay", "hover", "_hover", "_focus", "_active", "_disabled",
+  "md", "lg", "xl", "2xl", "sm",
+]);
+
+/**
+ * Check if a property is a valid Panda CSS property
+ */
+const isPandaDefaultProperty = (prop: string): boolean => {
+  return DEFAULT_PANDA_PROPERTIES.has(prop);
+};
+
+/**
+ * Find all JSX elements with Panda CSS props
+ */
+export const findJsxElementsWithPandaProps = (sourceFile: SourceFile, pandaContext?: any): ParsedJsxElement[] => {
+  const elements: ParsedJsxElement[] = [];
+
+  sourceFile.forEachDescendant((node) => {
+    if (Node.isJsxOpeningElement(node)) {
+      const attributes = node.getAttributes();
+      const pandaProps: Array<{ name: string; value: string; node: JsxAttribute }> = [];
+      const otherProps: Array<{ name: string; node: JsxAttribute }> = [];
+
+      attributes.forEach((attr) => {
+        if (Node.isJsxAttribute(attr)) {
+          const nameNode = attr.getNameNode();
+          const propName = nameNode?.getText() || "";
+          const initializer = attr.getInitializer();
+
+          const isValidProp = pandaContext?.isValidProperty?.(propName) || isPandaDefaultProperty(propName);
+          if (isValidProp) {
+            // Extract the value
+            let value = "";
+            if (initializer) {
+              if (Node.isStringLiteral(initializer)) {
+                value = initializer.getLiteralValue();
+              } else if (Node.isJsxExpression(initializer)) {
+                const expr = initializer.getExpression();
+                if (expr) {
+                  value = expr.getText();
+                }
+              } else {
+                value = initializer.getText();
+              }
+            }
+
+            if (value) {
+              pandaProps.push({ name: propName, value, node: attr });
+            }
+          } else if (propName) {
+            otherProps.push({ name: propName, node: attr });
+          }
+        }
+      });
+
+      if (pandaProps.length > 0) {
+        elements.push({
+          node,
+          startPos: node.getStart(),
+          endPos: node.getEnd(),
+          tagName: node.getTagNameNode().getText(),
+          pandaProps,
+          otherProps,
+        });
+      }
+    }
+  });
+
+  return elements;
 };
