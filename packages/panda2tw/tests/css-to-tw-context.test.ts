@@ -69,10 +69,12 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     expect(classes).toContain("flex");
     expect(classes).toContain("items-center");
     expect(classes).toContain("justify-center");
-    // These should resolve from the context's theme tokens
-    expect(classes).toContain("bg-#2563eb");
+    // These match default Tailwind colors, so should use TW token names
+    expect(classes).toContain("bg-blue-600");
     expect(classes).toContain("text-white");
-    expect(classes).toContain("hover:bg-#1d4ed8");
+    expect(classes).toContain("hover:bg-blue-700");
+    // padding doesn't match any default TW token, so uses arbitrary syntax
+    expect(classes).toContain("p-[8px]");
   });
 
   it("handles nested pseudo-selectors with context", () => {
@@ -91,10 +93,11 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
 
-    // With context, tokens resolve to actual values (hex colors in this case)
-    expect(classes).toContain("text-#ef4444"); // red.500 -> #ef4444
-    expect(classes).toContain("hover:text-#b91c1c"); // red.700 -> #b91c1c
-    // red.300 and red.200 are not in the context, so they use fallback
+    // With context, tokens resolve to actual values
+    // red.500 and red.700 match default TW colors
+    expect(classes).toContain("text-red-500");
+    expect(classes).toContain("hover:text-red-700");
+    // red.300 and red.200 are not in the context, so they use fallback token name
     expect(classes).toContain("dark:text-red-300");
     expect(classes).toContain("dark:hover:text-red-200");
   });

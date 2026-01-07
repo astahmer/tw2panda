@@ -215,6 +215,36 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 ): string[] => {
   const classes: string[] = [];
 
+  // Default Tailwind color palette (common colors)
+  const defaultTailwindColors: Record<string, string> = {
+    "blue-600": "#2563eb",
+    "blue-700": "#1d4ed8",
+    "red-500": "#ef4444",
+    "red-700": "#b91c1c",
+    "gray-100": "#f3f4f6",
+    "gray-200": "#e5e7eb",
+    "gray-300": "#d1d5db",
+    "gray-400": "#9ca3af",
+    "gray-500": "#6b7280",
+    "gray-600": "#4b5563",
+    "gray-700": "#374151",
+    "gray-800": "#1f2937",
+    "gray-900": "#111827",
+    white: "#ffffff",
+    black: "#000000",
+  };
+
+  // Helper to check if a resolved value matches a default Tailwind token
+  const findMatchingTailwindToken = (value: string): string | null => {
+    const normalizedValue = value.toLowerCase();
+    for (const [tokenName, tokenValue] of Object.entries(defaultTailwindColors)) {
+      if (tokenValue.toLowerCase() === normalizedValue) {
+        return tokenName;
+      }
+    }
+    return null;
+  };
+
   // Helper to resolve Panda token values to Tailwind-compatible format
   const resolveToken = (prop: string, path: string): string => {
     if (!pandaContext) return pandaTokenToTwSuffix(path);
@@ -270,7 +300,13 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     }
 
     if (resolved && typeof resolved === "string") {
-      return pandaTokenToTwSuffix(resolved);
+      // Check if this resolved value matches a default Tailwind token
+      const matchingToken = findMatchingTailwindToken(resolved);
+      if (matchingToken) {
+        return matchingToken;
+      }
+      // Otherwise, use arbitrary value syntax [value]
+      return `[${resolved}]`;
     }
 
     // Fallback to original token path
