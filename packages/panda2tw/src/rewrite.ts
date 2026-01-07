@@ -120,6 +120,59 @@ export interface BatchRewriteResult {
 }
 
 /**
+ * Detect if the input is a glob pattern or a file path
+ */
+export const isGlobPattern = (input: string): boolean => {
+  // Check for glob characters: *, ?, [, {
+  return /[*?\[\{]/.test(input);
+};
+
+/**
+ * Unified rewrite function that handles both single files and glob patterns
+ */
+export const rewritePattern = (
+  pattern: string,
+  options: RewriteOptions & { write?: boolean } = {},
+): BatchRewriteResult | RewriteResult => {
+  const isGlob = isGlobPattern(pattern);
+
+  if (isGlob) {
+    return batchRewritePandaToTailwind(pattern, options);
+  } else {
+    // Single file
+    try {
+      const content = readFileSync(pattern, "utf-8");
+      const result = rewritePandaToTailwind(content, pattern, options);
+
+      if (options.write) {
+        writeFileSync(pattern, result.output);
+      }
+
+      return {
+        totalFiles: 1,
+        successfulFiles: 1,
+        failedFiles: [],
+        totalConversions: result.conversions.length,
+        results: [{ file: pattern, conversions: result.conversions.length }],
+      };
+    } catch (e) {
+      return {
+        totalFiles: 1,
+        successfulFiles: 0,
+        failedFiles: [
+          {
+            file: pattern,
+            error: e instanceof Error ? e.message : String(e),
+          },
+        ],
+        totalConversions: 0,
+        results: [],
+      };
+    }
+  }
+};
+
+/**
  * Batch rewrite multiple files matching a glob pattern with a shared Project instance
  */
 export const batchRewritePandaToTailwind = (
