@@ -161,7 +161,8 @@ export const rewritePattern = async (
         pandaContext = context;
 
         // Also load Tailwind context for better token matching
-        tailwindConfig = await loadTailwindContext({ cwd: process.cwd() });
+        const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
+        tailwindConfig = tailwindResult.context?.config || tailwindResult as any;
       } catch (e) {
         // Context loading is optional - continue without it
       }
@@ -229,7 +230,8 @@ export const batchRewritePandaToTailwind = async (
     pandaContext = context;
 
     // Also load Tailwind config for all token types
-    tailwindConfig = await loadTailwindContext({ cwd: process.cwd() });
+    const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
+    tailwindConfig = tailwindResult.context?.config || tailwindResult as any;
   } catch (e) {
     // Context loading is optional - continue without it
   }

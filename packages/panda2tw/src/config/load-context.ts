@@ -1,53 +1,46 @@
 import { loadConfigAndCreateContext } from "@pandacss/node";
-import type { Config } from "tailwindcss";
-import resolveConfig from "tailwindcss/resolveConfig.js";
-import { findPandaConfig } from "./find-config";
+import { createPandaContext } from "../panda-context";
+import { createTailwindContext } from "../tw-context";
+import { bundle } from "../bundle";
+import { ConfigFileOptions, findPandaConfig, findTailwindConfig } from "./find-config";
 
-export interface ConfigFileOptions {
-  cwd?: string;
-  file?: string;
-  configPath?: string;
+/**
+ * Load tailwind context from:
+ * - configPath when provided
+ * - find tailwind.config.js from file or cwd, when provided
+ * - create in-memory tailwind context as fallback when no config file is found
+ */
+export async function loadTailwindContext(options: ConfigFileOptions) {
+  const filePath = options.configPath ?? findTailwindConfig({ from: options.file ?? options.cwd });
+
+  if (!filePath) {
+    const tw = createTailwindContext({} as any);
+    return { context: Object.assign(tw.context, { config: tw.config }), filePath };
+  }
+
+  const result = await bundle(filePath, options.cwd);
+  const tw = createTailwindContext(result.config as any);
+  return { context: Object.assign(tw.context, { config: tw.config }), filePath };
 }
 
 /**
- * Load Panda context from:
+ * Load panda context from:
  * - configPath when provided
- * - find panda.config.ts from file or cwd, when provided
+ * - find panda.config.js from file or cwd, when provided
  * - create in-memory panda context as fallback when no config file is found
  */
-export async function loadPandaContext(options: ConfigFileOptions = {}) {
+export async function loadPandaContext(options: ConfigFileOptions) {
   const filePath = options.configPath ?? findPandaConfig({ from: options.file ?? options.cwd });
 
   if (!filePath) {
-    // Return default context if no config found
-    const { loadConfigAndCreateContext: loadDefault } = await import("@pandacss/node");
-    return {
-      context: await loadDefault({ cwd: options.cwd }),
-      filePath: undefined,
-    };
+    return { context: createPandaContext() as ReturnType<typeof createPandaContext>, filePath };
   }
 
-  const context = await loadConfigAndCreateContext({
-    configPath: filePath,
-    cwd: options.cwd,
-  });
-
-  return { context, filePath };
+  return {
+    context: (await loadConfigAndCreateContext({ configPath: filePath, cwd: options.cwd })) as any,
+    filePath,
+  };
 }
-
-/**
- * Load Tailwind config to get access to theme tokens
- * This allows matching Panda tokens against actual Tailwind tokens for all token types
- */
-export async function loadTailwindContext(options: ConfigFileOptions = {}): Promise<Config> {
-  try {
-    // Try to dynamically import the tailwind config
-    const tailwindConfigPath = require.resolve(
-      options.configPath || "tailwind.config.js",
-      { paths: [options.cwd || process.cwd()] }
-    );
-
-    const tailwindConfig = await import(tailwindConfigPath);
     const config = resolveConfig(tailwindConfig.default || tailwindConfig);
 
     return config;

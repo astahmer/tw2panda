@@ -4,8 +4,9 @@
  */
 
 import type { StyleObject } from "./types.js";
-import type { PandaContext } from "@pandacss/node";
+import type { PandaContext } from "./panda-context.js";
 import type { Config } from "tailwindcss";
+import { createTailwindContext } from "./tw-context.js";
 
 // Comprehensive mapping of CSS properties to Tailwind prefix patterns
 const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
@@ -217,6 +218,19 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 ): string[] => {
   const classes: string[] = [];
 
+  // If no config provided, create a default one
+  // This will have all the standard Tailwind theme tokens
+  let effectiveConfig: Config | undefined = tailwindConfig;
+  if (!effectiveConfig) {
+    try {
+      const { config } = createTailwindContext({});
+      effectiveConfig = config;
+    } catch (e) {
+      // Fallback: use empty config if creation fails
+      effectiveConfig = {} as Config;
+    }
+  }
+
   // Build a flat map of Tailwind tokens from nested structure
   // { blue: { 600: "#2563eb", 700: "#1d4ed8" } } -> { "blue-600": "#2563eb", "blue-700": "#1d4ed8" }
   const flattenTokens = (
@@ -240,11 +254,38 @@ export const extractTailwindClassesFromPandaCssWithContext = (
   };
 
   // Build complete Tailwind token map from config theme
+  // Only use specific token categories, not all theme keys
   const tailwindTokens: Record<string, string> = {};
-  if (tailwindConfig?.theme) {
-    for (const [category, values] of Object.entries(tailwindConfig.theme)) {
+  
+  // Helper to flatten tokens without category prefix
+  const flattenTokensForMatching = (
+    tokens: Record<string, any>,
+    prefix = "",
+  ): Record<string, string> => {
+    const flattened: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(tokens)) {
+      const tokenName = prefix ? `${prefix}-${key}` : key;
+
+      if (typeof value === "string") {
+        flattened[tokenName] = value;
+      } else if (typeof value === "object" && value !== null) {
+        Object.assign(flattened, flattenTokensForMatching(value, tokenName));
+      }
+    }
+
+    return flattened;
+  };
+  
+  // Only build tokens from known categories that are meaningful for conversion
+  const tokenCategories = ["colors", "spacing", "sizing", "fontSizes", "fontWeights", "lineHeights", "letterSpacing", "radii", "borderWidths", "shadows"];
+  
+  if (effectiveConfig?.theme) {
+    for (const category of tokenCategories) {
+      const values = effectiveConfig.theme[category];
       if (typeof values === "object" && values !== null) {
-        Object.assign(tailwindTokens, flattenTokens(values as Record<string, any>, category));
+        // Don't include category prefix for these tokens
+        Object.assign(tailwindTokens, flattenTokensForMatching(values as Record<string, any>));
       }
     }
   }
