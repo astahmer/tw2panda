@@ -2,8 +2,8 @@
  * Convert Panda CVA (Class Variance Authority) to Tailwind classes
  */
 
-import { extractTailwindClassesFromPandaCss } from "./css-to-tw";
-import type { PandaCvaConfig, StyleObject } from "./types";
+import { extractTailwindClassesFromPandaCss } from "./css-to-tw.js";
+import type { PandaCvaConfig, StyleObject } from "./types.js";
 
 export interface CvaVariantMapping {
   variantName: string;
@@ -50,7 +50,7 @@ export const extractClassesFromNestedStyles = (
 ): string[] => {
   const classes: string[] = [];
 
-  Object.entries(obj).forEach(([key, value]) => {
+  Object.entries(obj).forEach(([key, value]: [string, any]) => {
     // Handle responsive/conditional styles (md:, dark:, etc.)
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       const nestedPrefix = prefix ? `${prefix}:${key}` : key;

@@ -2,12 +2,12 @@
  * Main rewrite logic: Convert Panda CSS file to Tailwind
  */
 
-import { Project, SourceFile, Node, CallExpression } from "ts-morph";
+import { Project, SourceFile } from "ts-morph";
 import MagicString from "magic-string";
-import { findCssCalls, findCvaCalls, nodeToObject } from "./parser";
-import { extractTailwindClassesFromPandaCss } from "./css-to-tw";
-import { extractClassesFromNestedStyles, pandaCvaToTailwind } from "./cva-to-tw";
-import type { RewriteOptions } from "./types";
+import { findCssCalls, findCvaCalls, nodeToObject, ParsedCssCall, ParsedCvaCall } from "./parser.js";
+import { extractTailwindClassesFromPandaCss } from "./css-to-tw.js";
+import { pandaCvaToTailwind } from "./cva-to-tw.js";
+import type { RewriteOptions } from "./types.js";
 
 export interface RewriteResult {
   output: string;
@@ -21,12 +21,12 @@ export interface RewriteResult {
 export const rewritePandaToTailwind = (
   content: string,
   filePath: string,
-  options: RewriteOptions = {},
+  _options: RewriteOptions = {},
 ): RewriteResult => {
   const project = new Project({ useInMemoryFileSystem: true });
-  const sourceFile = project.addSourceFileAtPath(
+  const sourceFile = project.createSourceFile(
     filePath,
-    { content },
+    content,
   ) as any as SourceFile;
 
   const code = sourceFile.getFullText();
@@ -73,9 +73,6 @@ export const rewritePandaToTailwind = (
     try {
       const baseObj = nodeToObject(call.baseConfig);
       const variantsObj = nodeToObject(call.variantsConfig);
-
-      // Extract base classes
-      const baseClasses = extractTailwindClassesFromPandaCss(baseObj);
 
       // For now, generate a comment showing the mapping
       // A full implementation would need to handle the variant logic

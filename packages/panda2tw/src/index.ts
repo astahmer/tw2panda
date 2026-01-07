@@ -2,9 +2,9 @@
  * Main entry point for panda2tw
  */
 
-export * from "./types";
-export * from "./css-to-tw";
-export * from "./cva-to-tw";
-export * from "./parser";
-export * from "./rewrite";
-export * from "./tailwind-context";
+export * from "./types.js";
+export * from "./css-to-tw.js";
+export * from "./cva-to-tw.js";
+export * from "./parser.js";
+export * from "./rewrite.js";
+export * from "./tailwind-context.js";

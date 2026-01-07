@@ -4,15 +4,11 @@
 
 import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
-import { defineCommand, runMain } from "cac";
-import { rewritePandaToTailwind } from "./rewrite";
-import { extractTailwindClassesFromPandaCss } from "./css-to-tw";
+import { cac } from "cac";
+import { rewritePandaToTailwind } from "./rewrite.js";
+import { extractTailwindClassesFromPandaCss } from "./css-to-tw.js";
 
-const cli = defineCommand({
-  name: "panda2tw",
-  version: "0.1.0",
-  description: "Convert Panda CSS to Tailwind CSS",
-});
+const cli = cac("panda2tw");
 
 cli
   .command("rewrite <file>", "Rewrite a Panda CSS file to use Tailwind classes")
@@ -49,6 +45,6 @@ cli
   });
 
 cli.help();
-cli.version();
+cli.version("0.1.0");
 
-runMain(cli);
+cli.parse();

@@ -3,7 +3,7 @@
  * Converts Panda CSS properties to equivalent Tailwind classes
  */
 
-import type { StyleObject } from "./types";
+import type { StyleObject } from "./types.js";
 
 // Comprehensive mapping of CSS properties to Tailwind prefix patterns
 const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {

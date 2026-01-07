@@ -2,7 +2,7 @@
  * Parse Panda CSS and CVA calls from TypeScript files
  */
 
-import { CallExpression, Node, SourceFile, ts } from "ts-morph";
+import { CallExpression, Node, SourceFile } from "ts-morph";
 
 export interface ParsedCssCall {
   node: CallExpression;
@@ -15,8 +15,8 @@ export interface ParsedCvaCall {
   node: CallExpression;
   startPos: number;
   endPos: number;
-  baseConfig?: Node;
-  variantsConfig?: Node;
+  baseConfig: Node | undefined;
+  variantsConfig: Node | undefined;
 }
 
 /**
