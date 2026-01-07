@@ -17,9 +17,36 @@ importers:
 
   packages/panda2tw:
     dependencies:
+      '@pandacss/config':
+        specifier: ^0.46.1
+        version: 0.46.1
+      '@pandacss/core':
+        specifier: ^0.46.1
+        version: 0.46.1
+      '@pandacss/generator':
+        specifier: ^0.46.1
+        version: 0.46.1
       '@pandacss/node':
         specifier: ^0.46.1
         version: 0.46.1(typescript@5.1.6)
+      '@pandacss/parser':
+        specifier: ^0.46.1
+        version: 0.46.1(typescript@5.1.6)
+      '@pandacss/preset-base':
+        specifier: ^0.46.1
+        version: 0.46.1
+      '@pandacss/preset-panda':
+        specifier: ^0.46.1
+        version: 0.46.1
+      '@pandacss/token-dictionary':
+        specifier: ^0.46.1
+        version: 0.46.1
+      '@pandacss/types':
+        specifier: ^0.46.1
+        version: 0.46.1
+      bundle-n-require:
+        specifier: ^1.0.1
+        version: 1.0.1
       cac:
         specifier: ^6.7.14
         version: 6.7.14
@@ -29,12 +56,18 @@ importers:
       glob:
         specifier: ^10.3.10
         version: 10.3.16
+      hookable:
+        specifier: ^5.5.3
+        version: 5.5.3
       magic-string:
         specifier: ^0.30.1
         version: 0.30.1
       pathe:
         specifier: ^1.1.1
         version: 1.1.1
+      postcss:
+        specifier: ^8.4.26
+        version: 8.4.26
       tailwindcss:
         specifier: ^3.3.0
         version: 3.3.3
@@ -50,7 +83,7 @@ importers:
         version: 3.0.0
       tsup:
         specifier: ^8.0.0
-        version: 8.0.2(postcss@8.5.6)(typescript@5.1.6)
+        version: 8.0.2(postcss@8.4.26)(typescript@5.1.6)
       typescript:
         specifier: ^5.0.0
         version: 5.1.6
@@ -235,7 +268,7 @@ importers:
         version: 7.5.4
       tsup:
         specifier: 8.0.2
-        version: 8.0.2(postcss@8.4.26)(typescript@5.1.6)
+        version: 8.0.2(postcss@8.5.6)(typescript@5.1.6)
       tsx:
         specifier: 4.11.0
         version: 4.11.0
@@ -536,7 +569,7 @@ packages:
       '@babel/helper-validator-identifier': 7.24.5
       chalk: 2.4.2
       js-tokens: 4.0.0
-      picocolors: 1.0.1
+      picocolors: 1.1.1
 
   /@babel/parser@7.22.7:
     resolution: {integrity: sha512-7NF8pOkHP5o2vpmGgNGcfAeCvOYhGLyA3Z4eBQkT1RJlWu47n63bCs93QfJ2hIAFCil7L5P2IWhs1oToVgrL0Q==}
@@ -801,7 +834,7 @@ packages:
     resolution: {integrity: sha512-0MhX9/B4iL6Re04jPrttDm+BsP8y6mS7byuv0BvXgdXhbV5PdlsHt55dvNsuBCPZ7xq1oTAOOuotR9NFbQyMSA==}
     dependencies:
       '@clack/core': 0.3.4
-      picocolors: 1.0.1
+      picocolors: 1.1.1
       sisteransi: 1.0.5
     dev: false
     bundledDependencies:
@@ -4088,7 +4121,7 @@ packages:
       '@vue/shared': 3.4.19
       entities: 4.5.0
       estree-walker: 2.0.2
-      source-map-js: 1.2.0
+      source-map-js: 1.2.1
     dev: false
 
   /@vue/compiler-dom@3.4.19:
@@ -4107,9 +4140,9 @@ packages:
       '@vue/compiler-ssr': 3.4.19
       '@vue/shared': 3.4.19
       estree-walker: 2.0.2
-      magic-string: 0.30.10
-      postcss: 8.4.38
-      source-map-js: 1.2.0
+      magic-string: 0.30.11
+      postcss: 8.5.6
+      source-map-js: 1.2.1
     dev: false
 
   /@vue/compiler-ssr@3.4.19:
@@ -5455,11 +5488,11 @@ packages:
   /escalade@3.1.2:
     resolution: {integrity: sha512-ErCHMCae19vR8vQGe50xIsVomy19rg6gFu3+r3jkEO46suLMWBksvVyoGgQV+jOfl84ZSOSlmv6Gxa89PmTGmA==}
     engines: {node: '>=6'}
+    dev: false
 
   /escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
     engines: {node: '>=6'}
-    dev: false
 
   /escape-string-regexp@1.0.5:
     resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
@@ -6874,6 +6907,7 @@ packages:
     resolution: {integrity: sha512-iIRwTIf0QKV3UAnYK4PU8uiEc4SRh5jX0mwpIwETPpHdhVM4f53RSwS/vXvN1JhGX+Cs7B8qIq3d6AH49O5fAQ==}
     dependencies:
       '@jridgewell/sourcemap-codec': 1.4.15
+    dev: true
 
   /magic-string@0.30.11:
     resolution: {integrity: sha512-+Wri9p0QHMy+545hKww7YAu5NyzF8iomPL/RQazugQ9+Ez4Ic3mERMd8ZTX5rfK944j+560ZJi8iAwgak1Ac7A==}
@@ -7272,11 +7306,6 @@ packages:
 
   /nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
-  /nanoid@3.3.6:
-    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -7837,6 +7866,7 @@ packages:
 
   /picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
+    dev: true
 
   /picocolors@1.0.1:
     resolution: {integrity: sha512-anP1Z8qwhkbmu7MFP5iTt+wQKXgwzf7zTyGlcdzabySa9vd0Xt392U0rVmz9poOaBj0uHJKyyo9/upk0HrEQew==}
@@ -8044,7 +8074,7 @@ packages:
       postcss: ^8.2.14
     dependencies:
       postcss: 8.4.35
-      postcss-selector-parser: 6.0.15
+      postcss-selector-parser: 6.1.1
 
   /postcss-nested@6.0.1(postcss@8.4.47):
     resolution: {integrity: sha512-mEp4xPMi5bSWiMbsgoPfcP74lsWLHkQbZc3sY+jWYd65CUwXrUaTp0fmNpa01ZcETKlIgUdFN/MpS2xZtqL9dQ==}
@@ -8053,7 +8083,7 @@ packages:
       postcss: ^8.2.14
     dependencies:
       postcss: 8.4.47
-      postcss-selector-parser: 6.0.15
+      postcss-selector-parser: 6.1.1
     dev: false
 
   /postcss-nested@6.0.1(postcss@8.5.6):
@@ -8063,7 +8093,7 @@ packages:
       postcss: ^8.2.14
     dependencies:
       postcss: 8.5.6
-      postcss-selector-parser: 6.0.15
+      postcss-selector-parser: 6.1.1
     dev: false
 
   /postcss-normalize-whitespace@6.0.1(postcss@8.4.35):
@@ -8098,7 +8128,6 @@ packages:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
-    dev: false
 
   /postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
@@ -8107,9 +8136,9 @@ packages:
     resolution: {integrity: sha512-jrXHFF8iTloAenySjM/ob3gSj7pCu0Ji49hnjqzsgSRa50hkWCKD0HQ+gMNJkW38jBI68MpAAg7ZWwHwX8NMMw==}
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
-      nanoid: 3.3.6
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
+      nanoid: 3.3.11
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
 
   /postcss@8.4.35:
     resolution: {integrity: sha512-u5U8qYpBCpN13BsiEB0CbR1Hhh4Gc0zLFuedrHJKMctHCHAGrMdG0PRM/KErzAL3CU6/eckEtmHNB3x6e3c0vA==}
@@ -8118,15 +8147,6 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.1
       source-map-js: 1.2.0
-
-  /postcss@8.4.38:
-    resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
-    engines: {node: ^10 || ^12 || >=14}
-    dependencies:
-      nanoid: 3.3.7
-      picocolors: 1.0.1
-      source-map-js: 1.2.0
-    dev: false
 
   /postcss@8.4.47:
     resolution: {integrity: sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==}
@@ -8839,10 +8859,6 @@ packages:
     dependencies:
       is-plain-obj: 2.1.0
     dev: true
-
-  /source-map-js@1.0.2:
-    resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
-    engines: {node: '>=0.10.0'}
 
   /source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
@@ -9663,8 +9679,8 @@ packages:
       browserslist: '>= 4.21.0'
     dependencies:
       browserslist: 4.23.0
-      escalade: 3.1.2
-      picocolors: 1.0.1
+      escalade: 3.2.0
+      picocolors: 1.1.1
 
   /update-browserslist-db@1.2.3(browserslist@4.23.3):
     resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
@@ -9835,7 +9851,7 @@ packages:
     dependencies:
       '@types/node': 20.4.2
       esbuild: 0.18.14
-      postcss: 8.4.26
+      postcss: 8.5.6
       rollup: 3.26.3
     optionalDependencies:
       fsevents: 2.3.3
@@ -10269,7 +10285,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       cliui: 8.0.1
-      escalade: 3.1.2
+      escalade: 3.2.0
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3

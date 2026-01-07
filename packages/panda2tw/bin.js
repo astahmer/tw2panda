@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require("./cli");
+import "./dist/cli.cjs";

@@ -1,13 +1,13 @@
 import type { Config } from "tailwindcss";
-import resolveConfig from "tailwindcss/resolveConfig";
+import resolveConfig from "tailwindcss/resolveConfig.js";
 
 // @ts-expect-error Types added below
-import { createContext as createContextRaw } from "tailwindcss/lib/lib/setupContextUtils";
+import { createContext as createContextRaw } from "tailwindcss/lib/lib/setupContextUtils.js";
 // @ts-expect-error Types added below
-import { resolveMatches as resolveMatchesRaw } from "tailwindcss/lib/lib/generateRules";
+import { resolveMatches as resolveMatchesRaw } from "tailwindcss/lib/lib/generateRules.js";
 
-import { evalTheme } from "./tw-eval-theme";
-import type { TailwindContext, TailwindMatch } from "./tw-types";
+import { evalTheme } from "./tw-eval-theme.js";
+import type { TailwindContext, TailwindMatch } from "./tw-types.js";
 
 const createContext = createContextRaw as (config: Config) => TailwindContext;
 

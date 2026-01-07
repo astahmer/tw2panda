@@ -223,8 +223,8 @@ export const extractTailwindClassesFromPandaCssWithContext = (
   let effectiveConfig: Config | undefined = tailwindConfig;
   if (!effectiveConfig) {
     try {
-      const { config } = createTailwindContext({});
-      effectiveConfig = config;
+      const { config } = createTailwindContext({} as Config);
+      effectiveConfig = config as any;
     } catch (e) {
       // Fallback: use empty config if creation fails
       effectiveConfig = {} as Config;
