@@ -233,6 +233,47 @@ const COMMON_CSS_PROPERTIES = new Set([
 ]);
 
 /**
+ * Props that should never be converted to CSS/Tailwind classes
+ * These are reserved for non-styling purposes
+ */
+const EXCLUDED_PROPS = new Set([
+  "content", // Content prop used for text/display, not CSS
+  "children", // React children
+  "key", // React key prop
+  "ref", // React ref prop
+]);
+
+/**
+ * Check if an initializer is a simple literal value (string or number)
+ * Returns true only for direct string/number literals, not complex expressions
+ */
+const isSimpleLiteral = (initializer: any): boolean => {
+  if (!initializer) return false;
+
+  // Allow string literals
+  if (Node.isStringLiteral(initializer)) return true;
+
+  // Allow number literals
+  if (Node.isNumericLiteral(initializer)) return true;
+
+  // For JSX expressions, only allow simple identifiers or string/number literals inside
+  if (Node.isJsxExpression(initializer)) {
+    const expr = initializer.getExpression();
+    if (!expr) return false;
+
+    // Allow simple string/number literals inside expressions
+    if (Node.isStringLiteral(expr) || Node.isNumericLiteral(expr)) {
+      return true;
+    }
+
+    // Don't allow complex expressions like ternaries, function calls, etc.
+    return false;
+  }
+
+  return false;
+};
+
+/**
  * Extract Panda CSS props from JSX element attributes
  */
 const extractPandaPropsFromAttributes = (
@@ -248,6 +289,12 @@ const extractPandaPropsFromAttributes = (
       const nameNode = attr.getNameNode();
       const propName = nameNode?.getText() || "";
       const initializer = attr.getInitializer();
+
+      // Skip excluded props (content, children, key, ref)
+      if (EXCLUDED_PROPS.has(propName)) {
+        otherProps.push({ name: propName, node: attr });
+        return;
+      }
 
       // Special handling for the "css" prop - it's always a Panda CSS prop
       const isCssProp = propName === "css";
@@ -266,11 +313,20 @@ const extractPandaPropsFromAttributes = (
       const isValidProp = isCssProp || isContextProp || isCssProperty;
 
       if (isValidProp) {
+        // For CSS props (not "css" object), only process simple literal values
+        // Complex expressions like ternaries should not be converted
+        if (!isCssProp && !isSimpleLiteral(initializer)) {
+          otherProps.push({ name: propName, node: attr });
+          return;
+        }
+
         // Extract the value
         let value = "";
         if (initializer) {
           if (Node.isStringLiteral(initializer)) {
             value = initializer.getLiteralValue();
+          } else if (Node.isNumericLiteral(initializer)) {
+            value = initializer.getText();
           } else if (Node.isJsxExpression(initializer)) {
             const expr = initializer.getExpression();
             if (expr) {

@@ -331,8 +331,9 @@ export const Component = () => {
 
       // Should still have variant prop
       expect(result.output).toContain("variant=");
-      // Should handle dynamic CSS props
-      expect(result.output).toContain("className=");
+      // Dynamic CSS props should NOT be converted (ternaries and variables are complex)
+      expect(result.output).toContain("display={isFlexible");
+      expect(result.output).toContain("padding={spacing}");
     });
   });
 
@@ -373,6 +374,200 @@ export const Component = () => {
       expect(result.output).not.toContain("display=");
       // Non-CSS props should be preserved
       expect(result.output).toContain("onClick=");
+    });
+  });
+
+  describe("Complex expressions are not converted", () => {
+    test("preserves CSS props with ternary expressions", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div left={isOpen ? "0" : "-100%"} display="flex" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Ternary expression should be preserved as-is
+      expect(result.output).toContain('left={isOpen ? "0" : "-100%"}');
+      // Simple display prop should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("flex");
+    });
+
+    test("preserves CSS props with function call expressions", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div width={getWidth()} height="100" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Function call should be preserved
+      expect(result.output).toContain("width={getWidth()}");
+      // Simple height should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("h-100");
+    });
+
+    test("preserves CSS props with variable references", () => {
+      const input = `
+export const Component = () => {
+  const spacing = "8";
+  return (
+    <div padding={spacing} margin="2" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Variable reference should be preserved
+      expect(result.output).toContain("padding={spacing}");
+      // Simple margin should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("m-2");
+    });
+
+    test("preserves CSS props with computed expressions", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div top={5 + offset} bottom={height * 2} left="10" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Computed expressions should be preserved
+      expect(result.output).toContain("top={5 + offset}");
+      expect(result.output).toContain("bottom={height * 2}");
+      // Simple left should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("left-10");
+    });
+  });
+
+  describe("Excluded props are not converted", () => {
+    test("excludes content prop from conversion", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div content="This is text" display="flex" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Content prop should be preserved
+      expect(result.output).toContain('content="This is text"');
+      // Display should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("flex");
+    });
+
+    test("excludes children prop from conversion", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div children={customChildren} display="flex" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Children prop should be preserved
+      expect(result.output).toContain("children={customChildren}");
+      // Display should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("flex");
+    });
+
+    test("excludes key prop from conversion", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div key={itemId} display="flex" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Key prop should be preserved
+      expect(result.output).toContain("key={itemId}");
+      // Display should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("flex");
+    });
+
+    test("excludes ref prop from conversion", () => {
+      const input = `
+export const Component = () => {
+  const ref = useRef();
+  return (
+    <div ref={ref} display="flex" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Ref prop should be preserved
+      expect(result.output).toContain("ref={ref}");
+      // Display should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("flex");
+    });
+  });
+
+  describe("Safe literal values are converted", () => {
+    test("converts string literal values", () => {
+      const input = `
+export const Component = () => {
+  return <div display="flex" gap="4" />;
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      expect(result.output).toContain("className=");
+      expect(result.output).not.toContain("display=");
+      expect(result.output).not.toContain("gap=");
+    });
+
+    test("converts numeric literal values", () => {
+      const input = `
+export const Component = () => {
+  return <div opacity={0.5} zIndex={10} />;
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      expect(result.output).toContain("className=");
+      // Numeric props inside JSX expressions should be converted
+    });
+
+    test("converts string literals inside JSX expressions", () => {
+      const input = `
+export const Component = () => {
+  return <div display={"flex"} gap={"4"} />;
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      expect(result.output).toContain("className=");
+      expect(result.output).not.toContain("display=");
+      expect(result.output).not.toContain("gap=");
     });
   });
 });
