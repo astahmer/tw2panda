@@ -300,6 +300,44 @@ export const Component = () => {
       expect(result.output).toContain("className=");
     });
 
+    test("merges existing className with converted Panda props using cn()", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div className="existing-class" display="flex" gap="4" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Should merge both the existing className and the converted Panda props
+      expect(result.output).toContain('className={cn("existing-class",');
+      expect(result.output).toContain("flex");
+      expect(result.output).toContain("gap");
+      // The panda props should be removed
+      expect(result.output).not.toContain('display="flex"');
+      expect(result.output).not.toContain('gap="4"');
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "conversions": [
+            {
+              "original": "display="flex" gap="4"",
+              "replacement": "className="flex gap-4"",
+            },
+          ],
+          "imports": Set {
+            "className",
+          },
+          "output": "export const Component = () => {
+          return (
+            <div className={cn("existing-class", "flex gap-4")} />
+          );
+        };",
+        }
+      `)
+    });
+
     test("handles empty value props correctly", () => {
       const input = `
 export const Component = () => {

@@ -171,8 +171,43 @@ const processSourceFile = (
       if (classes.length > 0) {
         const classString = classes.join(" ");
 
-        // Remove the Panda props from the element and add className before closing
-        let classNameAdded = false;
+        // Check if there's already a className prop
+        const existingClassNameProp = element.otherProps.find((p) => p.name === "className");
+        let finalClassString = classString;
+        let classNameNode: any = null;
+
+        if (existingClassNameProp) {
+          // Get the existing className value
+          const existingValue = existingClassNameProp.node.getInitializer();
+          let existingClassName = "";
+
+          if (existingValue) {
+            const valueText = existingValue.getText();
+            // Remove quotes if it's a string literal
+            if ((valueText.startsWith('"') && valueText.endsWith('"')) ||
+                (valueText.startsWith("'") && valueText.endsWith("'"))) {
+              existingClassName = valueText.slice(1, -1);
+            } else if (valueText.startsWith("{") && valueText.endsWith("}")) {
+              // It's a JSX expression like {something}
+              existingClassName = valueText;
+            } else {
+              existingClassName = valueText;
+            }
+          }
+
+          // Merge existing and new classes
+          if (existingClassName.startsWith("{") && existingClassName.endsWith("}")) {
+            // Use cn() utility for expressions
+            finalClassString = `cn(${existingClassName.slice(1, -1)}, "${classString}")`;
+          } else if (existingClassName) {
+            // Use cn() utility for string merge
+            finalClassString = `cn("${existingClassName}", "${classString}")`;
+          }
+
+          classNameNode = existingClassNameProp.node;
+        }
+
+        // Remove the Panda props from the element
         element.pandaProps.forEach(({ node }) => {
           magicStr.remove(node.getStart(), node.getEnd());
           // Remove the space after the attribute if it exists
@@ -180,13 +215,28 @@ const processSourceFile = (
           if (nextChar === " ") {
             magicStr.remove(node.getEnd(), node.getEnd() + 1);
           }
-
-          // Add className on the first prop removal
-          if (!classNameAdded) {
-            magicStr.appendLeft(node.getStart(), `className="${classString}" `);
-            classNameAdded = true;
-          }
         });
+
+        // Update or add className
+        if (classNameNode) {
+          // Replace existing className value
+          const initializer = classNameNode.getInitializer();
+          if (initializer) {
+            // Use JSX expression if merging with cn(), otherwise use string
+            const replacement = finalClassString.startsWith("cn(")
+              ? `{${finalClassString}}`
+              : `"${finalClassString}"`;
+            magicStr.overwrite(initializer.getStart(), initializer.getEnd(), replacement);
+          }
+        } else {
+          // Add new className to first panda prop position
+          const firstPandaProp = element.pandaProps[0];
+          // Use JSX expression if using cn(), otherwise use string
+          const value = finalClassString.startsWith("cn(")
+            ? `className={${finalClassString}}`
+            : `className="${finalClassString}"`;
+          magicStr.appendLeft(firstPandaProp.node.getStart(), `${value} `);
+        }
 
         conversions.push({
           original: element.pandaProps.map((p) => p.node.getText()).join(" "),
