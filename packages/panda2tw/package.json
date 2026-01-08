@@ -23,7 +23,7 @@
         "start": "node ./dist/cli.cjs",
         "dev": "tsup --watch",
         "build": "tsup",
-        "test": "vitest",
+        "test": "vitest run",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {

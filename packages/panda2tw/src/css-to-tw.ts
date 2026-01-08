@@ -295,6 +295,9 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   alignSelf: { pattern: /^.*$/, classPrefix: "self-" },
   justifyItems: { pattern: /^.*$/, classPrefix: "justify-items-" },
   justifySelf: { pattern: /^.*$/, classPrefix: "justify-self-" },
+  placeContent: { pattern: /^.*$/, classPrefix: "place-content-" },
+  placeItems: { pattern: /^.*$/, classPrefix: "place-items-" },
+  placeSelf: { pattern: /^.*$/, classPrefix: "place-self-" },
   order: { pattern: /^.*$/, classPrefix: "order-" },
 
   // Grid properties
@@ -489,7 +492,7 @@ export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string
 
     let className = "";
     const prefix = mapping.classPrefix;
-    const strValue = String(value);
+    let strValue = String(value);
 
     if (prefix) {
       const suffix = pandaTokenToTwSuffix(strValue);
@@ -660,6 +663,109 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
       if (strValue === "none") return "outline-none";
       if (strValue === "solid") return "outline";
       break;
+
+    // Alignment and justification properties with flex-start/flex-end mapping
+    case "justifyContent": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        let suffix = strValue;
+        if (strValue === "flex-start") suffix = "start";
+        else if (strValue === "flex-end") suffix = "end";
+        else if (strValue === "space-between") suffix = "between";
+        else if (strValue === "space-around") suffix = "around";
+        else if (strValue === "space-evenly") suffix = "evenly";
+        return `${mapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "alignItems": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        let suffix = strValue;
+        if (strValue === "flex-start") suffix = "start";
+        else if (strValue === "flex-end") suffix = "end";
+        return `${mapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "alignContent": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        let suffix = strValue;
+        if (strValue === "flex-start") suffix = "start";
+        else if (strValue === "flex-end") suffix = "end";
+        else if (strValue === "space-between") suffix = "between";
+        else if (strValue === "space-around") suffix = "around";
+        else if (strValue === "space-evenly") suffix = "evenly";
+        return `${mapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "alignSelf": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        let suffix = strValue;
+        if (strValue === "flex-start") suffix = "start";
+        else if (strValue === "flex-end") suffix = "end";
+        return `${mapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "justifyItems": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        return `${mapping.classPrefix}${strValue}`;
+      }
+      break;
+    }
+
+    case "justifySelf": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        let suffix = strValue;
+        if (strValue === "flex-start") suffix = "start";
+        else if (strValue === "flex-end") suffix = "end";
+        return `${mapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "placeContent": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        let suffix = strValue;
+        if (strValue === "flex-start") suffix = "start";
+        else if (strValue === "flex-end") suffix = "end";
+        else if (strValue === "space-between") suffix = "between";
+        else if (strValue === "space-around") suffix = "around";
+        else if (strValue === "space-evenly") suffix = "evenly";
+        return `${mapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "placeItems": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        return `${mapping.classPrefix}${strValue}`;
+      }
+      break;
+    }
+
+    case "placeSelf": {
+      const mapping = propertyMap[key];
+      if (mapping) {
+        let suffix = strValue;
+        if (strValue === "flex-start") suffix = "start";
+        else if (strValue === "flex-end") suffix = "end";
+        return `${mapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
   }
 
   return null;
