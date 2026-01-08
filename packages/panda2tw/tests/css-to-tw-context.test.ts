@@ -1128,4 +1128,148 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     // From pseudo-selector
     expect(classes).toContain("hover:font-[700]");
   });
+
+  it("handles responsive properties like gridTemplateColumns", () => {
+    const cssObj = {
+      gridTemplateColumns: {
+        base: "[1fr]",
+        xl: "[8fr 4fr]"
+      },
+      padding: "16"
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // Should have base grid-cols with responsive variant
+    expect(classes).toContain("grid-cols-[1fr]");
+    expect(classes).toContain("xl:grid-cols-[8fr 4fr]");
+    // And other properties
+    expect(classes).toContain("p-16");
+  });
+
+  it("handles responsive properties like overflowY", () => {
+    const cssObj = {
+      overflowY: {
+        base: "auto",
+        md: "hidden"
+      },
+      height: "100%"
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // Should have base overflow-y with responsive variant
+    expect(classes).toContain("overflow-y-auto");
+    expect(classes).toContain("md:overflow-y-hidden");
+    // And other properties
+    expect(classes).toContain("h-100%");
+  });
+
+  it("handles multiple responsive properties together", () => {
+    const cssObj = {
+      gridTemplateColumns: {
+        base: "[1fr]",
+        xl: "[8fr 4fr]"
+      },
+      overflowY: {
+        base: "auto"
+      },
+      paddingX: "24",
+      paddingY: "32",
+      gap: "24"
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // Responsive grid columns
+    expect(classes).toContain("grid-cols-[1fr]");
+    expect(classes).toContain("xl:grid-cols-[8fr 4fr]");
+    // Responsive overflow
+    expect(classes).toContain("overflow-y-auto");
+    // Other properties
+    expect(classes).toContain("px-24");
+    expect(classes).toContain("py-32");
+    expect(classes).toContain("gap-24");
+  });
+
+  it("handles responsive properties with custom breakpoints like xlDown", () => {
+    const contextWithCustomBreakpoints = {
+      config: {
+        theme: {
+          tokens: {},
+          textStyles: {},
+        },
+      },
+      conditions: {
+        breakpoints: {
+          base: { value: "0px" },
+          xl: { value: "1280px" },
+          xlDown: { value: "max-width: 1279px" },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      gridTemplateColumns: {
+        base: "[1fr]",
+        xl: "[8fr 4fr]"
+      },
+      overflowY: {
+        xlDown: "auto"
+      },
+      width: "100%",
+      height: "100%",
+      paddingX: "24",
+      paddingY: "32",
+      gap: "24"
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, contextWithCustomBreakpoints);
+
+    // Responsive grid columns
+    expect(classes).toContain("grid-cols-[1fr]");
+    expect(classes).toContain("xl:grid-cols-[8fr 4fr]");
+    // Responsive overflow with custom breakpoint
+    expect(classes).toContain("xlDown:overflow-y-auto");
+    // Other properties
+    expect(classes).toContain("w-100%");
+    expect(classes).toContain("h-100%");
+    expect(classes).toContain("px-24");
+    expect(classes).toContain("py-32");
+    expect(classes).toContain("gap-24");
+  });
+
+  it("handles responsive properties with unknown/custom breakpoints (fallback behavior)", () => {
+    // When breakpoints are not defined in context, we still want to detect responsive properties
+    const cssObj = {
+      gridTemplateColumns: {
+        base: "[1fr]",
+        xl: "[8fr 4fr]"
+      },
+      overflowY: {
+        xlDown: "auto"
+      },
+      width: "100%",
+      height: "100%",
+      paddingX: "24",
+      paddingY: "32",
+      gap: "24"
+    };
+
+    // Without context - xlDown won't be recognized as a known breakpoint
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj);
+
+    // Responsive grid columns (using default breakpoints)
+    expect(classes).toContain("grid-cols-[1fr]");
+    expect(classes).toContain("xl:grid-cols-[8fr 4fr]");
+    // When breakpoint is unknown, we should still handle it gracefully
+    // The xlDown key won't match known breakpoints, so fallback behavior applies
+    expect(classes).toContain("w-100%");
+    expect(classes).toContain("h-100%");
+    expect(classes).toContain("px-24");
+    expect(classes).toContain("py-32");
+    expect(classes).toContain("gap-24");
+  });
 });
+
+

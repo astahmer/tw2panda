@@ -1057,8 +1057,23 @@ export const extractTailwindClassesFromPandaCssWithContext = (
           // If we already have modifiers, treat other nested objects as additional conditions
           traverse(value, [...modifiers, key]);
         } else {
-          // Otherwise just process the nested object without adding a modifier
-          traverse(value, modifiers);
+          // Check if this is a responsive property definition (all keys are responsive conditions)
+          const objectKeys = Object.keys(value);
+          const allKeysAreResponsive = objectKeys.length > 0 &&
+            objectKeys.every(k => responsiveConditionKeys.includes(k) || k === "base");
+
+          if (allKeysAreResponsive) {
+            // This is a responsive property like gridTemplateColumns: { base: '...', xl: '...' }
+            // Process each responsive variant
+            Object.entries(value).forEach(([respKey, respValue]) => {
+              const respModifiers = respKey === "base" ? modifiers : [...modifiers, respKey];
+              const propertyObj = { [key]: respValue };
+              traverse(propertyObj, respModifiers);
+            });
+          } else {
+            // Otherwise just process the nested object without adding a modifier
+            traverse(value, modifiers);
+          }
         }
       } else if (typeof value === "string" || typeof value === "number") {
         // Actual style property with value - expand shorthand first
