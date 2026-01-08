@@ -3,7 +3,8 @@
     "compilerOptions": {
         "outDir": "dist",
         "rootDir": "src",
-        "module": "esnext",
+        "target": "esnext",
+        "module": "nodenext",
         "moduleResolution": "nodenext",
         "skipLibCheck": true
     },

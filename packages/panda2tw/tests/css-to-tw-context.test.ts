@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import type { PandaContext } from "@pandacss/node";
 import { extractTailwindClassesFromPandaCssWithContext } from "../src/css-to-tw";
+import type { PandaContext } from "../src/panda-context";
 
 describe("extractTailwindClassesFromPandaCssWithContext", () => {
   // Mock Panda context with custom theme tokens
@@ -196,9 +196,35 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockContextWithRawValues);
 
-    // Values that are not in the token map should use arbitrary value syntax or raw handling
-    expect(classes.length).toBeGreaterThan(0);
-    // Should have font-related classes
-    expect(classes.some(c => c.includes("font") || c.includes("text"))).toBe(true);
+    expect(classes).toMatchInlineSnapshot(`
+      [
+        "text-18px",
+        "font-600",
+      ]
+    `);
+    // Strict assertions
+    expect(classes).toContain("text-18px");
+    expect(classes).toContain("font-600");
+    expect(classes).toHaveLength(2);
+  });
+
+  it("handles raw values not in context tokens", () => {
+    const cssObj = {
+      paddingLeft: "123px",
+      display: "flex",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    expect(classes).toMatchInlineSnapshot(`
+      [
+        "pl-123px",
+        "flex",
+      ]
+    `);
+    // Strict assertions - raw values that aren't tokens still get converted
+    expect(classes).toContain("pl-123px");
+    expect(classes).toContain("flex");
+    expect(classes).toHaveLength(2);
   });
 });
