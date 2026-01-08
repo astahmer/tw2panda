@@ -124,11 +124,19 @@ const processSourceFile = (
       if (hasCssProp && element.pandaProps.length === 1) {
         // Only the css prop is present
         const cssPropValue = element.pandaProps[cssPropIndex].value;
-        try {
-          objectToConvert = new Function(`return (${cssPropValue})`)();
-        } catch (e) {
-          console.error("Failed to parse css prop value:", cssPropValue, e);
+
+        // Check if it's a ternary expression
+        if (cssPropValue.includes("?") && cssPropValue.includes(":")) {
+          // This is a ternary or complex expression - we can't statically convert it
+          // so we'll keep it as-is for now
           objectToConvert = {};
+        } else {
+          try {
+            objectToConvert = new Function(`return (${cssPropValue})`)();
+          } catch (e) {
+            console.error("Failed to parse css prop value:", cssPropValue, e);
+            objectToConvert = {};
+          }
         }
       } else {
         // Mix of other Panda props (possibly with css prop)
@@ -154,11 +162,18 @@ const processSourceFile = (
         // If there's also a css prop with other props, merge them
         if (hasCssProp) {
           const cssPropValue = element.pandaProps[cssPropIndex].value;
-          try {
-            const cssPropObj = new Function(`return (${cssPropValue})`)();
-            objectToConvert = { ...cssPropObj, ...objectToConvert };
-          } catch (e) {
-            console.error("Failed to parse css prop value:", cssPropValue, e);
+
+          // Check if it's a ternary expression
+          if (cssPropValue.includes("?") && cssPropValue.includes(":")) {
+            // Keep ternaries as-is, they can't be statically converted
+            // Skip merging the css prop in this case
+          } else {
+            try {
+              const cssPropObj = new Function(`return (${cssPropValue})`)();
+              objectToConvert = { ...cssPropObj, ...objectToConvert };
+            } catch (e) {
+              console.error("Failed to parse css prop value:", cssPropValue, e);
+            }
           }
         }
       }
@@ -237,8 +252,16 @@ const processSourceFile = (
           classNameNode = existingClassNameProp.node;
         }
 
-        // Remove the Panda props from the element
-        element.pandaProps.forEach(({ node }) => {
+        // Check if the css prop is a ternary (can't be converted)
+        const cssPropIsTernary = hasCssProp && element.pandaProps[cssPropIndex]?.value.includes("?") && element.pandaProps[cssPropIndex]?.value.includes(":");
+
+        // Remove the Panda props from the element, but skip ternary css props
+        element.pandaProps.forEach(({ node, name }) => {
+          // Skip removing css props that are ternaries
+          if (name === "css" && cssPropIsTernary) {
+            return;
+          }
+
           magicStr.remove(node.getStart(), node.getEnd());
           // Remove the space after the attribute if it exists
           const nextChar = code[node.getEnd()];
@@ -259,17 +282,24 @@ const processSourceFile = (
             magicStr.overwrite(initializer.getStart(), initializer.getEnd(), replacement);
           }
         } else {
-          // Add new className to first panda prop position
-          const firstPandaProp = element.pandaProps[0];
-          // Use JSX expression if using cn(), otherwise use string
-          const value = finalClassString.startsWith("cn(")
-            ? `className={${finalClassString}}`
-            : `className="${finalClassString}"`;
-          magicStr.appendLeft(firstPandaProp.node.getStart(), `${value} `);
+          // Add new className to first non-ternary panda prop position
+          const firstConvertibleProp = element.pandaProps.find(
+            (p) => !(p.name === "css" && cssPropIsTernary),
+          );
+          if (firstConvertibleProp) {
+            // Use JSX expression if using cn(), otherwise use string
+            const value = finalClassString.startsWith("cn(")
+              ? `className={${finalClassString}}`
+              : `className="${finalClassString}"`;
+            magicStr.appendLeft(firstConvertibleProp.node.getStart(), `${value} `);
+          }
         }
 
         conversions.push({
-          original: element.pandaProps.map((p) => p.node.getText()).join(" "),
+          original: element.pandaProps
+            .filter((p) => !(p.name === "css" && cssPropIsTernary))
+            .map((p) => p.node.getText())
+            .join(" "),
           replacement: `className="${classString}"`,
         });
       }

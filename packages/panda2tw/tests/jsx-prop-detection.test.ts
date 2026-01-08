@@ -509,6 +509,24 @@ export const Component = () => {
       expect(result.output).toContain("className=");
       expect(result.output).toContain("left-10");
     });
+
+    test("preserves css prop with ternary expressions", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div css={isRight ? { left: "auto", flexDirection: "row-reverse" } : { right: "[100%]" }} gap="2" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Ternary in css prop should be preserved as-is
+      expect(result.output).toContain('css={isRight ? { left: "auto", flexDirection: "row-reverse" } : { right: "[100%]" }}');
+      // Simple gap prop should be converted
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("gap");
+    });
   });
 
   describe("Excluded props are not converted", () => {
