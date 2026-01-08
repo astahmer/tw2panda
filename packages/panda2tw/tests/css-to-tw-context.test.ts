@@ -227,4 +227,188 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     expect(classes).toContain("flex");
     expect(classes).toHaveLength(2);
   });
+
+  it("resolves textStyle inside pseudo-selectors", () => {
+    const cssObj = {
+      textStyle: "body",
+      _hover: {
+        textStyle: "heading",
+      },
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // Base textStyle: body
+    expect(classes).toContain("text-16px");
+    expect(classes).toContain("leading-24px");
+    expect(classes).toContain("font-500");
+    // Hover textStyle: heading
+    expect(classes).toContain("hover:text-32px");
+    expect(classes).toContain("hover:leading-40px");
+    expect(classes).toContain("hover:font-bold");
+  });
+
+  it("merges textStyle with other properties correctly", () => {
+    const cssObj = {
+      textStyle: "body",
+      color: "red.500",
+      padding: "8px",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // From textStyle
+    expect(classes).toContain("text-16px");
+    expect(classes).toContain("leading-24px");
+    expect(classes).toContain("font-500");
+    // Explicit properties
+    expect(classes).toContain("text-red-500");
+    expect(classes).toContain("p-8px");
+  });
+
+  it("handles nested textStyle with responsive modifiers", () => {
+    const cssObj = {
+      md: {
+        textStyle: "heading",
+      },
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    expect(classes).toContain("md:text-32px");
+    expect(classes).toContain("md:leading-40px");
+    expect(classes).toContain("md:font-bold");
+  });
+
+  it("handles non-existent textStyle gracefully", () => {
+    const cssObj = {
+      textStyle: "nonexistent",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // Should just skip the textStyle if not found
+    expect(classes).toHaveLength(0);
+  });
+
+  it("handles textStyle with missing theme config", () => {
+    const contextNoTheme = {
+      config: {},
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "body",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, contextNoTheme);
+
+    // Should not crash, just return empty or skip
+    expect(classes).toHaveLength(0);
+  });
+
+  it("resolves textStyle with dotted path references", () => {
+    const contextWithDottedTextStyles = {
+      config: {
+        theme: {
+          tokens: {
+            colors: {
+              blue: {
+                600: "#2563eb",
+              },
+            },
+            fontSizes: {
+              "16px": "16px",
+              "32px": "32px",
+            },
+            lineHeights: {
+              "24px": "24px",
+              "40px": "40px",
+            },
+            fontWeights: {
+              "500": "500",
+              "700": "700",
+            },
+          },
+          textStyles: {
+            semantic: {
+              base: {
+                fontSize: "16px",
+                lineHeight: "24px",
+                fontWeight: "500",
+              },
+              highlight: {
+                fontSize: "32px",
+                lineHeight: "40px",
+                fontWeight: "700",
+              },
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "semantic.highlight",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, contextWithDottedTextStyles);
+
+    expect(classes).toContain("text-32px");
+    expect(classes).toContain("leading-40px");
+    expect(classes).toContain("font-700");
+  });
+
+  it("handles textStyle that overrides properties (last wins)", () => {
+    const cssObj = {
+      fontSize: "10px",
+      textStyle: "body", // fontSize: "16px"
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // textStyle should expand after the explicit property
+    // In CSS cascade, the textStyle expansion happens after explicit properties are set
+    // depending on implementation - verify current behavior
+    expect(classes).toContain("text-16px");
+    expect(classes).toContain("leading-24px");
+    expect(classes).toContain("font-500");
+  });
+
+  it("handles textStyle that combines with responsive modifiers and pseudo-selectors", () => {
+    const cssObj = {
+      md: {
+        _hover: {
+          textStyle: "heading",
+        },
+      },
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    expect(classes).toContain("md:hover:text-32px");
+    expect(classes).toContain("md:hover:leading-40px");
+    expect(classes).toContain("md:hover:font-bold");
+  });
+
+  it("handles multiple textStyle references (later one should apply)", () => {
+    const cssObj = {
+      textStyle: "body",
+      _hover: {
+        textStyle: "heading",
+        color: "blue.600",
+      },
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // Base textStyle
+    expect(classes).toContain("text-16px");
+    expect(classes).toContain("leading-24px");
+    expect(classes).toContain("font-500");
+    // Hover overrides
+    expect(classes).toContain("hover:text-32px");
+    expect(classes).toContain("hover:leading-40px");
+    expect(classes).toContain("hover:font-bold");
+    expect(classes).toContain("hover:text-blue-600");
+  });
 });
