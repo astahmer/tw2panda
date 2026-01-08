@@ -378,6 +378,19 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     if (!obj || typeof obj !== "object") return;
 
     Object.entries(obj).forEach(([key, value]) => {
+      // Handle textStyle specially - it's like a mixin
+      if (key === "textStyle" && typeof value === "string" && pandaContext) {
+        // Resolve textStyle from context
+        const textStyles = pandaContext.config?.theme?.textStyles || {};
+        const resolvedTextStyle = resolveDottedPath(value, textStyles);
+
+        if (resolvedTextStyle && typeof resolvedTextStyle === "object") {
+          // Recursively process the resolved text style object
+          traverse(resolvedTextStyle, modifiers);
+        }
+        return;
+      }
+
       if (key.startsWith("_")) {
         // Pseudo-selector like _hover, _focus, _active
         const modifier = key.slice(1);

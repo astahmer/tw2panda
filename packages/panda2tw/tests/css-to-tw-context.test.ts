@@ -22,6 +22,18 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
             "8px": "8px",
           },
         },
+        textStyles: {
+          body: {
+            fontSize: "16px",
+            lineHeight: "24px",
+            fontWeight: "500",
+          },
+          heading: {
+            fontSize: "32px",
+            lineHeight: "40px",
+            fontWeight: "bold",
+          },
+        },
       },
     },
   } as any as PandaContext;
@@ -114,5 +126,34 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     expect(classes).toContain("bg-blue-600");
     // 8px doesn't match any default TW spacing, so uses arbitrary syntax
     expect(classes).toContain("p-[8px]");
+  });
+
+  it("resolves textStyle mixins from context theme", () => {
+    const cssObj = {
+      textStyle: "body",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // textStyle should expand to its constituent properties
+    expect(classes).toContain("text-16px");
+    expect(classes).toContain("leading-24px");
+    expect(classes).toContain("font-500");
+  });
+
+  it("resolves textStyle and merges with other properties", () => {
+    const cssObj = {
+      textStyle: "heading",
+      color: "blue.600",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
+
+    // heading textStyle properties
+    expect(classes).toContain("text-32px");
+    expect(classes).toContain("leading-40px");
+    expect(classes).toContain("font-bold");
+    // color property
+    expect(classes).toContain("text-blue-600");
   });
 });
