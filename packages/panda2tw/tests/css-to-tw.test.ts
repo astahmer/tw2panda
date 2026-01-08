@@ -924,5 +924,101 @@ describe("css-to-tw", () => {
       expect(classes.length).toBe(1);
       expect(classes).toContain("flex");
     });
+
+    test("handles arbitrary selectors with pseudo-selectors", () => {
+      const cssObj = {
+        display: "flex",
+        "& + div": {
+          marginTop: "4",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      // Should skip the arbitrary "& + div" selector
+      expect(classes.length).toBe(1);
+      expect(classes).toContain("flex");
+      expect(classes.some((c) => c.includes("mt-4"))).toBe(false);
+    });
+
+    test("converts pseudo-selectors with complex combinator selectors", () => {
+      const cssObj = {
+        gap: "4",
+        "& > :last-child": {
+          paddingBottom: "8",
+        },
+        "& ~ div": {
+          marginTop: "2",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("gap-4");
+      expect(classes).toContain("last:pb-8");
+      // "& ~ div" doesn't have a pseudo-selector, so it should be skipped
+      expect(classes.some((c) => c.includes("mt-2"))).toBe(false);
+    });
+
+    test("handles multiple pseudo-selectors in same object", () => {
+      const cssObj = {
+        padding: "4",
+        "&:hover": {
+          backgroundColor: "blue.500",
+        },
+        "&:focus": {
+          borderColor: "blue.600",
+        },
+        "&:disabled": {
+          opacity: "0.5",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("p-4");
+      expect(classes.some((c) => c.includes("hover:bg-blue"))).toBe(true);
+      expect(classes.some((c) => c.includes("focus:border-blue"))).toBe(true);
+      expect(classes.some((c) => c.includes("disabled:opacity"))).toBe(true);
+    });
+
+    test("handles pseudo-elements with various syntaxes", () => {
+      const cssObj = {
+        "&::before": {
+          width: "100",
+          height: "50",
+        },
+        "&::after": {
+          display: "block",
+        },
+        "&::first-line": {
+          fontWeight: "bold",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("before:w-100"))).toBe(true);
+      expect(classes.some((c) => c.includes("before:h-50"))).toBe(true);
+      expect(classes.some((c) => c.includes("after:block"))).toBe(true);
+      // ::first-line doesn't have a Tailwind equivalent, should be skipped
+      expect(classes.filter((c) => c.includes("first-line")).length).toBe(0);
+    });
+
+    test("handles nth-child selectors", () => {
+      const cssObj = {
+        "& > :nth-child(2n)": {
+          backgroundColor: "gray.100",
+        },
+        "& > :nth-child(odd)": {
+          backgroundColor: "white",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("even:bg-gray"))).toBe(true);
+      expect(classes.some((c) => c.includes("odd:bg-white"))).toBe(true);
+    });
   });
 });

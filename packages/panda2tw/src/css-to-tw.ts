@@ -700,37 +700,77 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
 }
 
 /**
- * Map common CSS selectors to Tailwind variants
- * Converts selectors like '& > :last-child' to 'last'
+ * Map CSS pseudo-selectors and pseudo-elements to Tailwind variants
+ */
+const pseudoSelectorMap: Record<string, string> = {
+  ":hover": "hover",
+  ":focus": "focus",
+  ":active": "active",
+  ":disabled": "disabled",
+  ":invalid": "invalid",
+  ":enabled": "enabled",
+  ":checked": "checked",
+  ":visited": "visited",
+  ":target": "target",
+  ":first-child": "first",
+  ":last-child": "last",
+  ":first-of-type": "first",
+  ":last-of-type": "last",
+  ":only-child": "only",
+  ":nth-child(2n)": "even",
+  ":nth-child(2n + 1)": "odd",
+  ":nth-child(odd)": "odd",
+  ":nth-child(even)": "even",
+  ":placeholder-shown": "placeholder-shown",
+  "::before": "before",
+  "::after": "after",
+  ":not(:disabled)": "enabled",
+};
+
+/**
+ * Extract pseudo-selector from a CSS selector
+ * Examples:
+ *   "&:hover" -> ":hover"
+ *   "& > :last-child" -> ":last-child"
+ *   "&::before" -> "::before"
+ *   "&" -> null (no pseudo-selector)
+ */
+const extractPseudoSelector = (selector: string): string | null => {
+  // Handle pseudo-elements and pseudo-selectors
+  const pseudoMatch = selector.match(/(::[a-z-]+|:[a-z-]+(\([^)]*\))?)/);
+  if (pseudoMatch) {
+    return pseudoMatch[0];
+  }
+  return null;
+};
+
+/**
+ * Convert a CSS selector to Tailwind variant(s)
+ * Handles:
+ * - Pseudo-selectors: &:hover, &:focus, &:first-child, etc.
+ * - Pseudo-elements: &::before, &::after
+ * - Compound selectors: & > :last-child
+ * - Arbitrary selectors containing &
  */
 const selectorToTwVariant = (selector: string): string | null => {
   const trimmed = selector.trim();
 
-  // Map of selector patterns to Tailwind variants
-  const selectorMap: Record<string, string> = {
-    "&": "", // Root element (no modifier needed)
-    "&:hover": "hover",
-    "&:focus": "focus",
-    "&:active": "active",
-    "&:disabled": "disabled",
-    "&:invalid": "invalid",
-    "&:first-child": "first",
-    "&:last-child": "last",
-    "&:nth-child(2n)": "even",
-    "&:nth-child(2n + 1)": "odd",
-    "& > :first-child": "first",
-    "& > :last-child": "last",
-    "&::before": "before",
-    "&::after": "after",
-    "&:visited": "visited",
-    "&:target": "target",
-    "&:enabled": "enabled",
-    "&:checked": "checked",
-    "&:not(:disabled)": "enabled",
-    "&:placeholder-shown": "placeholder-shown",
-  };
+  // If it's just "&", no variant needed
+  if (trimmed === "&") {
+    return "";
+  }
 
-  return selectorMap[trimmed] ?? null;
+  // Try to extract a pseudo-selector/pseudo-element
+  const pseudoSelector = extractPseudoSelector(trimmed);
+  if (pseudoSelector) {
+    // Look up the pseudo-selector in our map
+    const variant = pseudoSelectorMap[pseudoSelector];
+    return variant ?? null;
+  }
+
+  // For other selectors containing &, we can't safely convert them
+  // (e.g., "& .child-class", ".parent & ", etc.)
+  return null;
 };
 
 /**
