@@ -206,10 +206,10 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[
         // Pseudo-selector like _hover, _focus
         const modifier = key.slice(1);
         traverse(value, [...modifiers, modifier]);
-      } else if (typeof value === "object") {
+      } else if (typeof value === "object" && !Array.isArray(value)) {
         // Nested object (conditions like md:, dark:, etc.)
         traverse(value, [...modifiers, key]);
-      } else {
+      } else if (typeof value === "string" || typeof value === "number") {
         // Actual style property
         const mapping = propertyMap[key];
         if (mapping) {
@@ -228,6 +228,56 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[
 
   traverse(cssObj);
   return [...new Set(classes)]; // Remove duplicates
+};
+
+/**
+ * Helper function to resolve token values using Panda's token dictionary
+ * Provides more robust token resolution than manual path walking
+ *
+ * FUTURE OPTIMIZATION: For even more robust token resolution, we could leverage
+ * Panda's built-in context methods:
+ *
+ * 1. pandaContext.tokens.getByName(path) - Get a token by its full path
+ * 2. pandaContext.tokens.resolveReference(value) - Resolve token references like {colors.blue.600}
+ * 3. pandaContext.tokens.expandReferenceInValue(value) - Expand nested references
+ * 4. pandaContext.utility.transform(prop, value) - Use Panda's utility transforms
+ * 5. pandaContext.encoder.processAtomic(styles) - Process styles through Panda's encoder
+ *
+ * Example:
+ *   const token = pandaContext.tokens.getByName('colors.blue.600');
+ *   const resolved = pandaContext.tokens.resolveReference('{colors.blue.600}');
+ *
+ * This would handle complex cases like:
+ * - Token references: {colors.blue.600}
+ * - Semantic tokens with conditions
+ * - Color mixtures and computed values
+ * - Nested token references
+ */
+const resolvePandaToken = (
+  path: string,
+  pandaContext?: PandaContext,
+): { value: string; resolved: boolean } => {
+  if (!pandaContext?.config?.theme?.tokens) {
+    return { value: path, resolved: false };
+  }
+
+  const tokens = pandaContext.config.theme.tokens;
+  const parts = path.split(".");
+
+  let current = tokens;
+  for (const part of parts) {
+    if (current && typeof current === "object" && part in current) {
+      current = current[part];
+    } else {
+      return { value: path, resolved: false };
+    }
+  }
+
+  if (typeof current === "string") {
+    return { value: current, resolved: true };
+  }
+
+  return { value: path, resolved: false };
 };
 
 /**
@@ -330,6 +380,7 @@ export const extractTailwindClassesFromPandaCssWithContext = (
   };
 
   // Helper to resolve Panda token values to Tailwind-compatible format
+  // This uses the Panda context's token dictionary for more robust resolution
   const resolveToken = (prop: string, path: string): string => {
     // Handle arbitrary tokens in square brackets (e.g., "[123px]")
     if (path.startsWith("[") && path.endsWith("]")) {
@@ -338,30 +389,27 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
     if (!pandaContext) return pandaTokenToTwSuffix(path);
 
-    // Try to resolve from Panda theme tokens
-    const tokens = pandaContext.config?.theme?.tokens || {};
-
     const category = tokenCategoryMap[prop];
-    let resolved;
+    let resolvedResult = { value: path, resolved: false };
 
     if (category) {
-      // First try with the category: colors.blue.600
-      resolved = resolveDottedPath(`${category}.${path}`, tokens);
+      // First try with the category prefix: colors.blue.600
+      resolvedResult = resolvePandaToken(`${category}.${path}`, pandaContext);
     }
 
-    // If not found with category, try direct path
-    if (!resolved) {
-      resolved = resolveDottedPath(path, tokens);
+    // If not found with category, try direct path resolution
+    if (!resolvedResult.resolved) {
+      resolvedResult = resolvePandaToken(path, pandaContext);
     }
 
-    if (resolved && typeof resolved === "string") {
+    if (resolvedResult.resolved) {
       // Check if this resolved value matches a default Tailwind token
-      const matchingToken = findMatchingTailwindToken(resolved);
+      const matchingToken = findMatchingTailwindToken(resolvedResult.value);
       if (matchingToken) {
         return matchingToken;
       }
       // Otherwise, use arbitrary value syntax [value]
-      return `[${resolved}]`;
+      return `[${resolvedResult.value}]`;
     }
 
     // Fallback to original token path
@@ -441,8 +489,11 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         const resolvedTextStyle = resolveDottedPath(value, textStyles);
 
         if (resolvedTextStyle && typeof resolvedTextStyle === "object") {
+          // If the resolved textStyle has a 'value' property (real-world Panda format),
+          // unwrap it and use that instead
+          const styleObject = resolvedTextStyle.value || resolvedTextStyle;
           // Recursively process the resolved text style object
-          traverse(resolvedTextStyle, modifiers);
+          traverse(styleObject, modifiers);
         }
         return;
       }

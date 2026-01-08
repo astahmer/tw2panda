@@ -411,4 +411,283 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     expect(classes).toContain("hover:font-bold");
     expect(classes).toContain("hover:text-blue-600");
   });
+
+  it("handles real-world nested textStyle with value property", () => {
+    const realWorldContext = {
+      config: {
+        theme: {
+          tokens: {},
+          textStyles: {
+            title: {
+              1: {
+                value: {
+                  fontSize: "[32px]",
+                  fontWeight: "[bold]",
+                  lineHeight: "[40px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+              2: {
+                value: {
+                  fontSize: "[24px]",
+                  fontWeight: "[bold]",
+                  lineHeight: "[32px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+            },
+            body: {
+              DEFAULT: {
+                value: {
+                  fontSize: "[14px]",
+                  fontWeight: "[400]",
+                  lineHeight: "[24px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+              bold: {
+                value: {
+                  fontSize: "[14px]",
+                  fontWeight: "[600]",
+                  lineHeight: "[24px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "title.1",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, realWorldContext);
+
+    expect(classes).toContain("text-[32px]");
+    expect(classes).toContain("font-[bold]");
+    expect(classes).toContain("leading-[40px]");
+    expect(classes).toContain("tracking-[0]");
+  });
+
+  it("handles real-world nested textStyle with DEFAULT variant", () => {
+    const realWorldContext = {
+      config: {
+        theme: {
+          tokens: {},
+          textStyles: {
+            body: {
+              DEFAULT: {
+                value: {
+                  fontSize: "[14px]",
+                  fontWeight: "[400]",
+                  lineHeight: "[24px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+              bold: {
+                value: {
+                  fontSize: "[14px]",
+                  fontWeight: "[600]",
+                  lineHeight: "[24px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "body.DEFAULT",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, realWorldContext);
+
+    expect(classes).toContain("text-[14px]");
+    expect(classes).toContain("font-[400]");
+    expect(classes).toContain("leading-[24px]");
+  });
+
+  it("handles real-world nested textStyle variant lookup", () => {
+    const realWorldContext = {
+      config: {
+        theme: {
+          tokens: {},
+          textStyles: {
+            body: {
+              DEFAULT: {
+                value: {
+                  fontSize: "[14px]",
+                  fontWeight: "[400]",
+                  lineHeight: "[24px]",
+                },
+              },
+              bold: {
+                value: {
+                  fontSize: "[14px]",
+                  fontWeight: "[600]",
+                  lineHeight: "[24px]",
+                },
+              },
+              link: {
+                value: {
+                  fontSize: "[14px]",
+                  fontWeight: "[400]",
+                  lineHeight: "[24px]",
+                  textDecoration: "underline",
+                },
+              },
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "body.bold",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, realWorldContext);
+
+    expect(classes).toContain("text-[14px]");
+    expect(classes).toContain("font-[600]");
+    expect(classes).toContain("leading-[24px]");
+  });
+
+  it("handles caption textStyle variants", () => {
+    const realWorldContext = {
+      config: {
+        theme: {
+          tokens: {},
+          textStyles: {
+            caption: {
+              bold: {
+                value: {
+                  fontSize: "[12px]",
+                  fontWeight: "[600]",
+                  lineHeight: "[16px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+              regular: {
+                value: {
+                  fontSize: "[12px]",
+                  fontWeight: "[400]",
+                  lineHeight: "[16px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "none",
+                },
+              },
+              link: {
+                value: {
+                  fontSize: "[12px]",
+                  fontWeight: "[400]",
+                  lineHeight: "[16px]",
+                  letterSpacing: "[0]",
+                  textDecoration: "underline",
+                },
+              },
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "caption.bold",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, realWorldContext);
+
+    expect(classes).toContain("text-[12px]");
+    expect(classes).toContain("font-[600]");
+    expect(classes).toContain("leading-[16px]");
+  });
+
+  it("handles notification textStyle without variants", () => {
+    const realWorldContext = {
+      config: {
+        theme: {
+          tokens: {},
+          textStyles: {
+            notification: {
+              value: {
+                fontSize: "[8px]",
+                fontWeight: "[600]",
+                lineHeight: "[16px]",
+                letterSpacing: "[0]",
+                textDecoration: "none",
+              },
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "notification",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, realWorldContext);
+
+    expect(classes).toContain("text-[8px]");
+    expect(classes).toContain("font-[600]");
+    expect(classes).toContain("leading-[16px]");
+  });
+
+  it("handles complex real-world scenario with nested variant and other properties", () => {
+    const realWorldContext = {
+      config: {
+        theme: {
+          tokens: {
+            colors: {
+              blue: {
+                600: "#2563eb",
+              },
+            },
+          },
+          textStyles: {
+            title: {
+              1: {
+                value: {
+                  fontSize: "[32px]",
+                  fontWeight: "[bold]",
+                  lineHeight: "[40px]",
+                },
+              },
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "title.1",
+      color: "blue.600",
+      _hover: {
+        fontWeight: "[700]",
+      },
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, realWorldContext);
+
+    // From textStyle
+    expect(classes).toContain("text-[32px]");
+    expect(classes).toContain("font-[bold]");
+    expect(classes).toContain("leading-[40px]");
+    // From other properties
+    expect(classes).toContain("text-blue-600");
+    // From pseudo-selector
+    expect(classes).toContain("hover:font-[700]");
+  });
 });
