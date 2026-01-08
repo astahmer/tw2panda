@@ -1,17 +1,8 @@
-/**
- * CSS property to Tailwind class mapper
- * Converts Panda CSS properties to equivalent Tailwind classes
- */
-
 import type { StyleObject } from "./types.js";
 import type { PandaContext } from "./panda-context.js";
 import type { Config } from "tailwindcss";
 import { createTailwindContext } from "./tw-context.js";
 
-/**
- * Build shorthand map from Panda context utilities
- * Falls back to default mapping if context is not available
- */
 const buildShorthandMap = (pandaContext?: PandaContext): Record<string, string> => {
   if (!pandaContext?.config?.utilities) {
     return getDefaultShorthandMap();
@@ -31,9 +22,6 @@ const buildShorthandMap = (pandaContext?: PandaContext): Record<string, string> 
   return Object.keys(map).length > 0 ? map : getDefaultShorthandMap();
 };
 
-/**
- * Default shorthand map for when Panda context is not available
- */
 const getDefaultShorthandMap = (): Record<string, string> => ({
   m: "margin",
   mt: "marginTop",
@@ -127,19 +115,11 @@ const getDefaultShorthandMap = (): Record<string, string> => ({
   zIndex: "zIndex",
 });
 
-/**
- * Convert Panda shorthand property to its full property name using context
- * Falls back to defaults if context is not provided
- */
 export const expandShorthand = (prop: string, pandaContext?: PandaContext): string => {
   const map = buildShorthandMap(pandaContext);
   return map[prop] ?? prop;
 };
 
-/**
- * Get responsive condition keys from Panda context
- * Returns keys like ['base', 'md', 'lg', 'xl'] based on configured breakpoints
- */
 const getResponsiveConditionKeys = (pandaContext?: PandaContext): string[] => {
   if (!pandaContext?.conditions?.breakpoints) {
     // Default fallback conditions if context is not available
@@ -157,7 +137,7 @@ const getResponsiveConditionKeys = (pandaContext?: PandaContext): string[] => {
   });
 };
 
-// Comprehensive mapping of CSS properties to Tailwind prefix patterns
+// Mapping of CSS properties to Tailwind classes
 const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   // Colors
   color: { pattern: /^.*$/, classPrefix: "text-" },
@@ -300,10 +280,6 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   },
   borderCollapse: { pattern: /^(collapse|separate)$/, classPrefix: "border-" },
   borderSpacing: { pattern: /^.*$/, classPrefix: "border-spacing-" },
-  // borderTopLeftRadius: { pattern: /^.*$/, classPrefix: "rounded-tl-" },
-  // borderTopRightRadius: { pattern: /^.*$/, classPrefix: "rounded-tr-" },
-  // borderBottomRightRadius: { pattern: /^.*$/, classPrefix: "rounded-br-" },
-  // borderBottomLeftRadius: { pattern: /^.*$/, classPrefix: "rounded-bl-" },
 
   // Box & Layout
   boxSizing: { pattern: /^(border-box|content-box)$/, classPrefix: "" }, // Special handling
@@ -482,9 +458,6 @@ const tokenCategoryMap: Record<string, string> = {
   textShadow: "shadows",
 };
 
-/**
- * Convert camelCase to kebab-case for CSS properties
- */
 export const camelToKebab = (str: string): string => {
   return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 };
@@ -499,9 +472,6 @@ export const pandaTokenToTwSuffix = (token: string): string => {
   return token.replace(/\./g, "-");
 };
 
-/**
- * Map Panda CSS properties to Tailwind class names
- */
 export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string[] = []): string[] => {
   const classes: string[] = [];
 
@@ -551,10 +521,6 @@ export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string
   return classes;
 };
 
-/**
- * Helper function for special property value mappings
- * Returns the className if the property has special handling, or null to use default
- */
 function getSpecialPropertyClass(key: string, strValue: string): string | null {
   switch (key) {
     case "textDecoration":
@@ -699,9 +665,6 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
   return null;
 }
 
-/**
- * Map CSS pseudo-selectors and pseudo-elements to Tailwind variants
- */
 const pseudoSelectorMap: Record<string, string> = {
   ":hover": "hover",
   ":focus": "focus",
@@ -750,7 +713,7 @@ const extractPseudoSelector = (selector: string): string | null => {
  * - Pseudo-selectors: &:hover, &:focus, &:first-child, etc.
  * - Pseudo-elements: &::before, &::after
  * - Compound selectors: & > :last-child
- * - Arbitrary selectors containing &
+ * - Arbitrary selectors: & + div, & ~ div, & > .child, etc.
  */
 const selectorToTwVariant = (selector: string): string | null => {
   const trimmed = selector.trim();
@@ -760,7 +723,12 @@ const selectorToTwVariant = (selector: string): string | null => {
     return "";
   }
 
-  // Try to extract a pseudo-selector/pseudo-element
+  // If selector doesn't contain "&", we can't handle it
+  if (!trimmed.includes("&")) {
+    return null;
+  }
+
+  // Try to extract a pseudo-selector/pseudo-element first
   const pseudoSelector = extractPseudoSelector(trimmed);
   if (pseudoSelector) {
     // Look up the pseudo-selector in our map
@@ -768,9 +736,8 @@ const selectorToTwVariant = (selector: string): string | null => {
     return variant ?? null;
   }
 
-  // For other selectors containing &, we can't safely convert them
-  // (e.g., "& .child-class", ".parent & ", etc.)
-  return null;
+  const cleanSelector = trimmed.replace(/\s+/g, "");
+  return cleanSelector;
 };
 
 /**
@@ -804,7 +771,18 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
           const twVariant = selectorToTwVariant(key);
           if (twVariant !== null) {
             // Valid Tailwind variant found
-            const newModifiers = twVariant ? [...modifiers, twVariant] : modifiers;
+            let newModifiers = modifiers;
+            if (twVariant) {
+              // Check if it's an arbitrary selector (contains & and is not in pseudoSelectorMap)
+              if (twVariant.includes("&") && !pseudoSelectorMap[key]) {
+                // Wrap arbitrary selector in brackets for Tailwind's arbitrary selector syntax
+                // e.g., "&+div" becomes "[&+div]"
+                newModifiers = [...modifiers, `[${twVariant}]`];
+              } else {
+                // Regular pseudo-selector variant
+                newModifiers = [...modifiers, twVariant];
+              }
+            }
             traverse(value, newModifiers);
           } else if (modifiers.length > 0 && !key.startsWith("_")) {
             // If we already have modifiers, treat other nested objects as additional conditions
@@ -892,10 +870,6 @@ const resolvePandaToken = (path: string, pandaContext?: PandaContext): { value: 
   return { value: path, resolved: false };
 };
 
-/**
- * Convert Panda CSS to Tailwind classes using Panda and Tailwind contexts
- * Uses actual theme tokens from both Panda and Tailwind for smart token resolution
- */
 export const extractTailwindClassesFromPandaCssWithContext = (
   cssObj: StyleObject,
   pandaContext?: PandaContext,
@@ -1034,51 +1008,16 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     if (!pandaContext) return null;
 
     const tokens = pandaContext.config?.theme?.tokens || {};
-    const tokenCategoryMap: Record<string, string> = {
-      color: "colors",
-      backgroundColor: "colors",
-      borderColor: "colors",
-      fillColor: "colors",
-      strokeColor: "colors",
-      padding: "spacing",
-      paddingTop: "spacing",
-      paddingRight: "spacing",
-      paddingBottom: "spacing",
-      paddingLeft: "spacing",
-      margin: "spacing",
-      marginTop: "spacing",
-      marginRight: "spacing",
-      marginBottom: "spacing",
-      marginLeft: "spacing",
-      gap: "spacing",
-      width: "sizing",
-      height: "sizing",
-      maxWidth: "sizing",
-      maxHeight: "sizing",
-      minWidth: "sizing",
-      minHeight: "sizing",
-      fontSize: "fontSizes",
-      fontWeight: "fontWeights",
-      lineHeight: "lineHeights",
-      letterSpacing: "letterSpacing",
-      borderRadius: "radii",
-      borderWidth: "borderWidths",
-      boxShadow: "shadows",
-      textShadow: "shadows",
-    };
-
     const category = tokenCategoryMap[prop];
     if (!category) return null;
 
     const categoryTokens = resolveDottedPath(category, tokens);
     if (!categoryTokens) return null;
 
-    // Search for the token by value
     for (const [tokenName, tokenValue] of Object.entries(categoryTokens)) {
       if (String(tokenValue) === String(value)) {
         return tokenName;
       }
-      // Also check nested tokens
       if (typeof tokenValue === "object" && tokenValue !== null) {
         for (const [nestedName, nestedValue] of Object.entries(tokenValue)) {
           if (String(nestedValue) === String(value)) {
@@ -1141,7 +1080,18 @@ export const extractTailwindClassesFromPandaCssWithContext = (
           const twVariant = selectorToTwVariant(key);
           if (twVariant !== null) {
             // Valid Tailwind variant found
-            const newModifiers = twVariant ? [...modifiers, twVariant] : modifiers;
+            let newModifiers = modifiers;
+            if (twVariant) {
+              // Check if it's an arbitrary selector (contains & and is not in pseudoSelectorMap)
+              if (twVariant.includes("&") && !pseudoSelectorMap[key]) {
+                // Wrap arbitrary selector in brackets for Tailwind's arbitrary selector syntax
+                // e.g., "&+div" becomes "[&+div]"
+                newModifiers = [...modifiers, `[${twVariant}]`];
+              } else {
+                // Regular pseudo-selector variant
+                newModifiers = [...modifiers, twVariant];
+              }
+            }
             traverse(value, newModifiers);
           } else if (modifiers.length > 0 && !key.startsWith("_")) {
             // If we already have modifiers, treat other nested objects as additional conditions

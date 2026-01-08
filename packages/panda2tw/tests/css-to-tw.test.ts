@@ -935,10 +935,10 @@ describe("css-to-tw", () => {
 
       const classes = extractTailwindClassesFromPandaCss(cssObj);
 
-      // Should skip the arbitrary "& + div" selector
-      expect(classes.length).toBe(1);
+      // Should convert the arbitrary "& + div" selector to Tailwind's arbitrary selector syntax
       expect(classes).toContain("flex");
-      expect(classes.some((c) => c.includes("mt-4"))).toBe(false);
+      expect(classes.some((c) => c.includes("[&+div]"))).toBe(true);
+      expect(classes.some((c) => c.includes("mt-4"))).toBe(true);
     });
 
     test("converts pseudo-selectors with complex combinator selectors", () => {
@@ -956,8 +956,9 @@ describe("css-to-tw", () => {
 
       expect(classes).toContain("gap-4");
       expect(classes).toContain("last:pb-8");
-      // "& ~ div" doesn't have a pseudo-selector, so it should be skipped
-      expect(classes.some((c) => c.includes("mt-2"))).toBe(false);
+      // "& ~ div" should be converted using arbitrary selector syntax
+      expect(classes.some((c) => c.includes("[&~div]"))).toBe(true);
+      expect(classes.some((c) => c.includes("mt-2"))).toBe(true);
     });
 
     test("handles multiple pseudo-selectors in same object", () => {
