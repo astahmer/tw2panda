@@ -206,70 +206,9 @@ export const isGlobPattern = (input: string): boolean => {
 };
 
 /**
- * Unified rewrite function that handles both single files and glob patterns
- */
-export const rewritePattern = async (
-  pattern: string,
-  options: RewriteOptions & { write?: boolean } = {},
-): Promise<BatchRewriteResult | RewriteResult> => {
-  const isGlob = isGlobPattern(pattern);
-
-  if (isGlob) {
-    return batchRewritePandaToTailwind(pattern, options);
-  } else {
-    // Single file - load context for smart conversion
-    try {
-      const content = readFileSync(pattern, "utf-8");
-
-      // Load Panda and Tailwind contexts if available
-      let pandaContext: PandaContext | undefined;
-      let tailwindConfig: Config | undefined;
-      try {
-        const { loadPandaContext, loadTailwindContext } = await import("./config/load-context.js");
-        const { context } = await loadPandaContext({ cwd: process.cwd() });
-        pandaContext = context;
-
-        // Also load Tailwind context for better token matching
-        const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
-        tailwindConfig = (tailwindResult.context?.config || (tailwindResult as any)) as any;
-      } catch (e) {
-        // Context loading is optional - continue without it
-      }
-
-      const result = rewritePandaToTailwind(content, pattern, options, pandaContext, tailwindConfig);
-
-      if (options.write) {
-        writeFileSync(pattern, result.output);
-      }
-
-      return {
-        totalFiles: 1,
-        successfulFiles: 1,
-        failedFiles: [],
-        totalConversions: result.conversions.length,
-        results: [{ file: pattern, conversions: result.conversions.length }],
-      };
-    } catch (e) {
-      return {
-        totalFiles: 1,
-        successfulFiles: 0,
-        failedFiles: [
-          {
-            file: pattern,
-            error: e instanceof Error ? e.message : String(e),
-          },
-        ],
-        totalConversions: 0,
-        results: [],
-      };
-    }
-  }
-};
-
-/**
  * Batch rewrite multiple files matching a glob pattern with a shared Project instance
  */
-export const batchRewritePandaToTailwind = async (
+export const rewritePattern = async (
   globPattern: string,
   options: RewriteOptions & { write?: boolean } = {},
 ): Promise<BatchRewriteResult> => {
@@ -311,6 +250,7 @@ export const batchRewritePandaToTailwind = async (
     const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
     tailwindConfig = (tailwindResult.context?.config || (tailwindResult as any)) as any;
   } catch (e) {
+    // console.log(e)
     // Context loading is optional - continue without it
   }
 

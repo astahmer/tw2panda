@@ -1,4 +1,7 @@
-import findUp from "escalade/sync";
+import findUpModule from "escalade/sync";
+
+// @ts-expect-error
+const findUp = findUpModule as typeof findUpModule.default;
 
 // Adapted from https://github.com/chakra-ui/panda/blob/b58daf4276e47aaad536b8327c7a27f48a4cdc2e/packages/config/src/find-config.ts#L4
 
@@ -16,13 +19,13 @@ export type ConfigFileOptions = {
 };
 
 export function findPandaConfig({ from }: { from: string }) {
-  return findUp.default(from, (_dir, paths) => {
+  return findUp(from, (_dir, paths) => {
     return paths.find(isPandaConfig);
   });
 }
 
 export function findTailwindConfig({ from }: { from: string }) {
-  return findUp.default(from, (_dir, paths) => {
+  return findUp(from, (_dir, paths) => {
     return paths.find(isTailwindConfig);
   });
 }
