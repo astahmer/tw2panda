@@ -163,6 +163,10 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   color: { pattern: /^.*$/, classPrefix: "text-" },
   backgroundColor: { pattern: /^.*$/, classPrefix: "bg-" },
   borderColor: { pattern: /^.*$/, classPrefix: "border-" },
+  borderTopColor: { pattern: /^.*$/, classPrefix: "border-t-" },
+  borderRightColor: { pattern: /^.*$/, classPrefix: "border-r-" },
+  borderBottomColor: { pattern: /^.*$/, classPrefix: "border-b-" },
+  borderLeftColor: { pattern: /^.*$/, classPrefix: "border-l-" },
   strokeColor: { pattern: /^.*$/, classPrefix: "stroke-" },
   fillColor: { pattern: /^.*$/, classPrefix: "fill-" },
 
@@ -192,6 +196,10 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
 
   // Borders
   borderWidth: { pattern: /^.*$/, classPrefix: "border-" },
+  borderTopWidth: { pattern: /^.*$/, classPrefix: "border-t-" },
+  borderRightWidth: { pattern: /^.*$/, classPrefix: "border-r-" },
+  borderBottomWidth: { pattern: /^.*$/, classPrefix: "border-b-" },
+  borderLeftWidth: { pattern: /^.*$/, classPrefix: "border-l-" },
   borderRadius: { pattern: /^.*$/, classPrefix: "rounded-" },
   borderTopLeftRadius: { pattern: /^.*$/, classPrefix: "rounded-tl-" },
   borderTopRightRadius: { pattern: /^.*$/, classPrefix: "rounded-tr-" },
