@@ -5,7 +5,7 @@
 import { Project, SourceFile, Node } from "ts-morph";
 import MagicString from "magic-string";
 import { globSync } from "glob";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, statSync } from "fs";
 import type { PandaContext } from "@pandacss/node";
 import type { Config } from "tailwindcss";
 import { findCssCalls, findCvaCalls, findJsxElementsWithPandaProps, nodeToObject } from "./parser.js";
@@ -273,8 +273,17 @@ export const batchRewritePandaToTailwind = async (
   globPattern: string,
   options: RewriteOptions & { write?: boolean } = {},
 ): Promise<BatchRewriteResult> => {
-  const files = globSync(globPattern, {
+  const globResults = globSync(globPattern, {
     ignore: ["**/node_modules/**", "**/dist/**", "**/.next/**"],
+  });
+
+  // Filter to only include files, not directories
+  const files = globResults.filter((file) => {
+    try {
+      return statSync(file).isFile();
+    } catch {
+      return false;
+    }
   });
 
   const result: BatchRewriteResult = {
