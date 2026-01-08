@@ -31,4 +31,5 @@ export type TailwindClass = {
 export type RewriteOptions = {
   includeComments?: boolean;
   generateComments?: boolean;
+  inlineTextStyles?: boolean;
 };

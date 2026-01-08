@@ -26,6 +26,7 @@ const processSourceFile = (
   sourceFile: SourceFile,
   pandaContext?: PandaContext,
   tailwindConfig?: Config,
+  inlineTextStyles?: boolean,
 ): RewriteResult => {
   const code = sourceFile.getFullText();
   const magicStr = new MagicString(code);
@@ -47,7 +48,7 @@ const processSourceFile = (
       const cssObj = nodeToObject(call.argument);
       // Use context-aware conversion if available, otherwise pass context for shorthand/responsive resolution
       const classes = pandaContext
-        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext as any, tailwindConfig)
+        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext as any, tailwindConfig, inlineTextStyles)
         : extractTailwindClassesFromPandaCss(cssObj, pandaContext as any);
 
       if (classes.length > 0) {
@@ -164,7 +165,7 @@ const processSourceFile = (
 
       // Convert CSS object to Tailwind classes
       const classes = pandaContext
-        ? extractTailwindClassesFromPandaCssWithContext(objectToConvert, pandaContext as any, tailwindConfig)
+        ? extractTailwindClassesFromPandaCssWithContext(objectToConvert, pandaContext as any, tailwindConfig, inlineTextStyles)
         : extractTailwindClassesFromPandaCss(objectToConvert, pandaContext as any);
 
       if (classes.length > 0) {
@@ -217,7 +218,7 @@ export const rewritePandaToTailwind = (
   const project = new Project({ useInMemoryFileSystem: true });
   const sourceFile = project.createSourceFile(filePath, content) as SourceFile;
 
-  return processSourceFile(sourceFile, pandaContext, tailwindConfig);
+  return processSourceFile(sourceFile, pandaContext, tailwindConfig, _options.inlineTextStyles);
 };
 
 export interface BatchRewriteResult {
@@ -296,7 +297,7 @@ export const rewritePattern = async (
       const sourceFile = project.createSourceFile(file, content) as SourceFile;
 
       // Process the file using the shared project and loaded contexts
-      const rewriteResult = processSourceFile(sourceFile, pandaContext, tailwindConfig);
+      const rewriteResult = processSourceFile(sourceFile, pandaContext, tailwindConfig, options.inlineTextStyles);
 
       if (options.write) {
         writeFileSync(file, rewriteResult.output);

@@ -809,6 +809,7 @@ export const extractTailwindClassesFromPandaCssWithContext = (
   cssObj: StyleObject,
   pandaContext?: PandaContext,
   tailwindConfig?: Config,
+  inlineTextStyles?: boolean,
 ): string[] => {
   const classes: string[] = [];
 
@@ -1007,17 +1008,27 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
     Object.entries(obj).forEach(([key, value]) => {
       // Handle textStyle specially - it's like a mixin
-      if (key === "textStyle" && typeof value === "string" && pandaContext) {
-        // Resolve textStyle from context
-        const textStyles = pandaContext.config?.theme?.textStyles || {};
-        const resolvedTextStyle = resolveDottedPath(value, textStyles);
+      if (key === "textStyle" && typeof value === "string") {
+        if (inlineTextStyles && pandaContext) {
+          // When inlineTextStyles is true, expand textStyle to its actual CSS properties
+          const textStyles = pandaContext.config?.theme?.textStyles || {};
+          const resolvedTextStyle = resolveDottedPath(value, textStyles);
 
-        if (resolvedTextStyle && typeof resolvedTextStyle === "object") {
-          // If the resolved textStyle has a 'value' property (real-world Panda format),
-          // unwrap it and use that instead
-          const styleObject = resolvedTextStyle.value || resolvedTextStyle;
-          // Recursively process the resolved text style object
-          traverse(styleObject, modifiers);
+          if (resolvedTextStyle && typeof resolvedTextStyle === "object") {
+            // If the resolved textStyle has a 'value' property (real-world Panda format),
+            // unwrap it and use that instead
+            const styleObject = resolvedTextStyle.value || resolvedTextStyle;
+            // Recursively process the resolved text style object
+            traverse(styleObject, modifiers);
+          }
+        } else {
+          // Default behavior: generate a simple class like "text-style-body"
+          const className = `text-style-${value}`;
+          if (modifiers.length > 0) {
+            classes.push(`${modifiers.join(":")}:${className}`);
+          } else {
+            classes.push(className);
+          }
         }
         return;
       }

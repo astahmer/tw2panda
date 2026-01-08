@@ -15,11 +15,12 @@ cli
     "Rewrite Panda CSS file(s) to use Tailwind classes (supports both files and glob patterns)",
   )
   .option("-w, --write", "Write to disk instead of stdout")
-  .action(async (path: string, options: { write?: boolean }) => {
+  .option("--inline-text-styles", "Inline textStyle definitions to actual CSS properties (instead of generating text-style-* classes)")
+  .action(async (path: string, options: { write?: boolean; inlineTextStyles?: boolean }) => {
     const cwd = process.cwd();
     const resolvedPath = resolve(cwd, path);
 
-    const result = await rewritePattern(resolvedPath, { write: options.write || false });
+    const result = await rewritePattern(resolvedPath, { write: options.write || false, inlineTextStyles: options.inlineTextStyles || false });
 
     // Check if it's a batch result (has totalFiles property)
     if ("totalFiles" in result) {
