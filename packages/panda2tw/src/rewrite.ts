@@ -20,6 +20,101 @@ export interface RewriteResult {
 }
 
 /**
+ * Exposed variant props mapping for Stack/HStack components
+ * Used when --with-jsx-stack flag is enabled
+ */
+const STACK_EXPOSED_VARIANTS = {
+  direction: ["row", "column"],
+  flexDirection: ["row", "column"],
+  alignItems: ["center", "start", "end"],
+  alignSelf: ["auto", "start", "end", "center", "stretch"],
+  justifyContent: ["center", "start", "end", "between", "around"],
+  wrap: [true],
+  w: ["full", "100%"],
+  h: ["full", "100%"],
+  gap: [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "0",
+    "2",
+    "4",
+    "8",
+    "12",
+    "16",
+    "24",
+    "32",
+    "40",
+    "48",
+    "56",
+    "64",
+    "72",
+    "80",
+  ],
+};
+
+/**
+ * Check if a prop is an exposed variant for Stack/HStack
+ */
+const isExposedVariant = (propName: string): propName is keyof typeof STACK_EXPOSED_VARIANTS => {
+  return propName in STACK_EXPOSED_VARIANTS;
+};
+
+/**
+ * Check if a variant value is in the exposed values list
+ */
+const isExposedVariantValue = (variantName: string, value: string | number | boolean): boolean => {
+  if (!isExposedVariant(variantName)) return false;
+  const exposedValues = STACK_EXPOSED_VARIANTS[variantName];
+  return (exposedValues as any[]).includes(value);
+};
+
+/**
+ * Components that support selective JSX prop conversion
+ * Only these components will use the --with-jsx-stack behavior
+ */
+const SELECTIVE_CONVERSION_COMPONENTS = new Set(["Stack", "HStack", "Flex", "Box"]);
+
+/**
+ * Check if a component should use selective JSX prop conversion
+ */
+const shouldUseSelectiveConversion = (tagName: string, withJsxStack: boolean): boolean => {
+  if (!withJsxStack) return false;
+  return SELECTIVE_CONVERSION_COMPONENTS.has(tagName);
+};
+
+/**
+ * Determine if a JSX prop should be converted or kept as-is
+ * When useSelectiveConversion is true, only convert props that are NOT exposed
+ * or have values NOT in the exposed values list
+ */
+const shouldConvertJsxProp = (
+  propName: string,
+  propValue: string | number | boolean,
+  useSelectiveConversion: boolean,
+): boolean => {
+  if (!useSelectiveConversion) return true; // Convert all by default
+
+  // If it's an exposed variant with an exposed value, don't convert it
+  if (isExposedVariant(propName) && isExposedVariantValue(propName, propValue)) {
+    return false;
+  }
+
+  // Otherwise, convert it
+  return true;
+};
+
+/**
  * Internal function to process a source file
  */
 const processSourceFile = (
@@ -27,6 +122,7 @@ const processSourceFile = (
   pandaContext?: PandaContext,
   tailwindConfig?: Config,
   inlineTextStyles?: boolean,
+  withJsxStack?: boolean,
 ): RewriteResult => {
   const code = sourceFile.getFullText();
   const magicStr = new MagicString(code);
@@ -115,6 +211,9 @@ const processSourceFile = (
   const jsxElements = findJsxElementsWithPandaProps(sourceFile, pandaContext);
   jsxElements.forEach((element) => {
     try {
+      // Determine if this component should use selective conversion
+      const useSelectiveConversion = shouldUseSelectiveConversion(element.tagName, withJsxStack);
+
       // Check if we have a css prop
       const cssPropIndex = element.pandaProps.findIndex((p) => p.name === "css");
       const hasCssProp = cssPropIndex !== -1;
@@ -123,19 +222,22 @@ const processSourceFile = (
 
       if (hasCssProp && element.pandaProps.length === 1) {
         // Only the css prop is present
-        const cssPropValue = element.pandaProps[cssPropIndex].value;
+        const cssProp = element.pandaProps[cssPropIndex];
+        if (cssProp) {
+          const cssPropValue = cssProp.value;
 
-        // Check if it's a ternary expression
-        if (cssPropValue.includes("?") && cssPropValue.includes(":")) {
-          // This is a ternary or complex expression - we can't statically convert it
-          // so we'll keep it as-is for now
-          objectToConvert = {};
-        } else {
-          try {
-            objectToConvert = new Function(`return (${cssPropValue})`)();
-          } catch (e) {
-            console.error("Failed to parse css prop value:", cssPropValue, e);
+          // Check if it's a ternary expression
+          if (cssPropValue.includes("?") && cssPropValue.includes(":")) {
+            // This is a ternary or complex expression - we can't statically convert it
+            // so we'll keep it as-is for now
             objectToConvert = {};
+          } else {
+            try {
+              objectToConvert = new Function(`return (${cssPropValue})`)();
+            } catch (e) {
+              console.error("Failed to parse css prop value:", cssPropValue, e);
+              objectToConvert = {};
+            }
           }
         }
       } else {
@@ -145,6 +247,13 @@ const processSourceFile = (
             // Skip css prop when mixed with others - it will be handled separately
             return;
           }
+
+          // Check if this prop should be converted
+          if (!shouldConvertJsxProp(name, value, useSelectiveConversion)) {
+            // Skip this prop - it's an exposed variant with an exposed value
+            return;
+          }
+
           // Try to parse the value as a JS expression if needed
           try {
             // If value is a simple string, use it directly; otherwise try to eval it
@@ -161,18 +270,21 @@ const processSourceFile = (
 
         // If there's also a css prop with other props, merge them
         if (hasCssProp) {
-          const cssPropValue = element.pandaProps[cssPropIndex].value;
+          const cssProp = element.pandaProps[cssPropIndex];
+          if (cssProp) {
+            const cssPropValue = cssProp.value;
 
-          // Check if it's a ternary expression
-          if (cssPropValue.includes("?") && cssPropValue.includes(":")) {
-            // Keep ternaries as-is, they can't be statically converted
-            // Skip merging the css prop in this case
-          } else {
-            try {
-              const cssPropObj = new Function(`return (${cssPropValue})`)();
-              objectToConvert = { ...cssPropObj, ...objectToConvert };
-            } catch (e) {
-              console.error("Failed to parse css prop value:", cssPropValue, e);
+            // Check if it's a ternary expression
+            if (cssPropValue.includes("?") && cssPropValue.includes(":")) {
+              // Keep ternaries as-is, they can't be statically converted
+              // Skip merging the css prop in this case
+            } else {
+              try {
+                const cssPropObj = new Function(`return (${cssPropValue})`)();
+                objectToConvert = { ...cssPropObj, ...objectToConvert };
+              } catch (e) {
+                console.error("Failed to parse css prop value:", cssPropValue, e);
+              }
             }
           }
         }
@@ -180,7 +292,12 @@ const processSourceFile = (
 
       // Convert CSS object to Tailwind classes
       const classes = pandaContext
-        ? extractTailwindClassesFromPandaCssWithContext(objectToConvert, pandaContext as any, tailwindConfig, inlineTextStyles)
+        ? extractTailwindClassesFromPandaCssWithContext(
+            objectToConvert,
+            pandaContext as any,
+            tailwindConfig,
+            inlineTextStyles,
+          )
         : extractTailwindClassesFromPandaCss(objectToConvert, pandaContext as any);
 
       if (classes.length > 0) {
@@ -200,8 +317,10 @@ const processSourceFile = (
           if (existingValue) {
             const valueText = existingValue.getText();
             // Remove quotes if it's a string literal
-            if ((valueText.startsWith('"') && valueText.endsWith('"')) ||
-                (valueText.startsWith("'") && valueText.endsWith("'"))) {
+            if (
+              (valueText.startsWith('"') && valueText.endsWith('"')) ||
+              (valueText.startsWith("'") && valueText.endsWith("'"))
+            ) {
               existingClassName = valueText.slice(1, -1);
             } else if (valueText.startsWith("{") && valueText.endsWith("}")) {
               // It's a JSX expression like {something}
@@ -253,12 +372,20 @@ const processSourceFile = (
         }
 
         // Check if the css prop is a ternary (can't be converted)
-        const cssPropIsTernary = hasCssProp && element.pandaProps[cssPropIndex]?.value.includes("?") && element.pandaProps[cssPropIndex]?.value.includes(":");
+        const cssPropIsTernary =
+          hasCssProp &&
+          element.pandaProps[cssPropIndex]?.value.includes("?") &&
+          element.pandaProps[cssPropIndex]?.value.includes(":");
 
-        // Remove the Panda props from the element, but skip ternary css props
-        element.pandaProps.forEach(({ node, name }) => {
+        // Remove the Panda props from the element, but skip ternary css props and exposed props when selective conversion is enabled
+        element.pandaProps.forEach(({ node, name, value }) => {
           // Skip removing css props that are ternaries
           if (name === "css" && cssPropIsTernary) {
+            return;
+          }
+
+          // Skip removing props that shouldn't be converted when selective conversion is enabled
+          if (!shouldConvertJsxProp(name, value, useSelectiveConversion)) {
             return;
           }
 
@@ -276,16 +403,12 @@ const processSourceFile = (
           const initializer = classNameNode.getInitializer();
           if (initializer) {
             // Use JSX expression if merging with cn(), otherwise use string
-            const replacement = finalClassString.startsWith("cn(")
-              ? `{${finalClassString}}`
-              : `"${finalClassString}"`;
+            const replacement = finalClassString.startsWith("cn(") ? `{${finalClassString}}` : `"${finalClassString}"`;
             magicStr.overwrite(initializer.getStart(), initializer.getEnd(), replacement);
           }
         } else {
           // Add new className to first non-ternary panda prop position
-          const firstConvertibleProp = element.pandaProps.find(
-            (p) => !(p.name === "css" && cssPropIsTernary),
-          );
+          const firstConvertibleProp = element.pandaProps.find((p) => !(p.name === "css" && cssPropIsTernary));
           if (firstConvertibleProp) {
             // Use JSX expression if using cn(), otherwise use string
             const value = finalClassString.startsWith("cn(")
@@ -328,7 +451,7 @@ export const rewritePandaToTailwind = (
   const project = new Project({ useInMemoryFileSystem: true });
   const sourceFile = project.createSourceFile(filePath, content) as SourceFile;
 
-  return processSourceFile(sourceFile, pandaContext, tailwindConfig, _options.inlineTextStyles);
+  return processSourceFile(sourceFile, pandaContext, tailwindConfig, _options.inlineTextStyles, _options.withJsxStack);
 };
 
 export interface BatchRewriteResult {
@@ -407,7 +530,13 @@ export const rewritePattern = async (
       const sourceFile = project.createSourceFile(file, content) as SourceFile;
 
       // Process the file using the shared project and loaded contexts
-      const rewriteResult = processSourceFile(sourceFile, pandaContext, tailwindConfig, options.inlineTextStyles);
+      const rewriteResult = processSourceFile(
+        sourceFile,
+        pandaContext,
+        tailwindConfig,
+        options.inlineTextStyles,
+        options.withJsxStack,
+      );
 
       if (options.write) {
         writeFileSync(file, rewriteResult.output);

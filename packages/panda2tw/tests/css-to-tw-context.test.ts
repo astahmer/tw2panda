@@ -1133,9 +1133,9 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     const cssObj = {
       gridTemplateColumns: {
         base: "[1fr]",
-        xl: "[8fr 4fr]"
+        xl: "[8fr 4fr]",
       },
-      padding: "16"
+      padding: "16",
     };
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
@@ -1151,9 +1151,9 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     const cssObj = {
       overflowY: {
         base: "auto",
-        md: "hidden"
+        md: "hidden",
       },
-      height: "100%"
+      height: "100%",
     };
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
@@ -1169,14 +1169,14 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     const cssObj = {
       gridTemplateColumns: {
         base: "[1fr]",
-        xl: "[8fr 4fr]"
+        xl: "[8fr 4fr]",
       },
       overflowY: {
-        base: "auto"
+        base: "auto",
       },
       paddingX: "24",
       paddingY: "32",
-      gap: "24"
+      gap: "24",
     };
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
@@ -1212,16 +1212,16 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     const cssObj = {
       gridTemplateColumns: {
         base: "[1fr]",
-        xl: "[8fr 4fr]"
+        xl: "[8fr 4fr]",
       },
       overflowY: {
-        xlDown: "auto"
+        xlDown: "auto",
       },
       width: "100%",
       height: "100%",
       paddingX: "24",
       paddingY: "32",
-      gap: "24"
+      gap: "24",
     };
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, contextWithCustomBreakpoints);
@@ -1244,16 +1244,16 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     const cssObj = {
       gridTemplateColumns: {
         base: "[1fr]",
-        xl: "[8fr 4fr]"
+        xl: "[8fr 4fr]",
       },
       overflowY: {
-        xlDown: "auto"
+        xlDown: "auto",
       },
       width: "100%",
       height: "100%",
       paddingX: "24",
       paddingY: "32",
-      gap: "24"
+      gap: "24",
     };
 
     // Without context - xlDown won't be recognized as a known breakpoint,
@@ -1273,5 +1273,3 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     expect(classes).toContain("gap-24");
   });
 });
-
-

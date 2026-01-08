@@ -122,8 +122,6 @@ export const extractStringLiteral = (node: Node | undefined): string => {
   return text;
 };
 
-
-
 /**
  * Get all Panda component imports from the source file
  * Returns a Set of component names imported from styled-system packages
@@ -280,7 +278,10 @@ const extractPandaPropsFromAttributes = (
   attributes: any[],
   pandaContext?: any,
   isPandaComponent?: boolean,
-): { pandaProps: Array<{ name: string; value: string; node: any }>; otherProps: Array<{ name: string; node: any }> } => {
+): {
+  pandaProps: Array<{ name: string; value: string; node: any }>;
+  otherProps: Array<{ name: string; node: any }>;
+} => {
   const pandaProps: Array<{ name: string; value: string; node: any }> = [];
   const otherProps: Array<{ name: string; node: any }> = [];
 

@@ -15,12 +15,23 @@ cli
     "Rewrite Panda CSS file(s) to use Tailwind classes (supports both files and glob patterns)",
   )
   .option("-w, --write", "Write to disk instead of stdout")
-  .option("--inline-text-styles", "Inline textStyle definitions to actual CSS properties (instead of generating text-style-* classes)")
-  .action(async (path: string, options: { write?: boolean; inlineTextStyles?: boolean }) => {
+  .option(
+    "--inline-text-styles",
+    "Inline textStyle definitions to actual CSS properties (instead of generating text-style-* classes)",
+  )
+  .option(
+    "--with-jsx-stack",
+    "Only convert JSX props that are not exposed or have values not exposed (for Stack/HStack components with CVA)",
+  )
+  .action(async (path: string, options: { write?: boolean; inlineTextStyles?: boolean; withJsxStack?: boolean }) => {
     const cwd = process.cwd();
     const resolvedPath = resolve(cwd, path);
 
-    const result = await rewritePattern(resolvedPath, { write: options.write || false, inlineTextStyles: options.inlineTextStyles || false });
+    const result = await rewritePattern(resolvedPath, {
+      write: options.write || false,
+      inlineTextStyles: options.inlineTextStyles || false,
+      withJsxStack: options.withJsxStack || false,
+    });
 
     // Check if it's a batch result (has totalFiles property)
     if ("totalFiles" in result) {
@@ -48,14 +59,6 @@ cli
 
       if (options.write && result.successfulFiles > 0) {
         console.log(`\n✨ ${result.successfulFiles} files updated!`);
-      }
-    } else {
-      // Single file result
-      if (options.write) {
-        console.log(`✅ Rewritten: ${path}`);
-        console.log(`📊 Conversions: ${result.conversions.length}`);
-      } else {
-        console.log(result.output);
       }
     }
   });

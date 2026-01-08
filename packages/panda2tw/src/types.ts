@@ -32,4 +32,5 @@ export type RewriteOptions = {
   includeComments?: boolean;
   generateComments?: boolean;
   inlineTextStyles?: boolean;
+  withJsxStack?: boolean;
 };

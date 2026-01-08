@@ -335,7 +335,7 @@ export const Component = () => {
           );
         };",
         }
-      `)
+      `);
     });
 
     test("merges existing css() call with converted Panda props", () => {
@@ -522,7 +522,9 @@ export const Component = () => {
       const result = rewritePandaToTailwind(input, "test.tsx");
 
       // Ternary in css prop should be preserved as-is
-      expect(result.output).toContain('css={isRight ? { left: "auto", flexDirection: "row-reverse" } : { right: "[100%]" }}');
+      expect(result.output).toContain(
+        'css={isRight ? { left: "auto", flexDirection: "row-reverse" } : { right: "[100%]" }}',
+      );
       // Simple gap prop should be converted
       expect(result.output).toContain("className=");
       expect(result.output).toContain("gap");
