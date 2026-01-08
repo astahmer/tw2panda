@@ -736,7 +736,9 @@ const selectorToTwVariant = (selector: string): string | null => {
     return variant ?? null;
   }
 
-  const cleanSelector = trimmed.replace(/\s+/g, "");
+  // For arbitrary selectors, convert spaces to underscores for Tailwind's bracket notation
+  // e.g., "& ol" becomes "&_ol", "& > ol" becomes "&_>_ol", "& + div" becomes "&_+_div"
+  const cleanSelector = trimmed.replace(/\s+/g, "_");
   return cleanSelector;
 };
 

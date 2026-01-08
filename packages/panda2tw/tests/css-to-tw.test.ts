@@ -937,7 +937,7 @@ describe("css-to-tw", () => {
 
       // Should convert the arbitrary "& + div" selector to Tailwind's arbitrary selector syntax
       expect(classes).toContain("flex");
-      expect(classes.some((c) => c.includes("[&+div]"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&_+_div]"))).toBe(true);
       expect(classes.some((c) => c.includes("mt-4"))).toBe(true);
     });
 
@@ -957,7 +957,7 @@ describe("css-to-tw", () => {
       expect(classes).toContain("gap-4");
       expect(classes).toContain("last:pb-8");
       // "& ~ div" should be converted using arbitrary selector syntax
-      expect(classes.some((c) => c.includes("[&~div]"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&_~_div]"))).toBe(true);
       expect(classes.some((c) => c.includes("mt-2"))).toBe(true);
     });
 
@@ -1020,6 +1020,37 @@ describe("css-to-tw", () => {
 
       expect(classes.some((c) => c.includes("even:bg-gray"))).toBe(true);
       expect(classes.some((c) => c.includes("odd:bg-white"))).toBe(true);
+    });
+
+    test("handles child element descendant selectors with underscores", () => {
+      const cssObj = {
+        display: "flex",
+        "& ol": {
+          listStyleType: "decimal",
+          paddingLeft: "6",
+          marginY: "2",
+        },
+        "& li": {
+          marginBottom: "1",
+        },
+        "& a": {
+          color: "content-emphasis",
+          fontWeight: "medium",
+          _hover: {
+            cursor: "pointer",
+          },
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("flex");
+      // Child element selectors should be wrapped with underscores for Tailwind's arbitrary syntax
+      expect(classes.some((c) => c.includes("[&_ol]"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&_li]"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&_a]"))).toBe(true);
+      // Check that properties are applied with the selector
+      expect(classes.some((c) => c.includes("[&_ol]:") || c.startsWith("[&_ol]:"))).toBe(true);
     });
   });
 });
