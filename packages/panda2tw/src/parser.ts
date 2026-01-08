@@ -122,11 +122,34 @@ export const extractStringLiteral = (node: Node | undefined): string => {
   return text;
 };
 
+
+
 /**
- * Fallback set of common Panda CSS properties when context is not available
+ * Get all Panda component imports from the source file
+ * Returns a Set of component names imported from styled-system packages
  */
-const DEFAULT_PANDA_PROPERTIES = new Set([
-  "css", // Special Panda CSS prop
+const getPandaComponentImports = (sourceFile: SourceFile): Set<string> => {
+  const pandaComponents = new Set<string>();
+
+  sourceFile.getImportDeclarations().forEach((importDecl) => {
+    const moduleSpecifier = importDecl.getModuleSpecifierValue();
+    // Match imports from Panda styled-system packages
+    if (moduleSpecifier?.includes("styled-system")) {
+      importDecl.getNamedImports().forEach((namedImport) => {
+        const name = namedImport.getNameNode().getText();
+        pandaComponents.add(name);
+      });
+    }
+  });
+
+  return pandaComponents;
+};
+
+/**
+ * Common CSS property names that are valid Panda CSS properties
+ * Used only for Panda-imported components
+ */
+const COMMON_CSS_PROPERTIES = new Set([
   "display",
   "flexDirection",
   "alignItems",
@@ -203,24 +226,11 @@ const DEFAULT_PANDA_PROPERTIES = new Set([
   "duration",
   "ease",
   "delay",
-  "hover",
-  "_hover",
-  "_focus",
-  "_active",
-  "_disabled",
-  "md",
-  "lg",
-  "xl",
-  "2xl",
-  "sm",
+  "boxShadow",
+  "scale",
+  "rotate",
+  "translate",
 ]);
-
-/**
- * Check if a property is a valid Panda CSS property
- */
-const isPandaDefaultProperty = (prop: string): boolean => {
-  return DEFAULT_PANDA_PROPERTIES.has(prop);
-};
 
 /**
  * Extract Panda CSS props from JSX element attributes
@@ -228,6 +238,7 @@ const isPandaDefaultProperty = (prop: string): boolean => {
 const extractPandaPropsFromAttributes = (
   attributes: any[],
   pandaContext?: any,
+  isPandaComponent?: boolean,
 ): { pandaProps: Array<{ name: string; value: string; node: any }>; otherProps: Array<{ name: string; node: any }> } => {
   const pandaProps: Array<{ name: string; value: string; node: any }> = [];
   const otherProps: Array<{ name: string; node: any }> = [];
@@ -240,9 +251,19 @@ const extractPandaPropsFromAttributes = (
 
       // Special handling for the "css" prop - it's always a Panda CSS prop
       const isCssProp = propName === "css";
-      const isDefaultProp = isPandaDefaultProperty(propName);
+
+      // Determine if this is a valid Panda CSS prop:
+      // 1. Always: "css" prop
+      // 2. If we have Panda context: validate with context
+      // 3. If prop is a known CSS property (on any element): allow it
+      // 4. Otherwise: it's not a CSS property
+      //
+      // Note: We allow known CSS properties on any element (not just Panda imports)
+      // because CSS properties are universally recognized and safe to convert.
+      // The "css" prop is specific to Panda, but "display", "padding", etc. are standard CSS.
       const isContextProp = pandaContext?.isValidProperty?.(propName);
-      const isValidProp = isCssProp || isContextProp || isDefaultProp;
+      const isCssProperty = COMMON_CSS_PROPERTIES.has(propName);
+      const isValidProp = isCssProp || isContextProp || isCssProperty;
 
       if (isValidProp) {
         // Extract the value
@@ -277,21 +298,24 @@ const extractPandaPropsFromAttributes = (
  */
 export const findJsxElementsWithPandaProps = (sourceFile: SourceFile, pandaContext?: any): ParsedJsxElement[] => {
   const elements: ParsedJsxElement[] = [];
+  const pandaImports = getPandaComponentImports(sourceFile);
 
   sourceFile.forEachDescendant((node) => {
     // Handle both JsxOpeningElement (from <Tag>...</Tag>) and JsxSelfClosingElement (from <Tag ... />)
     const isJsxElement = Node.isJsxOpeningElement(node) || Node.isJsxSelfClosingElement(node);
 
     if (isJsxElement) {
+      const tagName = node.getTagNameNode().getText();
+      const isPandaComponent = pandaImports.has(tagName);
       const attributes = node.getAttributes();
-      const { pandaProps, otherProps } = extractPandaPropsFromAttributes(attributes, pandaContext);
+      const { pandaProps, otherProps } = extractPandaPropsFromAttributes(attributes, pandaContext, isPandaComponent);
 
       if (pandaProps.length > 0) {
         elements.push({
           node: node as any,
           startPos: node.getStart(),
           endPos: node.getEnd(),
-          tagName: node.getTagNameNode().getText(),
+          tagName,
           pandaProps,
           otherProps,
         });
