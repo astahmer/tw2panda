@@ -84,17 +84,15 @@ const shorthandMap: Record<string, string> = {
   spaceY: "spaceY",
 
   // Flex/Grid shorthands
-  flex: "flex",
   items: "alignItems",
   justify: "justifyContent",
   self: "alignSelf",
-  grid: "display",
   cols: "gridTemplateColumns",
   rows: "gridTemplateRows",
   col: "gridColumn",
   row: "gridRow",
 
-  // Display shorthands
+  // Display shorthands (d, hidden, block, inline, flex, grid)
   d: "display",
   hidden: "display",
   block: "display",
@@ -244,7 +242,10 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
 
   // Visibility & Display
   visibility: { pattern: /^(visible|hidden|collapse)$/, classPrefix: "" }, // Special handling
-  display: { pattern: /^(flex|block|inline|grid|hidden|contents|table|table-row|table-cell|list-item)$/, classPrefix: "" },
+  display: {
+    pattern: /^(flex|block|inline|grid|hidden|contents|table|table-row|table-cell|list-item)$/,
+    classPrefix: "",
+  },
   pointerEvents: { pattern: /^(auto|none|pointer)$/, classPrefix: "pointer-events-" },
   userSelect: { pattern: /^(auto|none|text|contain|all)$/, classPrefix: "select-" },
   cursor: { pattern: /^.*$/, classPrefix: "cursor-" },
@@ -258,10 +259,22 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
 
   // Border properties
   borderStyle: { pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/, classPrefix: "border-" },
-  borderTopStyle: { pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/, classPrefix: "border-t-" },
-  borderRightStyle: { pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/, classPrefix: "border-r-" },
-  borderBottomStyle: { pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/, classPrefix: "border-b-" },
-  borderLeftStyle: { pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/, classPrefix: "border-l-" },
+  borderTopStyle: {
+    pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/,
+    classPrefix: "border-t-",
+  },
+  borderRightStyle: {
+    pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/,
+    classPrefix: "border-r-",
+  },
+  borderBottomStyle: {
+    pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/,
+    classPrefix: "border-b-",
+  },
+  borderLeftStyle: {
+    pattern: /^(solid|dashed|dotted|double|groove|ridge|inset|outset|none)$/,
+    classPrefix: "border-l-",
+  },
   borderCollapse: { pattern: /^(collapse|separate)$/, classPrefix: "border-" },
   borderSpacing: { pattern: /^.*$/, classPrefix: "border-spacing-" },
   // borderTopLeftRadius: { pattern: /^.*$/, classPrefix: "rounded-tl-" },
@@ -752,10 +765,7 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[
  * - Color mixtures and computed values
  * - Nested token references
  */
-const resolvePandaToken = (
-  path: string,
-  pandaContext?: PandaContext,
-): { value: string; resolved: boolean } => {
+const resolvePandaToken = (path: string, pandaContext?: PandaContext): { value: string; resolved: boolean } => {
   if (!pandaContext?.config?.theme?.tokens) {
     return { value: path, resolved: false };
   }

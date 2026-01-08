@@ -126,6 +126,7 @@ export const extractStringLiteral = (node: Node | undefined): string => {
  * Fallback set of common Panda CSS properties when context is not available
  */
 const DEFAULT_PANDA_PROPERTIES = new Set([
+  "css", // Special Panda CSS prop
   "display",
   "flexDirection",
   "alignItems",
@@ -222,52 +223,72 @@ const isPandaDefaultProperty = (prop: string): boolean => {
 };
 
 /**
+ * Extract Panda CSS props from JSX element attributes
+ */
+const extractPandaPropsFromAttributes = (
+  attributes: any[],
+  pandaContext?: any,
+): { pandaProps: Array<{ name: string; value: string; node: any }>; otherProps: Array<{ name: string; node: any }> } => {
+  const pandaProps: Array<{ name: string; value: string; node: any }> = [];
+  const otherProps: Array<{ name: string; node: any }> = [];
+
+  attributes.forEach((attr) => {
+    if (Node.isJsxAttribute(attr)) {
+      const nameNode = attr.getNameNode();
+      const propName = nameNode?.getText() || "";
+      const initializer = attr.getInitializer();
+
+      // Special handling for the "css" prop - it's always a Panda CSS prop
+      const isCssProp = propName === "css";
+      const isDefaultProp = isPandaDefaultProperty(propName);
+      const isContextProp = pandaContext?.isValidProperty?.(propName);
+      const isValidProp = isCssProp || isContextProp || isDefaultProp;
+
+      if (isValidProp) {
+        // Extract the value
+        let value = "";
+        if (initializer) {
+          if (Node.isStringLiteral(initializer)) {
+            value = initializer.getLiteralValue();
+          } else if (Node.isJsxExpression(initializer)) {
+            const expr = initializer.getExpression();
+            if (expr) {
+              value = expr.getText();
+            }
+          } else {
+            value = initializer.getText();
+          }
+        }
+
+        if (value) {
+          pandaProps.push({ name: propName, value, node: attr });
+        }
+      } else if (propName) {
+        otherProps.push({ name: propName, node: attr });
+      }
+    }
+  });
+
+  return { pandaProps, otherProps };
+};
+
+/**
  * Find all JSX elements with Panda CSS props
  */
 export const findJsxElementsWithPandaProps = (sourceFile: SourceFile, pandaContext?: any): ParsedJsxElement[] => {
   const elements: ParsedJsxElement[] = [];
 
   sourceFile.forEachDescendant((node) => {
-    if (Node.isJsxOpeningElement(node)) {
+    // Handle both JsxOpeningElement (from <Tag>...</Tag>) and JsxSelfClosingElement (from <Tag ... />)
+    const isJsxElement = Node.isJsxOpeningElement(node) || Node.isJsxSelfClosingElement(node);
+
+    if (isJsxElement) {
       const attributes = node.getAttributes();
-      const pandaProps: Array<{ name: string; value: string; node: JsxAttribute }> = [];
-      const otherProps: Array<{ name: string; node: JsxAttribute }> = [];
-
-      attributes.forEach((attr) => {
-        if (Node.isJsxAttribute(attr)) {
-          const nameNode = attr.getNameNode();
-          const propName = nameNode?.getText() || "";
-          const initializer = attr.getInitializer();
-
-          const isValidProp = pandaContext?.isValidProperty?.(propName) || isPandaDefaultProperty(propName);
-          if (isValidProp) {
-            // Extract the value
-            let value = "";
-            if (initializer) {
-              if (Node.isStringLiteral(initializer)) {
-                value = initializer.getLiteralValue();
-              } else if (Node.isJsxExpression(initializer)) {
-                const expr = initializer.getExpression();
-                if (expr) {
-                  value = expr.getText();
-                }
-              } else {
-                value = initializer.getText();
-              }
-            }
-
-            if (value) {
-              pandaProps.push({ name: propName, value, node: attr });
-            }
-          } else if (propName) {
-            otherProps.push({ name: propName, node: attr });
-          }
-        }
-      });
+      const { pandaProps, otherProps } = extractPandaPropsFromAttributes(attributes, pandaContext);
 
       if (pandaProps.length > 0) {
         elements.push({
-          node,
+          node: node as any,
           startPos: node.getStart(),
           endPos: node.getEnd(),
           tagName: node.getTagNameNode().getText(),

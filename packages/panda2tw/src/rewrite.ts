@@ -114,27 +114,58 @@ const processSourceFile = (
   const jsxElements = findJsxElementsWithPandaProps(sourceFile, pandaContext);
   jsxElements.forEach((element) => {
     try {
-      // Build a CSS object from the Panda props
-      const cssObj: Record<string, any> = {};
-      element.pandaProps.forEach(({ name, value }) => {
-        // Try to parse the value as a JS expression if needed
+      // Check if we have a css prop
+      const cssPropIndex = element.pandaProps.findIndex((p) => p.name === "css");
+      const hasCssProp = cssPropIndex !== -1;
+
+      let objectToConvert: Record<string, any> = {};
+
+      if (hasCssProp && element.pandaProps.length === 1) {
+        // Only the css prop is present
+        const cssPropValue = element.pandaProps[cssPropIndex].value;
         try {
-          // If value is a simple string, use it directly; otherwise try to eval it
-          if (value.startsWith('"') || value.startsWith("'")) {
-            cssObj[name] = value.slice(1, -1);
-          } else {
-            cssObj[name] = new Function(`return (${value})`)();
-          }
-        } catch {
-          // Fall back to string value
-          cssObj[name] = value;
+          objectToConvert = new Function(`return (${cssPropValue})`)();
+        } catch (e) {
+          console.error("Failed to parse css prop value:", cssPropValue, e);
+          objectToConvert = {};
         }
-      });
+      } else {
+        // Mix of other Panda props (possibly with css prop)
+        element.pandaProps.forEach(({ name, value }) => {
+          if (name === "css") {
+            // Skip css prop when mixed with others - it will be handled separately
+            return;
+          }
+          // Try to parse the value as a JS expression if needed
+          try {
+            // If value is a simple string, use it directly; otherwise try to eval it
+            if (value.startsWith('"') || value.startsWith("'")) {
+              objectToConvert[name] = value.slice(1, -1);
+            } else {
+              objectToConvert[name] = new Function(`return (${value})`)();
+            }
+          } catch {
+            // Fall back to string value
+            objectToConvert[name] = value;
+          }
+        });
+
+        // If there's also a css prop with other props, merge them
+        if (hasCssProp) {
+          const cssPropValue = element.pandaProps[cssPropIndex].value;
+          try {
+            const cssPropObj = new Function(`return (${cssPropValue})`)();
+            objectToConvert = { ...cssPropObj, ...objectToConvert };
+          } catch (e) {
+            console.error("Failed to parse css prop value:", cssPropValue, e);
+          }
+        }
+      }
 
       // Convert CSS object to Tailwind classes
       const classes = pandaContext
-        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext as any, tailwindConfig)
-        : extractTailwindClassesFromPandaCss(cssObj);
+        ? extractTailwindClassesFromPandaCssWithContext(objectToConvert, pandaContext as any, tailwindConfig)
+        : extractTailwindClassesFromPandaCss(objectToConvert);
 
       if (classes.length > 0) {
         const classString = classes.join(" ");
