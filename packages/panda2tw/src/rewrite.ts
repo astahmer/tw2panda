@@ -180,6 +180,7 @@ const processSourceFile = (
           // Get the existing className value
           const existingValue = existingClassNameProp.node.getInitializer();
           let existingClassName = "";
+          let existingClasses: string[] = [];
 
           if (existingValue) {
             const valueText = existingValue.getText();
@@ -189,19 +190,48 @@ const processSourceFile = (
               existingClassName = valueText.slice(1, -1);
             } else if (valueText.startsWith("{") && valueText.endsWith("}")) {
               // It's a JSX expression like {something}
-              existingClassName = valueText;
+              existingClassName = valueText.slice(1, -1);
             } else {
               existingClassName = valueText;
             }
           }
 
+          // Check if the existing className is a css() call
+          if (existingClassName.startsWith("css(")) {
+            try {
+              // Try to extract and convert the css() call
+              const cssMatch = existingClassName.match(/css\((.*)\)$/s);
+              if (cssMatch) {
+                const cssArg = cssMatch[1];
+                const cssObj = new Function(`return (${cssArg})`)();
+                const existingTwClasses = pandaContext
+                  ? extractTailwindClassesFromPandaCssWithContext(
+                      cssObj,
+                      pandaContext as any,
+                      tailwindConfig,
+                      inlineTextStyles,
+                    )
+                  : extractTailwindClassesFromPandaCss(cssObj, pandaContext as any);
+                existingClasses = existingTwClasses;
+              }
+            } catch (e) {
+              // If we can't parse it, keep the css() call as-is
+              console.debug("Failed to convert existing css() call:", e);
+            }
+          } else if (existingClassName && !existingClassName.startsWith("{")) {
+            // It's a plain string
+            existingClasses = [existingClassName];
+          } else if (existingClassName.startsWith("{")) {
+            // It's a JSX expression variable, keep as-is
+            if (existingClasses.length === 0) {
+              existingClasses = [existingClassName];
+            }
+          }
+
           // Merge existing and new classes
-          if (existingClassName.startsWith("{") && existingClassName.endsWith("}")) {
-            // Use cn() utility for expressions
-            finalClassString = `cn(${existingClassName.slice(1, -1)}, "${classString}")`;
-          } else if (existingClassName) {
-            // Use cn() utility for string merge
-            finalClassString = `cn("${existingClassName}", "${classString}")`;
+          if (existingClasses.length > 0) {
+            const mergedClasses = [...existingClasses, ...classes];
+            finalClassString = mergedClasses.join(" ");
           }
 
           classNameNode = existingClassNameProp.node;

@@ -300,7 +300,7 @@ export const Component = () => {
       expect(result.output).toContain("className=");
     });
 
-    test("merges existing className with converted Panda props using cn()", () => {
+    test("merges existing className with converted Panda props", () => {
       const input = `
 export const Component = () => {
   return (
@@ -312,7 +312,7 @@ export const Component = () => {
       const result = rewritePandaToTailwind(input, "test.tsx");
 
       // Should merge both the existing className and the converted Panda props
-      expect(result.output).toContain('className={cn("existing-class",');
+      expect(result.output).toContain('className="existing-class flex gap-4"');
       expect(result.output).toContain("flex");
       expect(result.output).toContain("gap");
       // The panda props should be removed
@@ -331,11 +331,31 @@ export const Component = () => {
           },
           "output": "export const Component = () => {
           return (
-            <div className={cn("existing-class", "flex gap-4")} />
+            <div className="existing-class flex gap-4" />
           );
         };",
         }
       `)
+    });
+
+    test("merges existing css() call with converted Panda props", () => {
+      const input = `
+export const Component = () => {
+  return (
+    <div className={css({ objectFit: 'contain' })} width="100" height="100" />
+  );
+};
+      `.trim();
+
+      const result = rewritePandaToTailwind(input, "test.tsx");
+
+      // Should convert the css() call and merge with new classes
+      expect(result.output).toContain("className=");
+      expect(result.output).toContain("w-100");
+      expect(result.output).toContain("h-100");
+      // The panda props should be removed
+      expect(result.output).not.toContain('width="100"');
+      expect(result.output).not.toContain('height="100"');
     });
 
     test("handles empty value props correctly", () => {
