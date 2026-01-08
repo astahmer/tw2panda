@@ -35,10 +35,7 @@ const processSourceFile = (
   // Remove old Panda imports
   sourceFile.getImportDeclarations().forEach((importDecl) => {
     const moduleSpecifier = importDecl.getModuleSpecifierValue();
-    if (
-      moduleSpecifier === "styled-system/css" ||
-      moduleSpecifier?.includes("styled-system")
-    ) {
+    if (moduleSpecifier === "styled-system/css" || moduleSpecifier?.includes("styled-system")) {
       magicStr.remove(importDecl.getStart(), importDecl.getEnd() + 1); // +1 for newline
     }
   });
@@ -160,7 +157,7 @@ const processSourceFile = (
         });
 
         conversions.push({
-          original: element.pandaProps.map(p => p.node.getText()).join(" "),
+          original: element.pandaProps.map((p) => p.node.getText()).join(" "),
           replacement: `className="${classString}"`,
         });
       }
@@ -187,10 +184,7 @@ export const rewritePandaToTailwind = (
   tailwindConfig?: Config,
 ): RewriteResult => {
   const project = new Project({ useInMemoryFileSystem: true });
-  const sourceFile = project.createSourceFile(
-    filePath,
-    content,
-  ) as SourceFile;
+  const sourceFile = project.createSourceFile(filePath, content) as SourceFile;
 
   return processSourceFile(sourceFile, pandaContext, tailwindConfig);
 };
@@ -237,7 +231,7 @@ export const rewritePattern = async (
 
         // Also load Tailwind context for better token matching
         const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
-        tailwindConfig = (tailwindResult.context?.config || tailwindResult as any) as any;
+        tailwindConfig = (tailwindResult.context?.config || (tailwindResult as any)) as any;
       } catch (e) {
         // Context loading is optional - continue without it
       }
@@ -306,7 +300,7 @@ export const batchRewritePandaToTailwind = async (
 
     // Also load Tailwind config for all token types
     const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
-    tailwindConfig = (tailwindResult.context?.config || tailwindResult as any) as any;
+    tailwindConfig = (tailwindResult.context?.config || (tailwindResult as any)) as any;
   } catch (e) {
     // Context loading is optional - continue without it
   }

@@ -89,6 +89,40 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   animation: { pattern: /^.*$/, classPrefix: "animate-" },
 };
 
+// Map CSS properties to token categories
+const tokenCategoryMap: Record<string, string> = {
+  color: "colors",
+  backgroundColor: "colors",
+  borderColor: "colors",
+  fillColor: "colors",
+  strokeColor: "colors",
+  padding: "spacing",
+  paddingTop: "spacing",
+  paddingRight: "spacing",
+  paddingBottom: "spacing",
+  paddingLeft: "spacing",
+  margin: "spacing",
+  marginTop: "spacing",
+  marginRight: "spacing",
+  marginBottom: "spacing",
+  marginLeft: "spacing",
+  gap: "spacing",
+  width: "sizing",
+  height: "sizing",
+  maxWidth: "sizing",
+  maxHeight: "sizing",
+  minWidth: "sizing",
+  minHeight: "sizing",
+  fontSize: "fontSizes",
+  fontWeight: "fontWeights",
+  lineHeight: "lineHeights",
+  letterSpacing: "letterSpacing",
+  borderRadius: "radii",
+  borderWidth: "borderWidths",
+  boxShadow: "shadows",
+  textShadow: "shadows",
+};
+
 /**
  * Convert camelCase to kebab-case for CSS properties
  */
@@ -109,19 +143,12 @@ export const pandaTokenToTwSuffix = (token: string): string => {
 /**
  * Map Panda CSS properties to Tailwind class names
  */
-export const pandaCssToTailwindClasses = (
-  cssObj: StyleObject,
-  modifiers: string[] = [],
-): string[] => {
+export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string[] = []): string[] => {
   const classes: string[] = [];
 
-  const processProperty = (
-    prop: string,
-    value: any,
-    currentModifiers: string[] = [],
-  ): void => {
+  const processProperty = (prop: string, value: any, currentModifiers: string[] = []): void => {
     // Skip special properties
-    if (prop.startsWith("_") || Array.isArray(value) || typeof value !== "string" && typeof value !== "number") {
+    if (prop.startsWith("_") || Array.isArray(value) || (typeof value !== "string" && typeof value !== "number")) {
       return;
     }
 
@@ -143,9 +170,7 @@ export const pandaCssToTailwindClasses = (
     }
 
     if (className) {
-      const fullClass = currentModifiers.length > 0
-        ? `${currentModifiers.join(":")}:${className}`
-        : className;
+      const fullClass = currentModifiers.length > 0 ? `${currentModifiers.join(":")}:${className}` : className;
       classes.push(fullClass);
     }
   };
@@ -170,9 +195,7 @@ export const pandaCssToTailwindClasses = (
 /**
  * Extract Tailwind classes from a Panda CSS object
  */
-export const extractTailwindClassesFromPandaCss = (
-  cssObj: StyleObject,
-): string[] => {
+export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[] => {
   const classes: string[] = [];
 
   const traverse = (obj: any, modifiers: string[] = []): void => {
@@ -233,10 +256,7 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
   // Build a flat map of Tailwind tokens from nested structure
   // { blue: { 600: "#2563eb", 700: "#1d4ed8" } } -> { "blue-600": "#2563eb", "blue-700": "#1d4ed8" }
-  const flattenTokens = (
-    tokens: Record<string, any>,
-    prefix = "",
-  ): Record<string, string> => {
+  const flattenTokens = (tokens: Record<string, any>, prefix = ""): Record<string, string> => {
     const flattened: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(tokens)) {
@@ -258,10 +278,7 @@ export const extractTailwindClassesFromPandaCssWithContext = (
   const tailwindTokens: Record<string, string> = {};
 
   // Helper to flatten tokens without category prefix
-  const flattenTokensForMatching = (
-    tokens: Record<string, any>,
-    prefix = "",
-  ): Record<string, string> => {
+  const flattenTokensForMatching = (tokens: Record<string, any>, prefix = ""): Record<string, string> => {
     const flattened: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(tokens)) {
@@ -278,7 +295,18 @@ export const extractTailwindClassesFromPandaCssWithContext = (
   };
 
   // Only build tokens from known categories that are meaningful for conversion
-  const tokenCategories = ["colors", "spacing", "sizing", "fontSizes", "fontWeights", "lineHeights", "letterSpacing", "radii", "borderWidths", "shadows"];
+  const tokenCategories = [
+    "colors",
+    "spacing",
+    "sizing",
+    "fontSizes",
+    "fontWeights",
+    "lineHeights",
+    "letterSpacing",
+    "radii",
+    "borderWidths",
+    "shadows",
+  ];
 
   if (effectiveConfig?.theme) {
     for (const category of tokenCategories) {
@@ -312,40 +340,6 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
     // Try to resolve from Panda theme tokens
     const tokens = pandaContext.config?.theme?.tokens || {};
-
-    // Map CSS properties to token categories
-    const tokenCategoryMap: Record<string, string> = {
-      color: "colors",
-      backgroundColor: "colors",
-      borderColor: "colors",
-      fillColor: "colors",
-      strokeColor: "colors",
-      padding: "spacing",
-      paddingTop: "spacing",
-      paddingRight: "spacing",
-      paddingBottom: "spacing",
-      paddingLeft: "spacing",
-      margin: "spacing",
-      marginTop: "spacing",
-      marginRight: "spacing",
-      marginBottom: "spacing",
-      marginLeft: "spacing",
-      gap: "spacing",
-      width: "sizing",
-      height: "sizing",
-      maxWidth: "sizing",
-      maxHeight: "sizing",
-      minWidth: "sizing",
-      minHeight: "sizing",
-      fontSize: "fontSizes",
-      fontWeight: "fontWeights",
-      lineHeight: "lineHeights",
-      letterSpacing: "letterSpacing",
-      borderRadius: "radii",
-      borderWidth: "borderWidths",
-      boxShadow: "shadows",
-      textShadow: "shadows",
-    };
 
     const category = tokenCategoryMap[prop];
     let resolved;

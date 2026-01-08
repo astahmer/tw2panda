@@ -10,7 +10,10 @@ import { extractTailwindClassesFromPandaCss } from "./css-to-tw.js";
 const cli = cac("panda2tw");
 
 cli
-  .command("rewrite <path>", "Rewrite Panda CSS file(s) to use Tailwind classes (supports both files and glob patterns)")
+  .command(
+    "rewrite <path>",
+    "Rewrite Panda CSS file(s) to use Tailwind classes (supports both files and glob patterns)",
+  )
   .option("-w, --write", "Write to disk instead of stdout")
   .action(async (path: string, options: { write?: boolean }) => {
     const cwd = process.cwd();
@@ -56,21 +59,19 @@ cli
     }
   });
 
-cli
-  .command("convert <cssObject>", "Convert a CSS object string to Tailwind classes")
-  .action((cssObjectStr: string) => {
-    try {
-      // Parse the CSS object string
-      const cssObj = new Function(`return (${cssObjectStr})`)();
-      const classes = extractTailwindClassesFromPandaCss(cssObj);
+cli.command("convert <cssObject>", "Convert a CSS object string to Tailwind classes").action((cssObjectStr: string) => {
+  try {
+    // Parse the CSS object string
+    const cssObj = new Function(`return (${cssObjectStr})`)();
+    const classes = extractTailwindClassesFromPandaCss(cssObj);
 
-      console.log("Tailwind classes:");
-      console.log(classes.join(" "));
-    } catch (e) {
-      console.error("Error parsing CSS object:", e);
-      process.exit(1);
-    }
-  });
+    console.log("Tailwind classes:");
+    console.log(classes.join(" "));
+  } catch (e) {
+    console.error("Error parsing CSS object:", e);
+    process.exit(1);
+  }
+});
 
 cli.help();
 cli.version("0.1.0");

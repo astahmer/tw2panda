@@ -44,10 +44,7 @@ export const pandaCvaToTailwind = (cvaConfig: PandaCvaConfig): string => {
 /**
  * Extract Tailwind classes from nested CSS object with conditions
  */
-export const extractClassesFromNestedStyles = (
-  obj: StyleObject,
-  prefix: string = "",
-): string[] => {
+export const extractClassesFromNestedStyles = (obj: StyleObject, prefix: string = ""): string[] => {
   const classes: string[] = [];
 
   Object.entries(obj).forEach(([key, value]: [string, any]) => {

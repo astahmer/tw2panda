@@ -108,7 +108,7 @@ export function Avatar() {
     `);
 
     // Strict assertions - ensure we don't have className={className="..."}
-    expect(result.output).not.toContain('className={className=');
+    expect(result.output).not.toContain("className={className=");
     expect(result.output).toContain('className={"w-[80px] h-[80px]"}');
     expect(result.conversions).toHaveLength(1);
   });

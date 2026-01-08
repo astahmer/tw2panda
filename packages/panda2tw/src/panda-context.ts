@@ -1,12 +1,12 @@
 // https://github.com/chakra-ui/panda/blob/e8ec0aac69f87c6911a33b19df031996aa3cbaa4/packages/fixture/src/create-context.ts#L1
-import { mergeConfigs } from '@pandacss/config'
-import { RuleProcessor } from '@pandacss/core'
-import { Generator } from '@pandacss/generator'
-import { PandaContext as OriginalPandaContext } from '@pandacss/node'
-import { parseJson, stringifyJson } from '@pandacss/shared'
-import type { Config, LoadConfigResult, UserConfig } from '@pandacss/types'
+import { mergeConfigs } from "@pandacss/config";
+import { RuleProcessor } from "@pandacss/core";
+import { Generator } from "@pandacss/generator";
+import { PandaContext as OriginalPandaContext } from "@pandacss/node";
+import { parseJson, stringifyJson } from "@pandacss/shared";
+import type { Config, LoadConfigResult, UserConfig } from "@pandacss/types";
 
-export type PandaContext = InstanceType<typeof OriginalPandaContext>
+export type PandaContext = InstanceType<typeof OriginalPandaContext>;
 
 // const hookUtils = {
 //   omit: omit,
@@ -14,32 +14,35 @@ export type PandaContext = InstanceType<typeof OriginalPandaContext>
 // }
 
 const defaults: UserConfig = {
-  cwd: '',
-  outdir: 'styled-system',
+  cwd: "",
+  outdir: "styled-system",
   include: [],
   //
-  cssVarRoot: ':where(html)',
-  jsxFramework: 'react',
-}
-const config = Object.assign({}, defaults)
+  cssVarRoot: ":where(html)",
+  jsxFramework: "react",
+};
+const config = Object.assign({}, defaults);
 
 const fixtureDefaults = {
   dependencies: [],
   config,
-  path: '',
+  path: "",
   hooks: {},
   serialized: stringifyJson(config),
   deserialize: () => parseJson(stringifyJson(config)),
-} as LoadConfigResult
+} as LoadConfigResult;
 
 export const createGeneratorContext = (userConfig?: Config) => {
-  const resolvedConfig = mergeConfigs([userConfig?.eject ? {} : fixtureDefaults.config, userConfig ?? {}]) as UserConfig
+  const resolvedConfig = mergeConfigs([
+    userConfig?.eject ? {} : fixtureDefaults.config,
+    userConfig ?? {},
+  ]) as UserConfig;
 
-  return new Generator({ ...fixtureDefaults, config: resolvedConfig })
-}
+  return new Generator({ ...fixtureDefaults, config: resolvedConfig });
+};
 
-export const createContext = (userConfig?: Config & Pick<Partial<LoadConfigResult>, 'tsconfig'>) => {
-  let resolvedConfig = mergeConfigs([userConfig?.eject ? {} : fixtureDefaults.config, userConfig ?? {}]) as UserConfig
+export const createContext = (userConfig?: Config & Pick<Partial<LoadConfigResult>, "tsconfig">) => {
+  let resolvedConfig = mergeConfigs([userConfig?.eject ? {} : fixtureDefaults.config, userConfig ?? {}]) as UserConfig;
 
   // const hooks = userConfig?.hooks ?? {}
 
@@ -67,10 +70,10 @@ export const createContext = (userConfig?: Config & Pick<Partial<LoadConfigResul
       // @ts-expect-error
       useInMemoryFileSystem: true,
     },
-  })
-}
+  });
+};
 
 export const createRuleProcessor = (userConfig?: Config) => {
-  const ctx = createContext(userConfig)
-  return new RuleProcessor(ctx)
-}
+  const ctx = createContext(userConfig);
+  return new RuleProcessor(ctx);
+};

@@ -1,9 +1,5 @@
 import { describe, expect, test } from "vitest";
-import {
-  extractTailwindClassesFromPandaCss,
-  pandaTokenToTwSuffix,
-  camelToKebab,
-} from "../src/css-to-tw";
+import { extractTailwindClassesFromPandaCss, pandaTokenToTwSuffix, camelToKebab } from "../src/css-to-tw";
 
 describe("css-to-tw", () => {
   test("camelToKebab", () => {
@@ -88,9 +84,7 @@ describe("css-to-tw", () => {
 
     const classes = extractTailwindClassesFromPandaCss(cssObj);
 
-    expect(classes.some((c) => c.includes("hover:") && c.includes("md:"))).toBe(
-      true,
-    );
+    expect(classes.some((c) => c.includes("hover:") && c.includes("md:"))).toBe(true);
     expect(classes).toMatchInlineSnapshot(`
       [
         "hover:md:text-green-500",
