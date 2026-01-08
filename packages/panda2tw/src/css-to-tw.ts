@@ -386,6 +386,8 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
         if (resolvedTextStyle && typeof resolvedTextStyle === "object") {
           // Recursively process the resolved text style object
+          // The values in the resolved textStyle might themselves be token references
+          // that we need to check against the token context
           traverse(resolvedTextStyle, modifiers);
         }
         return;
@@ -402,7 +404,82 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         // Actual style property with value
         const mapping = propertyMap[key];
         if (mapping) {
-          const suffix = resolveToken(key, String(value));
+          // For values from textStyle or other sources, check if they're token references
+          let suffix = String(value);
+
+          // Check if this value matches a token in the context
+          if (pandaContext) {
+            const tokens = pandaContext.config?.theme?.tokens || {};
+            const tokenCategoryMap: Record<string, string> = {
+              color: "colors",
+              backgroundColor: "colors",
+              borderColor: "colors",
+              fillColor: "colors",
+              strokeColor: "colors",
+              padding: "spacing",
+              paddingTop: "spacing",
+              paddingRight: "spacing",
+              paddingBottom: "spacing",
+              paddingLeft: "spacing",
+              margin: "spacing",
+              marginTop: "spacing",
+              marginRight: "spacing",
+              marginBottom: "spacing",
+              marginLeft: "spacing",
+              gap: "spacing",
+              width: "sizing",
+              height: "sizing",
+              maxWidth: "sizing",
+              maxHeight: "sizing",
+              minWidth: "sizing",
+              minHeight: "sizing",
+              fontSize: "fontSizes",
+              fontWeight: "fontWeights",
+              lineHeight: "lineHeights",
+              letterSpacing: "letterSpacing",
+              borderRadius: "radii",
+              borderWidth: "borderWidths",
+              boxShadow: "shadows",
+              textShadow: "shadows",
+            };
+
+            const category = tokenCategoryMap[key];
+            let tokenPath: string | undefined;
+
+            // First try to find this value as a token
+            if (category) {
+              const categoryTokens = resolveDottedPath(category, tokens);
+              if (categoryTokens) {
+                // Search for the token by value
+                for (const [tokenName, tokenValue] of Object.entries(categoryTokens)) {
+                  if (String(tokenValue) === String(value)) {
+                    tokenPath = tokenName;
+                    break;
+                  }
+                  // Also check nested tokens
+                  if (typeof tokenValue === "object" && tokenValue !== null) {
+                    for (const [nestedName, nestedValue] of Object.entries(tokenValue)) {
+                      if (String(nestedValue) === String(value)) {
+                        tokenPath = `${tokenName}.${nestedName}`;
+                        break;
+                      }
+                    }
+                  }
+                  if (tokenPath) break;
+                }
+              }
+            }
+
+            // If we found a token path, use it instead of the raw value
+            if (tokenPath) {
+              suffix = pandaTokenToTwSuffix(tokenPath);
+            } else {
+              suffix = resolveToken(key, String(value));
+            }
+          } else {
+            suffix = resolveToken(key, String(value));
+          }
+
           let className = suffix ? `${mapping.classPrefix}${suffix}` : mapping.classPrefix;
 
           if (modifiers.length > 0) {

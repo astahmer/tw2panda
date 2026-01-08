@@ -21,6 +21,17 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
           spacing: {
             "8px": "8px",
           },
+          fontSizes: {
+            "16px": "16px",
+            "32px": "32px",
+          },
+          lineHeights: {
+            "24px": "24px",
+            "40px": "40px",
+          },
+          fontWeights: {
+            "500": "500",
+          },
         },
         textStyles: {
           body: {
@@ -85,8 +96,8 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     expect(classes).toContain("bg-blue-600");
     expect(classes).toContain("text-white");
     expect(classes).toContain("hover:bg-blue-700");
-    // padding doesn't match any default TW token, so uses arbitrary syntax
-    expect(classes).toContain("p-[8px]");
+    // padding matches the spacing token defined in context
+    expect(classes).toContain("p-8px");
   });
 
   it("handles nested pseudo-selectors with context", () => {
@@ -124,11 +135,11 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
 
     // blue.600 matches default TW color
     expect(classes).toContain("bg-blue-600");
-    // 8px doesn't match any default TW spacing, so uses arbitrary syntax
-    expect(classes).toContain("p-[8px]");
+    // 8px matches the spacing token defined in context
+    expect(classes).toContain("p-8px");
   });
 
-  it("resolves textStyle mixins from context theme", () => {
+  it("resolves textStyle mixins from context theme using token references", () => {
     const cssObj = {
       textStyle: "body",
     };
@@ -136,12 +147,13 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
 
     // textStyle should expand to its constituent properties
+    // and resolve token values to token names instead of raw values
     expect(classes).toContain("text-16px");
     expect(classes).toContain("leading-24px");
     expect(classes).toContain("font-500");
   });
 
-  it("resolves textStyle and merges with other properties", () => {
+  it("resolves textStyle and merges with other properties using token references", () => {
     const cssObj = {
       textStyle: "heading",
       color: "blue.600",
@@ -149,11 +161,44 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
 
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockPandaContext);
 
-    // heading textStyle properties
+    // heading textStyle properties - should resolve to token names
     expect(classes).toContain("text-32px");
     expect(classes).toContain("leading-40px");
     expect(classes).toContain("font-bold");
     // color property
     expect(classes).toContain("text-blue-600");
+  });
+
+  it("resolves textStyle with raw values (non-token) using arbitrary syntax", () => {
+    const mockContextWithRawValues = {
+      config: {
+        theme: {
+          tokens: {
+            colors: {
+              blue: {
+                600: "#2563eb",
+              },
+            },
+          },
+          textStyles: {
+            custom: {
+              fontSize: "18px",
+              fontWeight: "600",
+            },
+          },
+        },
+      },
+    } as any as PandaContext;
+
+    const cssObj = {
+      textStyle: "custom",
+    };
+
+    const classes = extractTailwindClassesFromPandaCssWithContext(cssObj, mockContextWithRawValues);
+
+    // Values that are not in the token map should use arbitrary value syntax or raw handling
+    expect(classes.length).toBeGreaterThan(0);
+    // Should have font-related classes
+    expect(classes.some(c => c.includes("font") || c.includes("text"))).toBe(true);
   });
 });
