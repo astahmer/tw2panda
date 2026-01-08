@@ -52,11 +52,11 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   // Typography
   fontSize: { pattern: /^.*$/, classPrefix: "text-" },
   fontWeight: { pattern: /^.*$/, classPrefix: "font-" },
-  fontStyle: { pattern: /^.*$/, classPrefix: "italic" },
+  fontStyle: { pattern: /^(italic|normal|oblique)$/, classPrefix: "" }, // Special handling
   lineHeight: { pattern: /^.*$/, classPrefix: "leading-" },
   letterSpacing: { pattern: /^.*$/, classPrefix: "tracking-" },
   textAlign: { pattern: /^(left|center|right|justify)$/, classPrefix: "text-" },
-  textDecoration: { pattern: /^.*$/, classPrefix: "underline" },
+  textDecoration: { pattern: /^(none|underline|line-through|overline)$/, classPrefix: "" }, // Special handling
 
   // Flex & Grid
   flexDirection: { pattern: /^(row|column|row-reverse|column-reverse)$/, classPrefix: "flex-" },
@@ -224,6 +224,29 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   strokeLinejoin: { pattern: /^(arcs|bevel|miter|miter-clip|round)$/, classPrefix: "stroke-" },
   paintOrder: { pattern: /^.*$/, classPrefix: "" }, // Special handling
 
+  // Object & Image
+  objectFit: { pattern: /^(contain|cover|fill|none|scale-down)$/, classPrefix: "object-" },
+  objectPosition: { pattern: /^.*$/, classPrefix: "object-" },
+  textOverflow: { pattern: /^(clip|ellipsis)$/, classPrefix: "" }, // Special handling
+
+  // Background
+  backgroundRepeat: { pattern: /^(no-repeat|repeat|repeat-x|repeat-y|repeat-round|repeat-space)$/, classPrefix: "bg-" },
+  backgroundBlendMode: { pattern: /^.*$/, classPrefix: "bg-blend-" },
+
+  // Outline
+  outline: { pattern: /^.*$/, classPrefix: "outline-" },
+  outlineWidth: { pattern: /^.*$/, classPrefix: "outline-" },
+  outlineColor: { pattern: /^.*$/, classPrefix: "outline-" },
+  outlineStyle: { pattern: /^(none|solid|dashed|dotted|double)$/, classPrefix: "outline-" },
+  outlineOffset: { pattern: /^.*$/, classPrefix: "outline-offset-" },
+
+  // Border (shorthand variations)
+  border: { pattern: /^.*$/, classPrefix: "border-" },
+  borderTop: { pattern: /^.*$/, classPrefix: "border-t-" },
+  borderRight: { pattern: /^.*$/, classPrefix: "border-r-" },
+  borderBottom: { pattern: /^.*$/, classPrefix: "border-b-" },
+  borderLeft: { pattern: /^.*$/, classPrefix: "border-l-" },
+
   // Miscellaneous
   clipPath: { pattern: /^.*$/, classPrefix: "clip-" },
   content: { pattern: /^.*$/, classPrefix: "" }, // Special handling (CSS content property)
@@ -357,6 +380,154 @@ export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string
 };
 
 /**
+ * Helper function for special property value mappings
+ * Returns the className if the property has special handling, or null to use default
+ */
+function getSpecialPropertyClass(key: string, strValue: string): string | null {
+  switch (key) {
+    case "textDecoration":
+    case "textDecorationLine":
+      if (strValue === "none") return "no-underline";
+      if (strValue === "underline") return "underline";
+      if (strValue === "line-through") return "line-through";
+      if (strValue === "overline") return "overline";
+      break;
+
+    case "fontStyle":
+      if (strValue === "italic") return "italic";
+      if (strValue === "normal") return "not-italic";
+      if (strValue === "oblique") return "italic";
+      break;
+
+    case "visibility":
+      if (strValue === "hidden") return "invisible";
+      if (strValue === "visible") return "visible";
+      break;
+
+    case "textOverflow":
+      if (strValue === "ellipsis") return "text-ellipsis";
+      if (strValue === "clip") return "text-clip";
+      break;
+
+    case "textTransform":
+      if (strValue === "uppercase") return "uppercase";
+      if (strValue === "lowercase") return "lowercase";
+      if (strValue === "capitalize") return "capitalize";
+      break;
+
+    case "boxSizing":
+      if (strValue === "border-box") return "box-border";
+      if (strValue === "content-box") return "box-content";
+      break;
+
+    case "display":
+      return strValue === "none" ? "hidden" : null;
+
+    case "position":
+      const posMapping = propertyMap[key];
+      if (posMapping && posMapping.pattern.test(strValue)) return strValue;
+      break;
+
+    case "textAlign":
+      const alignMapping = propertyMap[key];
+      if (alignMapping) return `text-${strValue}`;
+      break;
+
+    case "flexWrap":
+      if (strValue === "wrap") return "flex-wrap";
+      if (strValue === "nowrap") return "flex-nowrap";
+      if (strValue === "wrap-reverse") return "flex-wrap-reverse";
+      break;
+
+    case "wordWrap":
+    case "overflowWrap":
+      if (strValue === "break-word") return "break-words";
+      break;
+
+    case "wordBreak": {
+      const wordBreakMapping = propertyMap[key];
+      if (wordBreakMapping) {
+        let suffix = strValue;
+        if (strValue === "break-all") suffix = "all";
+        else if (strValue === "keep-all") suffix = "keep";
+        else if (strValue === "break-word") suffix = "word";
+        else suffix = "normal";
+        return `${wordBreakMapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "whiteSpace": {
+      const wsMapping = propertyMap[key];
+      if (wsMapping) {
+        let suffix = strValue;
+        if (strValue === "pre-wrap") suffix = "pre-wrap";
+        else if (strValue === "pre-line") suffix = "pre-line";
+        else if (strValue === "pre") suffix = "pre";
+        else if (strValue === "nowrap") suffix = "nowrap";
+        else if (strValue === "break-spaces") suffix = "break-spaces";
+        else suffix = "normal";
+        return `${wsMapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "backgroundClip":
+      if (strValue === "text") return "bg-clip-text";
+      if (strValue === "border-box") return "bg-clip-border";
+      if (strValue === "padding-box") return "bg-clip-padding";
+      if (strValue === "content-box") return "bg-clip-content";
+      break;
+
+    case "borderCollapse":
+      if (strValue === "collapse") return "border-collapse";
+      if (strValue === "separate") return "border-separate";
+      break;
+
+    case "tableLayout":
+      if (strValue === "auto") return "table-auto";
+      if (strValue === "fixed") return "table-fixed";
+      break;
+
+    case "scrollBehavior":
+      if (strValue === "smooth") return "scroll-smooth";
+      if (strValue === "auto") return "scroll-auto";
+      break;
+
+    case "listStylePosition":
+      if (strValue === "inside") return "list-inside";
+      if (strValue === "outside") return "list-outside";
+      break;
+
+    case "backgroundRepeat": {
+      const bgRepeatMapping = propertyMap[key];
+      if (bgRepeatMapping) {
+        let suffix = strValue;
+        if (strValue === "no-repeat") suffix = "no-repeat";
+        else if (strValue === "repeat-x") suffix = "repeat-x";
+        else if (strValue === "repeat-y") suffix = "repeat-y";
+        else suffix = "repeat";
+        return `${bgRepeatMapping.classPrefix}${suffix}`;
+      }
+      break;
+    }
+
+    case "objectFit": {
+      const objFitMapping = propertyMap[key];
+      if (objFitMapping) return `${objFitMapping.classPrefix}${strValue}`;
+      break;
+    }
+
+    case "outlineStyle":
+      if (strValue === "none") return "outline-none";
+      if (strValue === "solid") return "outline";
+      break;
+  }
+
+  return null;
+}
+
+/**
  * Extract Tailwind classes from a Panda CSS object
  */
 export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[] => {
@@ -378,156 +549,10 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[
         let className = "";
         const strValue = String(value).toLowerCase();
 
-        // Special handling for properties with specific value mappings
-        if (key === "textDecoration") {
-          if (strValue === "none") {
-            className = "no-underline";
-          } else if (strValue === "underline") {
-            className = "underline";
-          } else if (strValue === "line-through") {
-            className = "line-through";
-          } else if (strValue === "overline") {
-            className = "overline";
-          }
-        } else if (key === "textDecorationLine") {
-          if (strValue === "none") {
-            className = "no-underline";
-          } else if (strValue === "underline") {
-            className = "underline";
-          } else if (strValue === "line-through") {
-            className = "line-through";
-          } else if (strValue === "overline") {
-            className = "overline";
-          }
-        } else if (key === "fontStyle") {
-          if (strValue === "italic") {
-            className = "italic";
-          } else if (strValue === "normal") {
-            className = "not-italic";
-          } else if (strValue === "oblique") {
-            className = "italic";
-          }
-        } else if (key === "visibility") {
-          if (strValue === "hidden") {
-            className = "invisible";
-          } else if (strValue === "visible") {
-            className = "visible";
-          }
-        } else if (key === "whiteSpace") {
-          const mapping = propertyMap[key];
-          if (mapping) {
-            let suffix = strValue;
-            if (strValue === "pre-wrap") suffix = "pre-wrap";
-            else if (strValue === "pre-line") suffix = "pre-line";
-            else if (strValue === "pre") suffix = "pre";
-            else if (strValue === "nowrap") suffix = "nowrap";
-            else if (strValue === "break-spaces") suffix = "break-spaces";
-            else suffix = "normal";
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "wordBreak") {
-          const mapping = propertyMap[key];
-          if (mapping) {
-            let suffix = strValue;
-            if (strValue === "break-all") suffix = "all";
-            else if (strValue === "keep-all") suffix = "keep";
-            else if (strValue === "break-word") suffix = "word";
-            else suffix = "normal";
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "wordWrap" || key === "overflowWrap") {
-          if (strValue === "break-word") {
-            className = "break-words";
-          }
-        } else if (key === "boxSizing") {
-          if (strValue === "border-box") {
-            className = "box-border";
-          } else if (strValue === "content-box") {
-            className = "box-content";
-          }
-        } else if (key === "display") {
-          className = strValue === "none" ? "hidden" : strValue;
-        } else if (key === "position") {
-          const mapping = propertyMap[key];
-          if (mapping && mapping.pattern.test(strValue)) {
-            className = strValue;
-          }
-        } else if (key === "textAlign") {
-          const mapping = propertyMap[key];
-          if (mapping) {
-            className = `text-${strValue}`;
-          }
-        } else if (key === "textTransform") {
-          if (strValue === "uppercase") {
-            className = "uppercase";
-          } else if (strValue === "lowercase") {
-            className = "lowercase";
-          } else if (strValue === "capitalize") {
-            className = "capitalize";
-          }
-        } else if (key === "flexWrap") {
-          const mapping = propertyMap[key];
-          if (mapping) {
-            if (strValue === "wrap") {
-              className = "flex-wrap";
-            } else if (strValue === "nowrap") {
-              className = "flex-nowrap";
-            } else if (strValue === "wrap-reverse") {
-              className = "flex-wrap-reverse";
-            }
-          }
-        } else if (key === "overflow" || key === "overflowX" || key === "overflowY") {
-          const mapping = propertyMap[key];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "backgroundClip") {
-          if (strValue === "text") {
-            className = "bg-clip-text";
-          } else if (strValue === "border-box") {
-            className = "bg-clip-border";
-          } else if (strValue === "padding-box") {
-            className = "bg-clip-padding";
-          } else if (strValue === "content-box") {
-            className = "bg-clip-content";
-          }
-        } else if (key === "borderCollapse") {
-          if (strValue === "collapse") {
-            className = "border-collapse";
-          } else if (strValue === "separate") {
-            className = "border-separate";
-          }
-        } else if (key === "tableLayout") {
-          if (strValue === "auto") {
-            className = "table-auto";
-          } else if (strValue === "fixed") {
-            className = "table-fixed";
-          }
-        } else if (key === "scrollBehavior") {
-          if (strValue === "smooth") {
-            className = "scroll-smooth";
-          } else if (strValue === "auto") {
-            className = "scroll-auto";
-          }
-        } else if (key === "listStylePosition") {
-          if (strValue === "inside") {
-            className = "list-inside";
-          } else if (strValue === "outside") {
-            className = "list-outside";
-          }
-        } else if (key === "pointerEvents") {
-          const mapping = propertyMap[key];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "userSelect") {
-          const mapping = propertyMap[key];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
+        // Try special handling first
+        const specialClass = getSpecialPropertyClass(key, strValue);
+        if (specialClass !== null) {
+          className = specialClass;
         } else {
           // Default handling for all other properties
           const mapping = propertyMap[key];
@@ -831,188 +856,10 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         let className = "";
         const strValue = String(value).toLowerCase();
 
-        // Special handling for properties that need custom value mapping
-        if (key === "textDecoration") {
-          // textDecoration: values map to specific classes
-          if (strValue === "none") {
-            className = "no-underline";
-          } else if (strValue === "underline") {
-            className = "underline";
-          } else if (strValue === "line-through" || strValue === "line through") {
-            className = "line-through";
-          } else if (strValue === "overline") {
-            className = "overline";
-          }
-        } else if (key === "textDecorationLine") {
-          // textDecorationLine: similar to textDecoration
-          if (strValue === "none") {
-            className = "no-underline";
-          } else if (strValue === "underline") {
-            className = "underline";
-          } else if (strValue === "line-through") {
-            className = "line-through";
-          } else if (strValue === "overline") {
-            className = "overline";
-          }
-        } else if (key === "fontStyle") {
-          // fontStyle: italic, normal, oblique
-          if (strValue === "italic") {
-            className = "italic";
-          } else if (strValue === "normal") {
-            className = "not-italic";
-          } else if (strValue === "oblique") {
-            className = "italic"; // Tailwind uses italic for oblique
-          }
-        } else if (key === "visibility") {
-          // visibility: visible, hidden, collapse
-          if (strValue === "hidden") {
-            className = "invisible";
-          } else if (strValue === "visible") {
-            className = "visible";
-          }
-        } else if (key === "pointerEvents") {
-          // pointerEvents: auto, none
-          const mapping = propertyMap[key];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "userSelect") {
-          // userSelect: auto, none, text, contain, all
-          const mapping = propertyMap[key];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "whiteSpace") {
-          // whiteSpace: normal, nowrap, pre, pre-wrap, pre-line, break-spaces
-          const mapping = propertyMap[key];
-          if (mapping) {
-            let suffix = strValue;
-            if (strValue === "pre-wrap") suffix = "pre-wrap";
-            else if (strValue === "pre-line") suffix = "pre-line";
-            else if (strValue === "pre") suffix = "pre";
-            else if (strValue === "nowrap") suffix = "nowrap";
-            else if (strValue === "break-spaces") suffix = "break-spaces";
-            else suffix = "normal";
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "wordBreak") {
-          // wordBreak: normal, break-all, keep-all, break-word
-          const mapping = propertyMap[key];
-          if (mapping) {
-            let suffix = strValue;
-            if (strValue === "break-all") suffix = "all";
-            else if (strValue === "keep-all") suffix = "keep";
-            else if (strValue === "break-word") suffix = "word";
-            else suffix = "normal";
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "wordWrap" || key === "overflowWrap") {
-          // wordWrap/overflowWrap: normal, break-word
-          if (strValue === "break-word") {
-            className = "break-words";
-          }
-        } else if (key === "boxSizing") {
-          // boxSizing: border-box, content-box
-          if (strValue === "border-box") {
-            className = "box-border";
-          } else if (strValue === "content-box") {
-            className = "box-content";
-          }
-        } else if (key === "display") {
-          // display: handle special cases
-          const mapping = propertyMap[key];
-          if (mapping) {
-            // Direct mapping for display values
-            className = strValue === "none" ? "hidden" : strValue;
-          }
-        } else if (key === "position") {
-          // position: static, relative, absolute, fixed, sticky
-          const mapping = propertyMap[key];
-          if (mapping && mapping.pattern.test(strValue)) {
-            className = strValue;
-          }
-        } else if (key === "textAlign") {
-          // textAlign: left, center, right, justify
-          const mapping = propertyMap[key];
-          if (mapping) {
-            className = `text-${strValue}`;
-          }
-        } else if (key === "textTransform") {
-          // textTransform: uppercase, lowercase, capitalize, none
-          if (strValue === "uppercase") {
-            className = "uppercase";
-          } else if (strValue === "lowercase") {
-            className = "lowercase";
-          } else if (strValue === "capitalize") {
-            className = "capitalize";
-          }
-        } else if (key === "flexWrap") {
-          // flexWrap: wrap, nowrap, wrap-reverse
-          const mapping = propertyMap[key];
-          if (mapping) {
-            if (strValue === "wrap") {
-              className = "flex-wrap";
-            } else if (strValue === "nowrap") {
-              className = "flex-nowrap";
-            } else if (strValue === "wrap-reverse") {
-              className = "flex-wrap-reverse";
-            }
-          }
-        } else if (key === "overflow" || key === "overflowX" || key === "overflowY") {
-          // overflow properties
-          const mapping = propertyMap[key];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        } else if (key === "backgroundClip") {
-          // backgroundClip: border-box, padding-box, content-box, text
-          if (strValue === "text") {
-            className = "bg-clip-text";
-          } else if (strValue === "border-box") {
-            className = "bg-clip-border";
-          } else if (strValue === "padding-box") {
-            className = "bg-clip-padding";
-          } else if (strValue === "content-box") {
-            className = "bg-clip-content";
-          }
-        } else if (key === "borderCollapse") {
-          // borderCollapse: collapse, separate
-          if (strValue === "collapse") {
-            className = "border-collapse";
-          } else if (strValue === "separate") {
-            className = "border-separate";
-          }
-        } else if (key === "tableLayout") {
-          // tableLayout: auto, fixed
-          if (strValue === "auto") {
-            className = "table-auto";
-          } else if (strValue === "fixed") {
-            className = "table-fixed";
-          }
-        } else if (key === "scrollBehavior") {
-          // scrollBehavior: auto, smooth
-          if (strValue === "smooth") {
-            className = "scroll-smooth";
-          } else if (strValue === "auto") {
-            className = "scroll-auto";
-          }
-        } else if (key === "listStylePosition") {
-          // listStylePosition: inside, outside
-          if (strValue === "inside") {
-            className = "list-inside";
-          } else if (strValue === "outside") {
-            className = "list-outside";
-          }
-        } else if (key === "cursor") {
-          // cursor values
-          const mapping = propertyMap[key];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
+        // Try special handling first
+        const specialClass = getSpecialPropertyClass(key, strValue);
+        if (specialClass !== null) {
+          className = specialClass;
         } else {
           // Default handling for all other properties
           const mapping = propertyMap[key];

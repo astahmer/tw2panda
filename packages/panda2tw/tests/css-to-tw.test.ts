@@ -501,5 +501,29 @@ describe("css-to-tw", () => {
       expect(classes.some((c) => c.includes("hover:uppercase"))).toBe(true);
       expect(classes.some((c) => c.includes("dark:invisible"))).toBe(true);
     });
+
+    test("textOverflow, objectFit, outlineStyle, backgroundRepeat", () => {
+      const textOverflowClasses = extractTailwindClassesFromPandaCss({ textOverflow: "ellipsis" });
+      const objectFitClasses = extractTailwindClassesFromPandaCss({ objectFit: "cover" });
+      const outlineStyleClasses = extractTailwindClassesFromPandaCss({ outlineStyle: "none" });
+      const bgRepeatClasses = extractTailwindClassesFromPandaCss({ backgroundRepeat: "no-repeat" });
+
+      expect(textOverflowClasses).toContain("text-ellipsis");
+      expect(objectFitClasses).toContain("object-cover");
+      expect(outlineStyleClasses).toContain("outline-none");
+      expect(bgRepeatClasses).toContain("bg-no-repeat");
+    });
+
+    test("border and outline properties", () => {
+      const borderClasses = extractTailwindClassesFromPandaCss({ border: "1px solid black" });
+      const borderTopClasses = extractTailwindClassesFromPandaCss({ borderTop: "2px solid red" });
+      const outlineClasses = extractTailwindClassesFromPandaCss({ outline: "2px solid blue" });
+      const outlineOffsetClasses = extractTailwindClassesFromPandaCss({ outlineOffset: "2px" });
+
+      expect(borderClasses.some((c) => c.includes("border"))).toBe(true);
+      expect(borderTopClasses.some((c) => c.includes("border-t"))).toBe(true);
+      expect(outlineClasses.some((c) => c.includes("outline"))).toBe(true);
+      expect(outlineOffsetClasses).toContain("outline-offset-2px");
+    });
   });
 });
