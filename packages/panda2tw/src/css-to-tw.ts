@@ -9,11 +9,32 @@ import type { Config } from "tailwindcss";
 import { createTailwindContext } from "./tw-context.js";
 
 /**
- * Map of Panda CSS shorthand properties to their full property names
- * E.g., mt -> marginTop, pt -> paddingTop
+ * Build shorthand map from Panda context utilities
+ * Falls back to default mapping if context is not available
  */
-const shorthandMap: Record<string, string> = {
-  // Margin shorthands
+const buildShorthandMap = (pandaContext?: PandaContext): Record<string, string> => {
+  if (!pandaContext?.config?.utilities) {
+    return getDefaultShorthandMap();
+  }
+
+  const utilities = pandaContext.config.utilities;
+  const map: Record<string, string> = {};
+
+  // Build shorthand map from utilities
+  Object.entries(utilities).forEach(([key, util]) => {
+    if (util?.shorthand && typeof util.shorthand === "string") {
+      map[util.shorthand] = key;
+    }
+  });
+
+  // If no shorthands found, use defaults
+  return Object.keys(map).length > 0 ? map : getDefaultShorthandMap();
+};
+
+/**
+ * Default shorthand map for when Panda context is not available
+ */
+const getDefaultShorthandMap = (): Record<string, string> => ({
   m: "margin",
   mt: "marginTop",
   mr: "marginRight",
@@ -21,8 +42,6 @@ const shorthandMap: Record<string, string> = {
   ml: "marginLeft",
   mx: "marginX",
   my: "marginY",
-
-  // Padding shorthands
   p: "padding",
   pt: "paddingTop",
   pr: "paddingRight",
@@ -30,16 +49,12 @@ const shorthandMap: Record<string, string> = {
   pl: "paddingLeft",
   px: "paddingX",
   py: "paddingY",
-
-  // Width/Height shorthands
   w: "width",
   h: "height",
   minW: "minWidth",
   maxW: "maxWidth",
   minH: "minHeight",
   maxH: "maxHeight",
-
-  // Position shorthands
   pos: "position",
   inset: "inset",
   insetX: "insetX",
@@ -48,8 +63,6 @@ const shorthandMap: Record<string, string> = {
   right: "right",
   bottom: "bottom",
   left: "left",
-
-  // Border shorthands
   border: "border",
   borderTop: "borderTop",
   borderRight: "borderRight",
@@ -66,24 +79,16 @@ const shorthandMap: Record<string, string> = {
   roundedTr: "borderTopRightRadius",
   roundedBr: "borderBottomRightRadius",
   roundedBl: "borderBottomLeftRadius",
-
-  // Text shorthands
   text: "fontSize",
   textColor: "color",
   tracking: "letterSpacing",
   leading: "lineHeight",
-
-  // Gap shorthands
   gap: "gap",
   gapX: "gapX",
   gapY: "gapY",
-
-  // Space shorthands
   space: "space",
   spaceX: "spaceX",
   spaceY: "spaceY",
-
-  // Flex/Grid shorthands
   items: "alignItems",
   justify: "justifyContent",
   self: "alignSelf",
@@ -91,31 +96,19 @@ const shorthandMap: Record<string, string> = {
   rows: "gridTemplateRows",
   col: "gridColumn",
   row: "gridRow",
-
-  // Display shorthands (d, hidden, block, inline, flex, grid)
   d: "display",
   hidden: "display",
   block: "display",
   inline: "display",
   flex: "display",
   grid: "display",
-
-  // Shadow shorthands
   shadow: "boxShadow",
-
-  // Overflow shorthands
   overflow: "overflow",
   overflowX: "overflowX",
   overflowY: "overflowY",
-
-  // Background shorthands
   bg: "backgroundColor",
-
-  // Border color/width shorthands
   borderColor: "borderColor",
   borderWidth: "borderWidth",
-
-  // Other common shorthands
   opacity: "opacity",
   scale: "scale",
   scaleX: "scaleX",
@@ -132,14 +125,36 @@ const shorthandMap: Record<string, string> = {
   pointerEvents: "pointerEvents",
   visibility: "visibility",
   zIndex: "zIndex",
+});
+
+/**
+ * Convert Panda shorthand property to its full property name using context
+ * Falls back to defaults if context is not provided
+ */
+export const expandShorthand = (prop: string, pandaContext?: PandaContext): string => {
+  const map = buildShorthandMap(pandaContext);
+  return map[prop] ?? prop;
 };
 
 /**
- * Convert Panda shorthand property to its full property name
- * E.g., mt -> marginTop, pt -> paddingTop
+ * Get responsive condition keys from Panda context
+ * Returns keys like ['base', 'md', 'lg', 'xl'] based on configured breakpoints
  */
-export const expandShorthand = (prop: string): string => {
-  return shorthandMap[prop] ?? prop;
+const getResponsiveConditionKeys = (pandaContext?: PandaContext): string[] => {
+  if (!pandaContext?.conditions?.breakpoints) {
+    // Default fallback conditions if context is not available
+    return ["base", "sm", "md", "lg", "xl", "2xl", "3xl"];
+  }
+
+  const breakpoints = pandaContext.conditions.breakpoints;
+  const keys = Object.keys(breakpoints);
+
+  // Sort with 'base' first
+  return keys.sort((a, b) => {
+    if (a === "base") return -1;
+    if (b === "base") return 1;
+    return 0;
+  });
 };
 
 // Comprehensive mapping of CSS properties to Tailwind prefix patterns
@@ -680,11 +695,11 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
  * Extract Tailwind classes from a Panda CSS object
  * Supports panda shorthands (mt, pt, etc.) and responsive conditions (base, md, lg, etc.)
  */
-export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[] => {
+export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaContext?: PandaContext): string[] => {
   const classes: string[] = [];
 
-  // List of responsive breakpoints that should NOT be used as prefixes when at base level
-  const baseResponsiveBreakpoints = ["base"];
+  // Get responsive condition keys from context
+  const responsiveConditionKeys = getResponsiveConditionKeys(pandaContext);
 
   const traverse = (obj: any, modifiers: string[] = []): void => {
     if (!obj || typeof obj !== "object") return;
@@ -696,22 +711,19 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[
         traverse(value, [...modifiers, modifier]);
       } else if (typeof value === "object" && !Array.isArray(value)) {
         // Nested object (could be responsive condition like md:, base: or pseudo like _hover)
-        // Check if it looks like a responsive condition (common breakpoint names)
-        const isResponsiveCondition = ["sm", "md", "lg", "xl", "2xl", "3xl"].includes(key);
-
-        if (isResponsiveCondition || (modifiers.length > 0 && !key.startsWith("_"))) {
-          // Apply as responsive modifier only if it's a known breakpoint or we already have modifiers
-          traverse(value, [...modifiers, key]);
-        } else if (key === "base") {
+        if (key === "base") {
           // "base" is just the default, don't add it as a modifier
           traverse(value, modifiers);
-        } else if (!key.startsWith("_")) {
-          // Unknown nested object, still process it as a potential responsive condition
+        } else if (responsiveConditionKeys.includes(key)) {
+          // Apply as responsive modifier for known breakpoints (excluding base)
+          traverse(value, [...modifiers, key]);
+        } else if (modifiers.length > 0 && !key.startsWith("_")) {
+          // If we already have modifiers, treat other nested objects as additional conditions
           traverse(value, [...modifiers, key]);
         }
       } else if (typeof value === "string" || typeof value === "number") {
         // Actual style property - expand shorthand first
-        const expandedKey = expandShorthand(key);
+        const expandedKey = expandShorthand(key, pandaContext);
         let className = "";
         const strValue = String(value).toLowerCase();
 
@@ -987,6 +999,9 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     return null;
   };
 
+  // Get responsive condition keys from context
+  const responsiveConditionKeys = getResponsiveConditionKeys(pandaContext);
+
   const traverse = (obj: any, modifiers: string[] = []): void => {
     if (!obj || typeof obj !== "object") return;
 
@@ -1013,15 +1028,12 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         traverse(value, [...modifiers, modifier]);
       } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
         // Nested object (could be responsive condition like md:, base: or pseudo-selector)
-        // Check if it looks like a responsive condition (common breakpoint names)
-        const isResponsiveCondition = ["sm", "md", "lg", "xl", "2xl", "3xl"].includes(key);
-
-        if (isResponsiveCondition) {
-          // Apply as responsive modifier for known breakpoints
-          traverse(value, [...modifiers, key]);
-        } else if (key === "base") {
+        if (key === "base") {
           // "base" is just the default, don't add it as a modifier
           traverse(value, modifiers);
+        } else if (responsiveConditionKeys.includes(key)) {
+          // Apply as responsive modifier for known breakpoints (excluding base)
+          traverse(value, [...modifiers, key]);
         } else if (modifiers.length > 0 && !key.startsWith("_")) {
           // If we already have modifiers, treat other nested objects as additional conditions
           traverse(value, [...modifiers, key]);
@@ -1031,7 +1043,7 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         }
       } else if (typeof value === "string" || typeof value === "number") {
         // Actual style property with value - expand shorthand first
-        const expandedKey = expandShorthand(key);
+        const expandedKey = expandShorthand(key, pandaContext);
         let className = "";
         const strValue = String(value).toLowerCase();
 

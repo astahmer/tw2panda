@@ -45,10 +45,10 @@ const processSourceFile = (
   cssCalls.forEach((call) => {
     try {
       const cssObj = nodeToObject(call.argument);
-      // Use context-aware conversion if available
+      // Use context-aware conversion if available, otherwise pass context for shorthand/responsive resolution
       const classes = pandaContext
         ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext as any, tailwindConfig)
-        : extractTailwindClassesFromPandaCss(cssObj);
+        : extractTailwindClassesFromPandaCss(cssObj, pandaContext as any);
 
       if (classes.length > 0) {
         const classString = classes.join(" ");
@@ -165,7 +165,7 @@ const processSourceFile = (
       // Convert CSS object to Tailwind classes
       const classes = pandaContext
         ? extractTailwindClassesFromPandaCssWithContext(objectToConvert, pandaContext as any, tailwindConfig)
-        : extractTailwindClassesFromPandaCss(objectToConvert);
+        : extractTailwindClassesFromPandaCss(objectToConvert, pandaContext as any);
 
       if (classes.length > 0) {
         const classString = classes.join(" ");
