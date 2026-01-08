@@ -782,4 +782,147 @@ describe("css-to-tw", () => {
       expect(classes.some((c) => c === "lg:p-8")).toBe(true);
     });
   });
+
+  describe("CSS selector conversion", () => {
+    test("converts & > :last-child to last: variant", () => {
+      const cssObj = {
+        "& > :last-child": {
+          paddingBottom: "24",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("last:pb-24");
+    });
+
+    test("converts & > :first-child to first: variant", () => {
+      const cssObj = {
+        "& > :first-child": {
+          paddingTop: "16",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("first:pt-16");
+    });
+
+    test("converts &:hover to hover: variant", () => {
+      const cssObj = {
+        "&:hover": {
+          backgroundColor: "blue.500",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("hover:bg-blue"))).toBe(true);
+    });
+
+    test("converts &:focus to focus: variant", () => {
+      const cssObj = {
+        "&:focus": {
+          borderColor: "blue.600",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("focus:border-blue"))).toBe(true);
+    });
+
+    test("converts &:first-child to first: variant", () => {
+      const cssObj = {
+        "&:first-child": {
+          marginTop: "0",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("first:"))).toBe(true);
+    });
+
+    test("converts &:last-child to last: variant", () => {
+      const cssObj = {
+        "&:last-child": {
+          marginBottom: "0",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("last:"))).toBe(true);
+    });
+
+    test("converts &::before to before: variant", () => {
+      const cssObj = {
+        "&::before": {
+          display: "block",
+          width: "100",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      // before: variant should apply to the CSS properties
+      expect(classes.some((c) => c.includes("before:block"))).toBe(true);
+      expect(classes.some((c) => c.includes("before:w-100"))).toBe(true);
+    });
+
+    test("converts &::after to after: variant", () => {
+      const cssObj = {
+        "&::after": {
+          display: "block",
+          backgroundColor: "gray.100",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      // after: variant should apply to the CSS properties
+      expect(classes.some((c) => c.includes("after:block"))).toBe(true);
+      expect(classes.some((c) => c.includes("after:bg-gray"))).toBe(true);
+    });
+
+    test("handles complex nested selectors with responsive conditions", () => {
+      const cssObj = {
+        gap: "24",
+        height: "100",
+        minHeight: "0",
+        marginBottom: "24",
+        paddingY: "0",
+        paddingX: "24",
+        "& > :last-child": {
+          paddingBottom: "24",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("gap-24");
+      expect(classes).toContain("h-100");
+      expect(classes).toContain("min-h-0");
+      expect(classes).toContain("mb-24");
+      expect(classes).toContain("py-0");
+      expect(classes).toContain("px-24");
+      expect(classes).toContain("last:pb-24");
+    });
+
+    test("skips unknown selectors", () => {
+      const cssObj = {
+        display: "flex",
+        ".some-random-class": {
+          color: "red.500",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      // Should only have the display class, not process the unknown selector
+      expect(classes.length).toBe(1);
+      expect(classes).toContain("flex");
+    });
+  });
 });

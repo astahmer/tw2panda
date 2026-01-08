@@ -700,6 +700,40 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
 }
 
 /**
+ * Map common CSS selectors to Tailwind variants
+ * Converts selectors like '& > :last-child' to 'last'
+ */
+const selectorToTwVariant = (selector: string): string | null => {
+  const trimmed = selector.trim();
+
+  // Map of selector patterns to Tailwind variants
+  const selectorMap: Record<string, string> = {
+    "&": "", // Root element (no modifier needed)
+    "&:hover": "hover",
+    "&:focus": "focus",
+    "&:active": "active",
+    "&:disabled": "disabled",
+    "&:invalid": "invalid",
+    "&:first-child": "first",
+    "&:last-child": "last",
+    "&:nth-child(2n)": "even",
+    "&:nth-child(2n + 1)": "odd",
+    "& > :first-child": "first",
+    "& > :last-child": "last",
+    "&::before": "before",
+    "&::after": "after",
+    "&:visited": "visited",
+    "&:target": "target",
+    "&:enabled": "enabled",
+    "&:checked": "checked",
+    "&:not(:disabled)": "enabled",
+    "&:placeholder-shown": "placeholder-shown",
+  };
+
+  return selectorMap[trimmed] ?? null;
+};
+
+/**
  * Extract Tailwind classes from a Panda CSS object
  * Supports panda shorthands (mt, pt, etc.) and responsive conditions (base, md, lg, etc.)
  */
@@ -725,9 +759,18 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
         } else if (responsiveConditionKeys.includes(key)) {
           // Apply as responsive modifier for known breakpoints (excluding base)
           traverse(value, [...modifiers, key]);
-        } else if (modifiers.length > 0 && !key.startsWith("_")) {
-          // If we already have modifiers, treat other nested objects as additional conditions
-          traverse(value, [...modifiers, key]);
+        } else {
+          // Try to convert CSS selector to Tailwind variant
+          const twVariant = selectorToTwVariant(key);
+          if (twVariant !== null) {
+            // Valid Tailwind variant found
+            const newModifiers = twVariant ? [...modifiers, twVariant] : modifiers;
+            traverse(value, newModifiers);
+          } else if (modifiers.length > 0 && !key.startsWith("_")) {
+            // If we already have modifiers, treat other nested objects as additional conditions
+            traverse(value, [...modifiers, key]);
+          }
+          // Otherwise skip this selector (it's not a recognized pattern)
         }
       } else if (typeof value === "string" || typeof value === "number") {
         // Actual style property - expand shorthand first
@@ -1053,30 +1096,38 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         } else if (responsiveConditionKeys.includes(key)) {
           // Apply as responsive modifier for known breakpoints (excluding base)
           traverse(value, [...modifiers, key]);
-        } else if (modifiers.length > 0 && !key.startsWith("_")) {
-          // If we already have modifiers, treat other nested objects as additional conditions
-          traverse(value, [...modifiers, key]);
         } else {
-          // Check if this is a responsive property definition (all keys are responsive conditions)
-          const objectKeys = Object.keys(value);
-          const allKeysAreResponsive = objectKeys.length > 0 &&
-            objectKeys.every(k => responsiveConditionKeys.includes(k) || k === "base");
-
-          // Also check if all values are primitives (strings/numbers), which indicates responsive values
-          const allValuesArePrimitives = objectKeys.length > 0 &&
-            objectKeys.every(k => typeof value[k] === "string" || typeof value[k] === "number");
-
-          if (allKeysAreResponsive || allValuesArePrimitives) {
-            // This is a responsive property like gridTemplateColumns: { base: '...', xl: '...' }
-            // Process each responsive variant
-            Object.entries(value).forEach(([respKey, respValue]) => {
-              const respModifiers = respKey === "base" ? modifiers : [...modifiers, respKey];
-              const propertyObj = { [key]: respValue };
-              traverse(propertyObj, respModifiers);
-            });
+          // Try to convert CSS selector to Tailwind variant
+          const twVariant = selectorToTwVariant(key);
+          if (twVariant !== null) {
+            // Valid Tailwind variant found
+            const newModifiers = twVariant ? [...modifiers, twVariant] : modifiers;
+            traverse(value, newModifiers);
+          } else if (modifiers.length > 0 && !key.startsWith("_")) {
+            // If we already have modifiers, treat other nested objects as additional conditions
+            traverse(value, [...modifiers, key]);
           } else {
-            // Otherwise just process the nested object without adding a modifier
-            traverse(value, modifiers);
+            // Check if this is a responsive property definition (all keys are responsive conditions)
+            const objectKeys = Object.keys(value);
+            const allKeysAreResponsive = objectKeys.length > 0 &&
+              objectKeys.every(k => responsiveConditionKeys.includes(k) || k === "base");
+
+            // Also check if all values are primitives (strings/numbers), which indicates responsive values
+            const allValuesArePrimitives = objectKeys.length > 0 &&
+              objectKeys.every(k => typeof value[k] === "string" || typeof value[k] === "number");
+
+            if (allKeysAreResponsive || allValuesArePrimitives) {
+              // This is a responsive property like gridTemplateColumns: { base: '...', xl: '...' }
+              // Process each responsive variant
+              Object.entries(value).forEach(([respKey, respValue]) => {
+                const respModifiers = respKey === "base" ? modifiers : [...modifiers, respKey];
+                const propertyObj = { [key]: respValue };
+                traverse(propertyObj, respModifiers);
+              });
+            } else {
+              // Otherwise just process the nested object without adding a modifier
+              traverse(value, modifiers);
+            }
           }
         }
       } else if (typeof value === "string" || typeof value === "number") {
