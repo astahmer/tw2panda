@@ -16,13 +16,13 @@ export type ConfigFileOptions = {
 };
 
 export function findPandaConfig({ from }: { from: string }) {
-  return findUp(from, (_dir, paths) => {
+  return findUp.default(from, (_dir, paths) => {
     return paths.find(isPandaConfig);
   });
 }
 
 export function findTailwindConfig({ from }: { from: string }) {
-  return findUp(from, (_dir, paths) => {
+  return findUp.default(from, (_dir, paths) => {
     return paths.find(isTailwindConfig);
   });
 }

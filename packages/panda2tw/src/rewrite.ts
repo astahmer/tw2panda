@@ -237,7 +237,7 @@ export const rewritePattern = async (
 
         // Also load Tailwind context for better token matching
         const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
-        tailwindConfig = tailwindResult.context?.config || tailwindResult as any;
+        tailwindConfig = (tailwindResult.context?.config || tailwindResult as any) as any;
       } catch (e) {
         // Context loading is optional - continue without it
       }
@@ -306,7 +306,7 @@ export const batchRewritePandaToTailwind = async (
 
     // Also load Tailwind config for all token types
     const tailwindResult = await loadTailwindContext({ cwd: process.cwd() });
-    tailwindConfig = tailwindResult.context?.config || tailwindResult as any;
+    tailwindConfig = (tailwindResult.context?.config || tailwindResult as any) as any;
   } catch (e) {
     // Context loading is optional - continue without it
   }
