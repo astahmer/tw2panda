@@ -1256,14 +1256,16 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
       gap: "24"
     };
 
-    // Without context - xlDown won't be recognized as a known breakpoint
+    // Without context - xlDown won't be recognized as a known breakpoint,
+    // but our improved detection checks if all values are primitives
     const classes = extractTailwindClassesFromPandaCssWithContext(cssObj);
 
     // Responsive grid columns (using default breakpoints)
     expect(classes).toContain("grid-cols-[1fr]");
     expect(classes).toContain("xl:grid-cols-[8fr 4fr]");
-    // When breakpoint is unknown, we should still handle it gracefully
-    // The xlDown key won't match known breakpoints, so fallback behavior applies
+    // Even with unknown breakpoint, we now detect it by checking if all values are primitives
+    expect(classes).toContain("xlDown:overflow-y-auto");
+    // Other properties
     expect(classes).toContain("w-100%");
     expect(classes).toContain("h-100%");
     expect(classes).toContain("px-24");

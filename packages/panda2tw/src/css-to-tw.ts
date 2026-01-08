@@ -1062,7 +1062,11 @@ export const extractTailwindClassesFromPandaCssWithContext = (
           const allKeysAreResponsive = objectKeys.length > 0 &&
             objectKeys.every(k => responsiveConditionKeys.includes(k) || k === "base");
 
-          if (allKeysAreResponsive) {
+          // Also check if all values are primitives (strings/numbers), which indicates responsive values
+          const allValuesArePrimitives = objectKeys.length > 0 &&
+            objectKeys.every(k => typeof value[k] === "string" || typeof value[k] === "number");
+
+          if (allKeysAreResponsive || allValuesArePrimitives) {
             // This is a responsive property like gridTemplateColumns: { base: '...', xl: '...' }
             // Process each responsive variant
             Object.entries(value).forEach(([respKey, respValue]) => {
