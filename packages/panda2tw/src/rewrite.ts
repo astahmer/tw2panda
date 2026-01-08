@@ -2,7 +2,7 @@
  * Main rewrite logic: Convert Panda CSS file to Tailwind
  */
 
-import { Project, SourceFile } from "ts-morph";
+import { Project, SourceFile, Node } from "ts-morph";
 import MagicString from "magic-string";
 import { globSync } from "glob";
 import { readFileSync, writeFileSync } from "fs";
@@ -55,7 +55,26 @@ const processSourceFile = (
 
       if (classes.length > 0) {
         const classString = classes.join(" ");
-        const replacement = `className="${classString}"`;
+
+        // Check if css() call is inside a JSX expression (like className={css(...)})
+        // by checking if parent is a JsxExpression
+        let parent = call.node.getParent();
+        let isInJsxExpression = false;
+
+        while (parent) {
+          if (Node.isJsxExpression(parent)) {
+            isInJsxExpression = true;
+            break;
+          }
+          if (Node.isJsxAttribute(parent) || Node.isJsxOpeningElement(parent)) {
+            break;
+          }
+          parent = parent.getParent();
+        }
+
+        // If inside a JSX expression, just use the class string
+        // Otherwise, replace with className="..."
+        const replacement = isInJsxExpression ? `"${classString}"` : `className="${classString}"`;
 
         magicStr.overwrite(call.startPos, call.endPos, replacement);
         conversions.push({

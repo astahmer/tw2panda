@@ -73,4 +73,43 @@ export const Component = () => {
     expect(result.output).not.toContain("className=");
     expect(result.conversions).toHaveLength(0);
   });
+
+  test("handles className={css(...)} correctly without doubling className", () => {
+    const input = `
+export function Avatar() {
+  return (
+    <img
+      className={css({ width: '[80px]', height: '[80px]' })}
+      alt="presentation"
+    />
+  );
+}
+    `.trim();
+
+    const result = rewritePandaToTailwind(input, "test.tsx");
+
+    expect(result.output).toMatchInlineSnapshot(`
+      "export function Avatar() {
+        return (
+          <img
+            className={"w-[80px] h-[80px]"}
+            alt="presentation"
+          />
+        );
+      }"
+    `);
+    expect(result.conversions).toMatchInlineSnapshot(`
+      [
+        {
+          "original": "css({ width: '[80px]', height: '[80px]' })",
+          "replacement": ""w-[80px] h-[80px]"",
+        },
+      ]
+    `);
+
+    // Strict assertions - ensure we don't have className={className="..."}
+    expect(result.output).not.toContain('className={className=');
+    expect(result.output).toContain('className={"w-[80px] h-[80px]"}');
+    expect(result.conversions).toHaveLength(1);
+  });
 });
