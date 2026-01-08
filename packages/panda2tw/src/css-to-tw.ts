@@ -8,6 +8,142 @@ import type { PandaContext } from "./panda-context.js";
 import type { Config } from "tailwindcss";
 import { createTailwindContext } from "./tw-context.js";
 
+/**
+ * Map of Panda CSS shorthand properties to their full property names
+ * E.g., mt -> marginTop, pt -> paddingTop
+ */
+const shorthandMap: Record<string, string> = {
+  // Margin shorthands
+  m: "margin",
+  mt: "marginTop",
+  mr: "marginRight",
+  mb: "marginBottom",
+  ml: "marginLeft",
+  mx: "marginX",
+  my: "marginY",
+
+  // Padding shorthands
+  p: "padding",
+  pt: "paddingTop",
+  pr: "paddingRight",
+  pb: "paddingBottom",
+  pl: "paddingLeft",
+  px: "paddingX",
+  py: "paddingY",
+
+  // Width/Height shorthands
+  w: "width",
+  h: "height",
+  minW: "minWidth",
+  maxW: "maxWidth",
+  minH: "minHeight",
+  maxH: "maxHeight",
+
+  // Position shorthands
+  pos: "position",
+  inset: "inset",
+  insetX: "insetX",
+  insetY: "insetY",
+  top: "top",
+  right: "right",
+  bottom: "bottom",
+  left: "left",
+
+  // Border shorthands
+  border: "border",
+  borderTop: "borderTop",
+  borderRight: "borderRight",
+  borderBottom: "borderBottom",
+  borderLeft: "borderLeft",
+  borderX: "borderX",
+  borderY: "borderY",
+  rounded: "borderRadius",
+  roundedTop: "borderTopRadius",
+  roundedRight: "borderRightRadius",
+  roundedBottom: "borderBottomRadius",
+  roundedLeft: "borderLeftRadius",
+  roundedTl: "borderTopLeftRadius",
+  roundedTr: "borderTopRightRadius",
+  roundedBr: "borderBottomRightRadius",
+  roundedBl: "borderBottomLeftRadius",
+
+  // Text shorthands
+  text: "fontSize",
+  textColor: "color",
+  tracking: "letterSpacing",
+  leading: "lineHeight",
+
+  // Gap shorthands
+  gap: "gap",
+  gapX: "gapX",
+  gapY: "gapY",
+
+  // Space shorthands
+  space: "space",
+  spaceX: "spaceX",
+  spaceY: "spaceY",
+
+  // Flex/Grid shorthands
+  flex: "flex",
+  items: "alignItems",
+  justify: "justifyContent",
+  self: "alignSelf",
+  grid: "display",
+  cols: "gridTemplateColumns",
+  rows: "gridTemplateRows",
+  col: "gridColumn",
+  row: "gridRow",
+
+  // Display shorthands
+  d: "display",
+  hidden: "display",
+  block: "display",
+  inline: "display",
+  flex: "display",
+  grid: "display",
+
+  // Shadow shorthands
+  shadow: "boxShadow",
+
+  // Overflow shorthands
+  overflow: "overflow",
+  overflowX: "overflowX",
+  overflowY: "overflowY",
+
+  // Background shorthands
+  bg: "backgroundColor",
+
+  // Border color/width shorthands
+  borderColor: "borderColor",
+  borderWidth: "borderWidth",
+
+  // Other common shorthands
+  opacity: "opacity",
+  scale: "scale",
+  scaleX: "scaleX",
+  scaleY: "scaleY",
+  rotate: "rotate",
+  skew: "skew",
+  skewX: "skewX",
+  skewY: "skewY",
+  translate: "translate",
+  translateX: "translateX",
+  translateY: "translateY",
+  cursor: "cursor",
+  userSelect: "userSelect",
+  pointerEvents: "pointerEvents",
+  visibility: "visibility",
+  zIndex: "zIndex",
+};
+
+/**
+ * Convert Panda shorthand property to its full property name
+ * E.g., mt -> marginTop, pt -> paddingTop
+ */
+export const expandShorthand = (prop: string): string => {
+  return shorthandMap[prop] ?? prop;
+};
+
 // Comprehensive mapping of CSS properties to Tailwind prefix patterns
 const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   // Colors
@@ -529,9 +665,13 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
 
 /**
  * Extract Tailwind classes from a Panda CSS object
+ * Supports panda shorthands (mt, pt, etc.) and responsive conditions (base, md, lg, etc.)
  */
 export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[] => {
   const classes: string[] = [];
+
+  // List of responsive breakpoints that should NOT be used as prefixes when at base level
+  const baseResponsiveBreakpoints = ["base"];
 
   const traverse = (obj: any, modifiers: string[] = []): void => {
     if (!obj || typeof obj !== "object") return;
@@ -542,20 +682,33 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject): string[
         const modifier = key.slice(1);
         traverse(value, [...modifiers, modifier]);
       } else if (typeof value === "object" && !Array.isArray(value)) {
-        // Nested object (conditions like md:, dark:, etc.)
-        traverse(value, [...modifiers, key]);
+        // Nested object (could be responsive condition like md:, base: or pseudo like _hover)
+        // Check if it looks like a responsive condition (common breakpoint names)
+        const isResponsiveCondition = ["sm", "md", "lg", "xl", "2xl", "3xl"].includes(key);
+
+        if (isResponsiveCondition || (modifiers.length > 0 && !key.startsWith("_"))) {
+          // Apply as responsive modifier only if it's a known breakpoint or we already have modifiers
+          traverse(value, [...modifiers, key]);
+        } else if (key === "base") {
+          // "base" is just the default, don't add it as a modifier
+          traverse(value, modifiers);
+        } else if (!key.startsWith("_")) {
+          // Unknown nested object, still process it as a potential responsive condition
+          traverse(value, [...modifiers, key]);
+        }
       } else if (typeof value === "string" || typeof value === "number") {
-        // Actual style property
+        // Actual style property - expand shorthand first
+        const expandedKey = expandShorthand(key);
         let className = "";
         const strValue = String(value).toLowerCase();
 
         // Try special handling first
-        const specialClass = getSpecialPropertyClass(key, strValue);
+        const specialClass = getSpecialPropertyClass(expandedKey, strValue);
         if (specialClass !== null) {
           className = specialClass;
         } else {
           // Default handling for all other properties
-          const mapping = propertyMap[key];
+          const mapping = propertyMap[expandedKey];
           if (mapping) {
             const suffix = pandaTokenToTwSuffix(strValue);
             className = `${mapping.classPrefix}${suffix}`;
@@ -849,31 +1002,47 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         const modifier = key.slice(1);
         traverse(value, [...modifiers, modifier]);
       } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-        // Nested object (conditions like md:, dark:, etc.)
-        traverse(value, [...modifiers, key]);
+        // Nested object (could be responsive condition like md:, base: or pseudo-selector)
+        // Check if it looks like a responsive condition (common breakpoint names)
+        const isResponsiveCondition = ["sm", "md", "lg", "xl", "2xl", "3xl"].includes(key);
+
+        if (isResponsiveCondition) {
+          // Apply as responsive modifier for known breakpoints
+          traverse(value, [...modifiers, key]);
+        } else if (key === "base") {
+          // "base" is just the default, don't add it as a modifier
+          traverse(value, modifiers);
+        } else if (modifiers.length > 0 && !key.startsWith("_")) {
+          // If we already have modifiers, treat other nested objects as additional conditions
+          traverse(value, [...modifiers, key]);
+        } else {
+          // Otherwise just process the nested object without adding a modifier
+          traverse(value, modifiers);
+        }
       } else if (typeof value === "string" || typeof value === "number") {
-        // Actual style property with value
+        // Actual style property with value - expand shorthand first
+        const expandedKey = expandShorthand(key);
         let className = "";
         const strValue = String(value).toLowerCase();
 
         // Try special handling first
-        const specialClass = getSpecialPropertyClass(key, strValue);
+        const specialClass = getSpecialPropertyClass(expandedKey, strValue);
         if (specialClass !== null) {
           className = specialClass;
         } else {
           // Default handling for all other properties
-          const mapping = propertyMap[key];
+          const mapping = propertyMap[expandedKey];
           if (mapping) {
             // First try to find this value as a token in the context
             let suffix: string;
-            const tokenPath = findTokenByValue(key, String(value));
+            const tokenPath = findTokenByValue(expandedKey, String(value));
 
             if (tokenPath) {
               // Found a matching token, use the token name
               suffix = pandaTokenToTwSuffix(tokenPath);
             } else {
               // Fallback to resolveToken for standard resolution
-              suffix = resolveToken(key, String(value));
+              suffix = resolveToken(expandedKey, String(value));
             }
 
             className = suffix ? `${mapping.classPrefix}${suffix}` : mapping.classPrefix;

@@ -526,4 +526,260 @@ describe("css-to-tw", () => {
       expect(outlineOffsetClasses).toContain("outline-offset-2px");
     });
   });
+
+  describe("Panda shorthands", () => {
+    test("margin shorthands - mt, mr, mb, ml", () => {
+      const mtClasses = extractTailwindClassesFromPandaCss({ mt: "4" });
+      const mrClasses = extractTailwindClassesFromPandaCss({ mr: "2" });
+      const mbClasses = extractTailwindClassesFromPandaCss({ mb: "6" });
+      const mlClasses = extractTailwindClassesFromPandaCss({ ml: "3" });
+
+      expect(mtClasses).toContain("mt-4");
+      expect(mrClasses).toContain("mr-2");
+      expect(mbClasses).toContain("mb-6");
+      expect(mlClasses).toContain("ml-3");
+    });
+
+    test("margin shorthand - mx, my", () => {
+      const mxClasses = extractTailwindClassesFromPandaCss({ mx: "4" });
+      const myClasses = extractTailwindClassesFromPandaCss({ my: "2" });
+
+      expect(mxClasses).toContain("mx-4");
+      expect(myClasses).toContain("my-2");
+    });
+
+    test("padding shorthands - pt, pr, pb, pl", () => {
+      const ptClasses = extractTailwindClassesFromPandaCss({ pt: "4" });
+      const prClasses = extractTailwindClassesFromPandaCss({ pr: "2" });
+      const pbClasses = extractTailwindClassesFromPandaCss({ pb: "6" });
+      const plClasses = extractTailwindClassesFromPandaCss({ pl: "3" });
+
+      expect(ptClasses).toContain("pt-4");
+      expect(prClasses).toContain("pr-2");
+      expect(pbClasses).toContain("pb-6");
+      expect(plClasses).toContain("pl-3");
+    });
+
+    test("padding shorthand - px, py", () => {
+      const pxClasses = extractTailwindClassesFromPandaCss({ px: "4" });
+      const pyClasses = extractTailwindClassesFromPandaCss({ py: "2" });
+
+      expect(pxClasses).toContain("px-4");
+      expect(pyClasses).toContain("py-2");
+    });
+
+    test("sizing shorthands - w, h", () => {
+      const wClasses = extractTailwindClassesFromPandaCss({ w: "1/2" });
+      const hClasses = extractTailwindClassesFromPandaCss({ h: "32" });
+
+      expect(wClasses).toContain("w-1/2");
+      expect(hClasses).toContain("h-32");
+    });
+
+    test("border radius shorthand - rounded", () => {
+      const roundedClasses = extractTailwindClassesFromPandaCss({ rounded: "md" });
+      const roundedTlClasses = extractTailwindClassesFromPandaCss({ roundedTl: "lg" });
+
+      expect(roundedClasses).toContain("rounded-md");
+      expect(roundedTlClasses).toContain("rounded-tl-lg");
+    });
+
+    test("text shorthands - text (fontSize), textColor", () => {
+      const textClasses = extractTailwindClassesFromPandaCss({ text: "lg" });
+      const textColorClasses = extractTailwindClassesFromPandaCss({ textColor: "red.500" });
+
+      expect(textClasses).toContain("text-lg");
+      expect(textColorClasses.some((c) => c.includes("text-red"))).toBe(true);
+    });
+
+    test("gap shorthands - gap, gapX, gapY", () => {
+      const gapClasses = extractTailwindClassesFromPandaCss({ gap: "4" });
+      const gapXClasses = extractTailwindClassesFromPandaCss({ gapX: "2" });
+      const gapYClasses = extractTailwindClassesFromPandaCss({ gapY: "6" });
+
+      expect(gapClasses).toContain("gap-4");
+      expect(gapXClasses).toContain("gap-x-2");
+      expect(gapYClasses).toContain("gap-y-6");
+    });
+
+    test("space shorthands - spaceX, spaceY", () => {
+      const spaceXClasses = extractTailwindClassesFromPandaCss({ spaceX: "2" });
+      const spaceYClasses = extractTailwindClassesFromPandaCss({ spaceY: "4" });
+
+      expect(spaceXClasses).toContain("space-x-2");
+      expect(spaceYClasses).toContain("space-y-4");
+    });
+
+    test("flex shorthands - items (alignItems), justify (justifyContent)", () => {
+      const itemsClasses = extractTailwindClassesFromPandaCss({ items: "center" });
+      const justifyClasses = extractTailwindClassesFromPandaCss({ justify: "between" });
+
+      expect(itemsClasses).toContain("items-center");
+      expect(justifyClasses).toContain("justify-between");
+    });
+
+    test("background shorthand - bg", () => {
+      const bgClasses = extractTailwindClassesFromPandaCss({ bg: "blue.500" });
+
+      expect(bgClasses.some((c) => c.includes("bg-blue"))).toBe(true);
+    });
+
+    test("transform shorthands - scale, rotate, translate", () => {
+      const scaleClasses = extractTailwindClassesFromPandaCss({ scale: "110" });
+      const rotateClasses = extractTailwindClassesFromPandaCss({ rotate: "45" });
+      const translateXClasses = extractTailwindClassesFromPandaCss({ translateX: "4" });
+
+      expect(scaleClasses).toContain("scale-110");
+      expect(rotateClasses).toContain("rotate-45");
+      expect(translateXClasses).toContain("translate-x-4");
+    });
+
+    test("shadow shorthand - shadow", () => {
+      const shadowClasses = extractTailwindClassesFromPandaCss({ shadow: "md" });
+
+      expect(shadowClasses).toContain("shadow-md");
+    });
+  });
+
+  describe("Responsive properties with conditions", () => {
+    test("responsive with base condition", () => {
+      const cssObj = {
+        base: {
+          display: "block",
+          fontSize: "sm",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("block");
+      expect(classes.some((c) => c.includes("text-sm"))).toBe(true);
+    });
+
+    test("responsive with md breakpoint", () => {
+      const cssObj = {
+        md: {
+          display: "flex",
+          padding: "8",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c === "md:flex")).toBe(true);
+      expect(classes.some((c) => c === "md:p-8")).toBe(true);
+    });
+
+    test("responsive with multiple breakpoints", () => {
+      const cssObj = {
+        base: {
+          display: "block",
+          padding: "4",
+        },
+        md: {
+          display: "flex",
+          padding: "6",
+        },
+        lg: {
+          display: "grid",
+          padding: "8",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("block");
+      expect(classes).toContain("p-4");
+      expect(classes.some((c) => c === "md:flex")).toBe(true);
+      expect(classes.some((c) => c === "md:p-6")).toBe(true);
+      expect(classes.some((c) => c === "lg:grid")).toBe(true);
+      expect(classes.some((c) => c === "lg:p-8")).toBe(true);
+    });
+
+    test("responsive with shorthand properties", () => {
+      const cssObj = {
+        base: {
+          pt: "4",
+          pb: "4",
+        },
+        md: {
+          pt: "8",
+          pb: "8",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("pt-4");
+      expect(classes).toContain("pb-4");
+      expect(classes.some((c) => c === "md:pt-8")).toBe(true);
+      expect(classes.some((c) => c === "md:pb-8")).toBe(true);
+    });
+
+    test("responsive with pseudo-selectors", () => {
+      const cssObj = {
+        base: {
+          display: "block",
+        },
+        md: {
+          display: "flex",
+          _hover: {
+            backgroundColor: "blue.500",
+          },
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("block");
+      expect(classes.some((c) => c === "md:flex")).toBe(true);
+      expect(classes.some((c) => c.includes("md:hover:bg-blue"))).toBe(true);
+    });
+
+    test("responsive with multiple grid columns pattern", () => {
+      const cssObj = {
+        base: {
+          gridTemplateColumns: "1",
+        },
+        xl: {
+          gridTemplateColumns: "2",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("grid-cols-1");
+      expect(classes.some((c) => c === "xl:grid-cols-2")).toBe(true);
+    });
+
+    test("complex responsive with shorthand and pseudo-selectors", () => {
+      const cssObj = {
+        display: "block",
+        mt: "4",
+        base: {
+          padding: "2",
+        },
+        md: {
+          padding: "4",
+          px: "6",
+          _hover: {
+            bg: "gray.100",
+          },
+        },
+        lg: {
+          padding: "8",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("block");
+      expect(classes).toContain("mt-4");
+      expect(classes).toContain("p-2");
+      expect(classes.some((c) => c === "md:p-4")).toBe(true);
+      expect(classes.some((c) => c === "md:px-6")).toBe(true);
+      expect(classes.some((c) => c.includes("md:hover:bg-gray"))).toBe(true);
+      expect(classes.some((c) => c === "lg:p-8")).toBe(true);
+    });
+  });
 });
