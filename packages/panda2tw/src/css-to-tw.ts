@@ -532,6 +532,10 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
       if (strValue === "underline") return "underline";
       if (strValue === "line-through") return "line-through";
       if (strValue === "overline") return "overline";
+      if (strValue === "inherit") return "decoration-inherit";
+      if (strValue === "initial") return "decoration-initial";
+      if (strValue === "revert") return "decoration-revert";
+      if (strValue === "unset") return "decoration-unset";
       break;
 
     case "fontStyle":

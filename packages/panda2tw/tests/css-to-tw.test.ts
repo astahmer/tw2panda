@@ -171,6 +171,18 @@ describe("css-to-tw", () => {
       expect(overlineClasses).toContain("overline");
     });
 
+    test("textDecoration - CSS-wide keywords (inherit/initial/revert/unset)", () => {
+      const inheritClasses = extractTailwindClassesFromPandaCss({ textDecoration: "inherit" });
+      const initialClasses = extractTailwindClassesFromPandaCss({ textDecoration: "initial" });
+      const revertClasses = extractTailwindClassesFromPandaCss({ textDecoration: "revert" });
+      const unsetClasses = extractTailwindClassesFromPandaCss({ textDecoration: "unset" });
+
+      expect(inheritClasses).toContain("decoration-inherit");
+      expect(initialClasses).toContain("decoration-initial");
+      expect(revertClasses).toContain("decoration-revert");
+      expect(unsetClasses).toContain("decoration-unset");
+    });
+
     test("textDecorationLine - same as textDecoration", () => {
       const classes = extractTailwindClassesFromPandaCss({
         textDecorationLine: "underline",
