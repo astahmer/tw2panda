@@ -889,6 +889,17 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
     if (!obj || typeof obj !== "object") return;
 
     Object.entries(obj).forEach(([key, value]) => {
+      // Handle textStyle specially - generate a simple class like "text-style-body"
+      if (key === "textStyle" && typeof value === "string") {
+        const className = `text-style-${value}`;
+        if (modifiers.length > 0) {
+          classes.push(`${modifiers.join(":")}:${className}`);
+        } else {
+          classes.push(className);
+        }
+        return;
+      }
+
       if (key.startsWith("_")) {
         // Pseudo-selector like _hover, _focus
         const modifier = key.slice(1);

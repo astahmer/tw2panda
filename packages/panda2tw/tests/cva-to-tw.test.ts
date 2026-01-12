@@ -48,4 +48,34 @@ describe("cva-to-tw", () => {
     expect(classes).toContain("block");
     expect(classes.some((c) => c.startsWith("md:"))).toBe(true);
   });
+
+  test("extractClassesFromNestedStyles - with textStyle", () => {
+    const styles = {
+      textStyle: "body",
+      display: "flex",
+    };
+
+    const classes = extractClassesFromNestedStyles(styles);
+
+    expect(classes).toContain("text-style-body");
+    expect(classes).toContain("flex");
+  });
+
+  test("extractClassesFromNestedStyles - with textStyle and responsive", () => {
+    const styles = {
+      textStyle: "heading",
+      display: "block",
+      md: {
+        textStyle: "body",
+        display: "flex",
+      },
+    };
+
+    const classes = extractClassesFromNestedStyles(styles);
+
+    expect(classes).toContain("text-style-heading");
+    expect(classes).toContain("block");
+    expect(classes.some((c) => c === "md:text-style-body")).toBe(true);
+    expect(classes.some((c) => c === "md:flex")).toBe(true);
+  });
 });

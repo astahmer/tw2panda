@@ -100,4 +100,41 @@ function Avatar({ size = 'md', variant = 'default' }: AvatarProps) {
     expect(result).toContain("inline-flex");
     expect(result).toContain("rounded-full");
   });
+
+  test("rewrites a CVA with textStyle property", () => {
+    const code = `
+const cardStyles = cva({
+  base: {
+    textStyle: 'body',
+    padding: '4',
+    borderRadius: 'md',
+  },
+  variants: {
+    variant: {
+      heading: {
+        textStyle: 'heading',
+      },
+      caption: {
+        textStyle: 'caption',
+        fontSize: 'sm',
+      },
+    },
+  },
 });
+`;
+
+    const result = detectAndConvertCvaInCode(code);
+
+    expect(result).toContain("const cardStyles");
+    expect(result).toContain("cva");
+    // textStyle should be converted to text-style-* classes
+    expect(result).toContain("text-style-body");
+    expect(result).toContain("text-style-heading");
+    expect(result).toContain("text-style-caption");
+    // Other properties should also be converted
+    expect(result).toContain("p-4");
+    expect(result).toContain("rounded-md");
+    expect(result).toContain("text-sm");
+  });
+});
+
