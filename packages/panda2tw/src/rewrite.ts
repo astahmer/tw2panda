@@ -11,6 +11,7 @@ import type { Config } from "tailwindcss";
 import { findCssCalls, findCvaCalls, findJsxElementsWithPandaProps, nodeToObject } from "./parser.js";
 import { extractTailwindClassesFromPandaCss, extractTailwindClassesFromPandaCssWithContext } from "./css-to-tw.js";
 import { pandaCvaToTailwind } from "./cva-to-tw.js";
+import { detectAndConvertCvaInCode } from "./detect-and-convert-cva.js";
 import type { RewriteOptions } from "./types.js";
 
 export interface RewriteResult {
@@ -179,6 +180,18 @@ const processSourceFile = (
       magicStr.remove(importDecl.getStart(), importDecl.getEnd() + 1); // +1 for newline
     }
   });
+
+  // First, detect and convert CVA configs (base + variants patterns)
+  const updatedCode = detectAndConvertCvaInCode(code);
+  if (updatedCode !== code) {
+    // If CVA conversion happened, recreate the source file with the converted code
+    const updatedSourceFile = new Project({ useInMemoryFileSystem: true }).createSourceFile(
+      sourceFile.getFilePath(),
+      updatedCode,
+    ) as SourceFile;
+    // Continue processing with the updated code
+    return processSourceFile(updatedSourceFile, pandaContext, tailwindConfig, inlineTextStyles, withJsxStack);
+  }
 
   // Convert css() calls
   const cssCalls = findCssCalls(sourceFile);

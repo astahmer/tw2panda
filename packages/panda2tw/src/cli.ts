@@ -6,6 +6,7 @@ import { resolve } from "path";
 import { cac } from "cac";
 import { rewritePattern } from "./rewrite.js";
 import { extractTailwindClassesFromPandaCss } from "./css-to-tw.js";
+import { pandaCvaToTailwind } from "./cva-to-tw.js";
 
 const cli = cac("panda2tw");
 
@@ -76,6 +77,22 @@ cli.command("convert <cssObject>", "Convert a CSS object string to Tailwind clas
     process.exit(1);
   }
 });
+
+cli
+  .command("cva <cvaConfig>", "Convert a Panda CVA config object to Tailwind classes")
+  .action((cvaConfigStr: string) => {
+    try {
+      // Parse the CVA config string
+      const cvaConfig = new Function(`return (${cvaConfigStr})`)();
+      const result = pandaCvaToTailwind(cvaConfig);
+
+      console.log("Tailwind output:");
+      console.log(result);
+    } catch (e) {
+      console.error("Error parsing CVA config:", e instanceof Error ? e.message : String(e));
+      process.exit(1);
+    }
+  });
 
 cli.help();
 cli.version("0.1.0");

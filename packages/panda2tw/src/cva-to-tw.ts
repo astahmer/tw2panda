@@ -14,31 +14,33 @@ export interface CvaVariantMapping {
  * Convert a Panda CVA config object back to pattern with Tailwind classes
  */
 export const pandaCvaToTailwind = (cvaConfig: PandaCvaConfig): string => {
-  const lines: string[] = [];
-
-  // Handle base styles
-  if (cvaConfig.base) {
-    const baseClasses = extractTailwindClassesFromPandaCss(cvaConfig.base);
-    if (baseClasses.length > 0) {
-      lines.push(`// Base classes: ${baseClasses.join(" ")}`);
-    }
-  }
+  const baseClasses = cvaConfig.base ? extractTailwindClassesFromPandaCss(cvaConfig.base) : [];
+  const variants: Record<string, Record<string, string[]>> = {};
 
   // Handle variants
   if (cvaConfig.variants) {
-    const variantLines: string[] = [];
     Object.entries(cvaConfig.variants).forEach(([variantName, variantValues]) => {
-      variantLines.push(`\n// ${variantName} variant:`);
+      variants[variantName] = {};
 
       Object.entries(variantValues).forEach(([valueName, styles]) => {
         const classes = extractTailwindClassesFromPandaCss(styles);
-        variantLines.push(`//   ${valueName}: ${classes.join(" ")}`);
+        variants[variantName][valueName] = classes;
       });
     });
-    lines.push(...variantLines);
   }
 
-  return lines.join("\n");
+  // Format as CVA-style configuration
+  const output: Record<string, any> = {};
+
+  if (baseClasses.length > 0) {
+    output.base = baseClasses.join(" ");
+  }
+
+  if (Object.keys(variants).length > 0) {
+    output.variants = variants;
+  }
+
+  return JSON.stringify(output, null, 2);
 };
 
 /**

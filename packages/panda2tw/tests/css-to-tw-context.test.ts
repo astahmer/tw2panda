@@ -1162,7 +1162,7 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     expect(classes).toContain("overflow-y-auto");
     expect(classes).toContain("md:overflow-y-hidden");
     // And other properties
-    expect(classes).toContain("h-100%");
+    expect(classes).toContain("h-full");
   });
 
   it("handles multiple responsive properties together", () => {
@@ -1232,8 +1232,8 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     // Responsive overflow with custom breakpoint
     expect(classes).toContain("xlDown:overflow-y-auto");
     // Other properties
-    expect(classes).toContain("w-100%");
-    expect(classes).toContain("h-100%");
+    expect(classes).toContain("w-full");
+    expect(classes).toContain("h-full");
     expect(classes).toContain("px-24");
     expect(classes).toContain("py-32");
     expect(classes).toContain("gap-24");
@@ -1266,8 +1266,8 @@ describe("extractTailwindClassesFromPandaCssWithContext", () => {
     // Even with unknown breakpoint, we now detect it by checking if all values are primitives
     expect(classes).toContain("xlDown:overflow-y-auto");
     // Other properties
-    expect(classes).toContain("w-100%");
-    expect(classes).toContain("h-100%");
+    expect(classes).toContain("w-full");
+    expect(classes).toContain("h-full");
     expect(classes).toContain("px-24");
     expect(classes).toContain("py-32");
     expect(classes).toContain("gap-24");

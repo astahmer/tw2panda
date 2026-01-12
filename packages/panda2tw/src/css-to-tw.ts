@@ -538,6 +538,12 @@ export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string
 };
 
 function getSpecialPropertyClass(key: string, strValue: string): string | null {
+  // Handle percentage values for width/height
+  if ((key === "width" || key === "height" || key === "maxWidth" || key === "maxHeight" || key === "minWidth" || key === "minHeight") && strValue === "100%") {
+    const prefix = key === "width" || key === "maxWidth" || key === "minWidth" ? "w-" : "h-";
+    return `${prefix}full`;
+  }
+
   switch (key) {
     case "textDecoration":
     case "textDecorationLine":
