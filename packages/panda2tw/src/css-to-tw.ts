@@ -115,7 +115,17 @@ const getDefaultShorthandMap = (): Record<string, string> => ({
   zIndex: "zIndex",
 });
 
-export const expandShorthand = (prop: string, pandaContext?: PandaContext): string => {
+export const expandShorthand = (prop: string, pandaContext?: PandaContext, value?: any): string => {
+  // Special case: 'flex' is ambiguous - it could mean display:flex or the CSS flex shorthand
+  // Only expand to 'display' if the value looks like a boolean/keyword, not a flex value
+  if (prop === "flex" && value !== undefined) {
+    const strValue = String(value).toLowerCase();
+    // These are actual CSS flex shorthand values, not display:flex shortcuts
+    if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "auto", "none", "initial", "inherit", "revert", "unset"].includes(strValue)) {
+      return prop; // Keep as flex
+    }
+  }
+
   const map = buildShorthandMap(pandaContext);
   return map[prop] ?? prop;
 };
@@ -287,6 +297,7 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   zIndex: { pattern: /^.*$/, classPrefix: "z-" },
 
   // Flexbox properties
+  flex: { pattern: /^.*$/, classPrefix: "flex-" },
   flexWrap: { pattern: /^(wrap|nowrap|wrap-reverse)$/, classPrefix: "flex-" },
   flexGrow: { pattern: /^.*$/, classPrefix: "grow-" },
   flexShrink: { pattern: /^.*$/, classPrefix: "shrink-" },
@@ -904,7 +915,7 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
         }
       } else if (typeof value === "string" || typeof value === "number") {
         // Actual style property - expand shorthand first
-        const expandedKey = expandShorthand(key, pandaContext);
+        const expandedKey = expandShorthand(key, pandaContext, value);
         let className = "";
         const strValue = String(value).toLowerCase();
 
@@ -1235,7 +1246,7 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         }
       } else if (typeof value === "string" || typeof value === "number") {
         // Actual style property with value - expand shorthand first
-        const expandedKey = expandShorthand(key, pandaContext);
+        const expandedKey = expandShorthand(key, pandaContext, value);
         let className = "";
         const strValue = String(value).toLowerCase();
 

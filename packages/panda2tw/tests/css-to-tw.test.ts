@@ -252,6 +252,18 @@ describe("css-to-tw", () => {
       expect(noneClasses).toContain("hidden");
     });
 
+    test("flex - basic flex values", () => {
+      const flex1Classes = extractTailwindClassesFromPandaCss({ flex: "1" });
+      const flexAutoClasses = extractTailwindClassesFromPandaCss({ flex: "auto" });
+      const flexNoneClasses = extractTailwindClassesFromPandaCss({ flex: "none" });
+      const flexInitialClasses = extractTailwindClassesFromPandaCss({ flex: "initial" });
+
+      expect(flex1Classes).toContain("flex-1");
+      expect(flexAutoClasses).toContain("flex-auto");
+      expect(flexNoneClasses).toContain("flex-none");
+      expect(flexInitialClasses).toContain("flex-initial");
+    });
+
     test("textAlign - left/center/right/justify", () => {
       const leftClasses = extractTailwindClassesFromPandaCss({ textAlign: "left" });
       const centerClasses = extractTailwindClassesFromPandaCss({ textAlign: "center" });
