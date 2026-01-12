@@ -617,6 +617,18 @@ describe("css-to-tw", () => {
       expect(roundedTlClasses).toContain("rounded-tl-lg");
     });
 
+    test("border radius side-specific - borderTopRadius, borderBottomRadius, etc", () => {
+      const borderTopRadiusClasses = extractTailwindClassesFromPandaCss({ borderTopRadius: "8px" });
+      const borderBottomRadiusClasses = extractTailwindClassesFromPandaCss({ borderBottomRadius: "16px" });
+      const borderLeftRadiusClasses = extractTailwindClassesFromPandaCss({ borderLeftRadius: "4px" });
+      const borderRightRadiusClasses = extractTailwindClassesFromPandaCss({ borderRightRadius: "12px" });
+
+      expect(borderTopRadiusClasses).toContain("rounded-t-8px");
+      expect(borderBottomRadiusClasses).toContain("rounded-b-16px");
+      expect(borderLeftRadiusClasses).toContain("rounded-l-4px");
+      expect(borderRightRadiusClasses).toContain("rounded-r-12px");
+    });
+
     test("text shorthands - text (fontSize), textColor", () => {
       const textClasses = extractTailwindClassesFromPandaCss({ text: "lg" });
       const textColorClasses = extractTailwindClassesFromPandaCss({ textColor: "red.500" });

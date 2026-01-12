@@ -197,6 +197,10 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   borderTopRightRadius: { pattern: /^.*$/, classPrefix: "rounded-tr-" },
   borderBottomRightRadius: { pattern: /^.*$/, classPrefix: "rounded-br-" },
   borderBottomLeftRadius: { pattern: /^.*$/, classPrefix: "rounded-bl-" },
+  borderTopRadius: { pattern: /^.*$/, classPrefix: "rounded-t-" },
+  borderBottomRadius: { pattern: /^.*$/, classPrefix: "rounded-b-" },
+  borderLeftRadius: { pattern: /^.*$/, classPrefix: "rounded-l-" },
+  borderRightRadius: { pattern: /^.*$/, classPrefix: "rounded-r-" },
 
   // Typography
   fontSize: { pattern: /^.*$/, classPrefix: "text-" },
