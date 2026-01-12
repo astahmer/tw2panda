@@ -940,7 +940,14 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
         // Actual style property - expand shorthand first
         const expandedKey = expandShorthand(key, pandaContext, value);
         let className = "";
-        const strValue = String(value).toLowerCase();
+        let strValue = String(value).toLowerCase();
+        let isImportant = false;
+
+        // Check for !important flag
+        if (strValue.includes("!important")) {
+          isImportant = true;
+          strValue = strValue.replace(/\s*!important\s*/g, "").trim();
+        }
 
         // Try special handling first
         const specialClass = getSpecialPropertyClass(expandedKey, strValue);
@@ -956,6 +963,10 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
         }
 
         if (className) {
+          // Add important modifier prefix if needed (Tailwind's ! prefix)
+          if (isImportant) {
+            className = `!${className}`;
+          }
           if (modifiers.length > 0) {
             className = `${modifiers.join(":")}:${className}`;
           }
@@ -1271,7 +1282,14 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         // Actual style property with value - expand shorthand first
         const expandedKey = expandShorthand(key, pandaContext, value);
         let className = "";
-        const strValue = String(value).toLowerCase();
+        let strValue = String(value).toLowerCase();
+        let isImportant = false;
+
+        // Check for !important flag
+        if (strValue.includes("!important")) {
+          isImportant = true;
+          strValue = strValue.replace(/\s*!important\s*/g, "").trim();
+        }
 
         // Try special handling first
         const specialClass = getSpecialPropertyClass(expandedKey, strValue);
@@ -1283,14 +1301,14 @@ export const extractTailwindClassesFromPandaCssWithContext = (
           if (mapping) {
             // First try to find this value as a token in the context
             let suffix: string;
-            const tokenPath = findTokenByValue(expandedKey, String(value));
+            const tokenPath = findTokenByValue(expandedKey, String(value).replace(/\s*!important\s*/g, "").trim());
 
             if (tokenPath) {
               // Found a matching token, use the token name
               suffix = pandaTokenToTwSuffix(tokenPath);
             } else {
               // Fallback to resolveToken for standard resolution
-              suffix = resolveToken(expandedKey, String(value));
+              suffix = resolveToken(expandedKey, strValue);
             }
 
             className = suffix ? `${mapping.classPrefix}${suffix}` : mapping.classPrefix;
@@ -1298,6 +1316,10 @@ export const extractTailwindClassesFromPandaCssWithContext = (
         }
 
         if (className) {
+          // Add important modifier prefix if needed (Tailwind's ! prefix)
+          if (isImportant) {
+            className = `!${className}`;
+          }
           if (modifiers.length > 0) {
             className = `${modifiers.join(":")}:${className}`;
           }

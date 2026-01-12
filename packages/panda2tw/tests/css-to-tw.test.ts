@@ -1097,5 +1097,51 @@ describe("css-to-tw", () => {
       // Check that properties are applied with the selector
       expect(classes.some((c) => c.includes("[&_ol]:") || c.startsWith("[&_ol]:"))).toBe(true);
     });
+
+    test("handles !important flag - simple property", () => {
+      const cssObj = {
+        display: "flex !important",
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("!flex");
+    });
+
+    test("handles !important flag - with arbitrary selector", () => {
+      const cssObj = {
+        "& div.activityRoomEventContainer": {
+          paddingY: "0 !important",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("[&_div.activityRoomEventContainer]:!py-0"))).toBe(true);
+    });
+
+    test("handles !important flag - with pseudo-selector", () => {
+      const cssObj = {
+        _hover: {
+          backgroundColor: "blue.500 !important",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("hover:!bg-blue-500"))).toBe(true);
+    });
+
+    test("handles !important flag - with responsive modifier", () => {
+      const cssObj = {
+        md: {
+          padding: "4 !important",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c === "md:!p-4")).toBe(true);
+    });
   });
 });
