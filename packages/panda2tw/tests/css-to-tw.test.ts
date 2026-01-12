@@ -547,6 +547,34 @@ describe("css-to-tw", () => {
       expect(bgRepeatClasses).toContain("bg-no-repeat");
     });
 
+    test("bgColor property converts to bg- classes", () => {
+      const simpleBgColor = extractTailwindClassesFromPandaCss({ bgColor: "red.500" });
+      expect(simpleBgColor.some((c) => c.includes("bg-red"))).toBe(true);
+      expect(simpleBgColor).toMatchInlineSnapshot(`
+        [
+          "bg-red-500",
+        ]
+      `);
+
+      const bgColorWithPseudo = extractTailwindClassesFromPandaCss({
+        bgColor: "blue.600",
+        _hover: {
+          bgColor: "blue.800",
+        },
+      });
+      expect(bgColorWithPseudo).toContain("bg-blue-600");
+      expect(bgColorWithPseudo.some((c) => c.includes("hover:bg-blue"))).toBe(true);
+
+      const bgColorWithResponsive = extractTailwindClassesFromPandaCss({
+        bgColor: "gray.100",
+        md: {
+          bgColor: "gray.200",
+        },
+      });
+      expect(bgColorWithResponsive).toContain("bg-gray-100");
+      expect(bgColorWithResponsive.some((c) => c.includes("md:bg-gray"))).toBe(true);
+    });
+
     test("border and outline properties", () => {
       const borderClasses = extractTailwindClassesFromPandaCss({ border: "1px solid black" });
       const borderTopClasses = extractTailwindClassesFromPandaCss({ borderTop: "2px solid red" });

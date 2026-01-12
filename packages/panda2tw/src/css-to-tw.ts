@@ -154,6 +154,7 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   // Colors
   color: { pattern: /^.*$/, classPrefix: "text-" },
   backgroundColor: { pattern: /^.*$/, classPrefix: "bg-" },
+  bgColor: { pattern: /^.*$/, classPrefix: "bg-" },
   borderColor: { pattern: /^.*$/, classPrefix: "border-" },
   borderTopColor: { pattern: /^.*$/, classPrefix: "border-t-" },
   borderRightColor: { pattern: /^.*$/, classPrefix: "border-r-" },
@@ -876,26 +877,88 @@ const selectorToTwVariant = (selector: string): string | null => {
 };
 
 /**
+ * Extract important flag from a CSS value and return cleaned value
+ */
+const extractImportantFlag = (value: string): { cleanValue: string; isImportant: boolean } => {
+  let strValue = String(value).toLowerCase();
+  let isImportant = false;
+
+  if (strValue.includes("!important")) {
+    isImportant = true;
+    strValue = strValue.replace(/\s*!important\s*/g, "").trim();
+  }
+
+  return { cleanValue: strValue, isImportant };
+};
+
+
+
+/**
+ * Helper to build final class name with important flag and modifiers
+ */
+const buildFinalClassName = (className: string, isImportant: boolean, modifiers: string[]): string => {
+  let finalClass = className;
+  if (isImportant) {
+    finalClass = `!${finalClass}`;
+  }
+  if (modifiers.length > 0) {
+    finalClass = `${modifiers.join(":")}:${finalClass}`;
+  }
+  return finalClass;
+};
+
+/**
  * Extract Tailwind classes from a Panda CSS object
  * Supports panda shorthands (mt, pt, etc.) and responsive conditions (base, md, lg, etc.)
  */
 export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaContext?: PandaContext): string[] => {
   const classes: string[] = [];
-
-  // Get responsive condition keys from context
   const responsiveConditionKeys = getResponsiveConditionKeys(pandaContext);
 
+  const traverse = createCommonTraverse(
+    classes,
+    responsiveConditionKeys,
+    pandaContext,
+  );
+
+  traverse(cssObj);
+  return [...new Set(classes)]; // Remove duplicates
+};
+
+/**
+ * Factory function to create a shared traverse function for both simple and context-aware implementations
+ */
+const createCommonTraverse = (
+  classes: string[],
+  responsiveConditionKeys: string[],
+  pandaContext: PandaContext | undefined,
+  contextData?: {
+    inlineTextStyles?: boolean;
+    findTokenByValue?: (prop: string, value: string) => string | null;
+    resolveToken?: (prop: string, path: string) => string;
+  },
+) => {
+  // Use a recursive function with proper closure
   const traverse = (obj: any, modifiers: string[] = []): void => {
     if (!obj || typeof obj !== "object") return;
 
     Object.entries(obj).forEach(([key, value]) => {
-      // Handle textStyle specially - generate a simple class like "text-style-body"
+      // Handle textStyle specially
       if (key === "textStyle" && typeof value === "string") {
-        const className = `text-style-${value}`;
-        if (modifiers.length > 0) {
-          classes.push(`${modifiers.join(":")}:${className}`);
+        if (contextData?.inlineTextStyles && pandaContext) {
+          // When inlineTextStyles is true, expand textStyle to its actual CSS properties
+          const textStyles = pandaContext.config?.theme?.textStyles || {};
+          const resolvedTextStyle = resolveDottedPath(value, textStyles);
+
+          if (resolvedTextStyle && typeof resolvedTextStyle === "object") {
+            const styleObject = resolvedTextStyle.value || resolvedTextStyle;
+            traverse(styleObject, modifiers);
+          }
         } else {
-          classes.push(className);
+          // Default behavior: generate a simple class like "text-style-body"
+          const className = `text-style-${value}`;
+          const fullClass = buildFinalClassName(className, false, modifiers);
+          classes.push(fullClass);
         }
         return;
       }
@@ -933,52 +996,81 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
           } else if (modifiers.length > 0 && !key.startsWith("_")) {
             // If we already have modifiers, treat other nested objects as additional conditions
             traverse(value, [...modifiers, key]);
+          } else {
+            // Otherwise skip this selector (it's not a recognized pattern)
+            // Check if this is a responsive property definition
+            const objectKeys = Object.keys(value);
+            const allKeysAreResponsive =
+              objectKeys.length > 0 && objectKeys.every((k) => responsiveConditionKeys.includes(k) || k === "base");
+
+            const allValuesArePrimitives =
+              objectKeys.length > 0 &&
+              objectKeys.every((k) => typeof value[k] === "string" || typeof value[k] === "number");
+
+            if (allKeysAreResponsive || allValuesArePrimitives) {
+              Object.entries(value).forEach(([respKey, respValue]) => {
+                const respModifiers = respKey === "base" ? modifiers : [...modifiers, respKey];
+                const propertyObj = { [key]: respValue };
+                traverse(propertyObj, respModifiers);
+              });
+            } else {
+              traverse(value, modifiers);
+            }
           }
-          // Otherwise skip this selector (it's not a recognized pattern)
         }
       } else if (typeof value === "string" || typeof value === "number") {
-        // Actual style property - expand shorthand first
+        // Actual style property
         const expandedKey = expandShorthand(key, pandaContext, value);
-        let className = "";
-        let strValue = String(value).toLowerCase();
-        let isImportant = false;
+        const strValue = String(value).toLowerCase();
 
-        // Check for !important flag
-        if (strValue.includes("!important")) {
-          isImportant = true;
-          strValue = strValue.replace(/\s*!important\s*/g, "").trim();
-        }
+        // For context-aware version with advanced token resolution
+        if (contextData?.findTokenByValue && contextData?.resolveToken) {
+          const { cleanValue, isImportant } = extractImportantFlag(strValue);
+          const specialClass = getSpecialPropertyClass(expandedKey, cleanValue);
+          let className = specialClass ?? "";
 
-        // Try special handling first
-        const specialClass = getSpecialPropertyClass(expandedKey, strValue);
-        if (specialClass !== null) {
-          className = specialClass;
+          if (className === "") {
+            const mapping = propertyMap[expandedKey];
+            if (mapping) {
+              const tokenPath = contextData.findTokenByValue(expandedKey, String(value).replace(/\s*!important\s*/g, "").trim());
+              const suffix = tokenPath ? pandaTokenToTwSuffix(tokenPath) : contextData.resolveToken(expandedKey, cleanValue);
+              className = suffix ? `${mapping.classPrefix}${suffix}` : mapping.classPrefix;
+            }
+          }
+
+          if (className) {
+            const finalClass = buildFinalClassName(className, isImportant, modifiers);
+            classes.push(finalClass);
+          }
         } else {
-          // Default handling for all other properties
-          const mapping = propertyMap[expandedKey];
-          if (mapping) {
-            const suffix = pandaTokenToTwSuffix(strValue);
-            className = `${mapping.classPrefix}${suffix}`;
-          }
-        }
+          // Simple version - process property directly
+          const { cleanValue, isImportant } = extractImportantFlag(strValue);
 
-        if (className) {
-          // Add important modifier prefix if needed (Tailwind's ! prefix)
-          if (isImportant) {
-            className = `!${className}`;
+          // Try special handling first
+          let className = getSpecialPropertyClass(expandedKey, cleanValue);
+          if (className === null) {
+            // Default handling for all other properties
+            const mapping = propertyMap[expandedKey];
+            if (mapping) {
+              const suffix = pandaTokenToTwSuffix(cleanValue);
+              className = `${mapping.classPrefix}${suffix}`;
+            } else {
+              className = "";
+            }
           }
-          if (modifiers.length > 0) {
-            className = `${modifiers.join(":")}:${className}`;
+
+          if (className) {
+            const finalClass = buildFinalClassName(className, isImportant, modifiers);
+            classes.push(finalClass);
           }
-          classes.push(className);
         }
       }
     });
   };
 
-  traverse(cssObj);
-  return [...new Set(classes)]; // Remove duplicates
+  return traverse;
 };
+
 
 /**
  * Helper function to resolve token values using Panda's token dictionary
@@ -1043,52 +1135,25 @@ export const extractTailwindClassesFromPandaCssWithContext = (
       const { config } = createTailwindContext({} as Config);
       effectiveConfig = config as any;
     } catch (e) {
-      // Fallback: use empty config if creation fails
       effectiveConfig = {} as Config;
     }
   }
 
-  // Build a flat map of Tailwind tokens from nested structure
-  // { blue: { 600: "#2563eb", 700: "#1d4ed8" } } -> { "blue-600": "#2563eb", "blue-700": "#1d4ed8" }
-  const flattenTokens = (tokens: Record<string, any>, prefix = ""): Record<string, string> => {
-    const flattened: Record<string, string> = {};
-
-    for (const [key, value] of Object.entries(tokens)) {
-      const tokenName = prefix ? `${prefix}-${key}` : key;
-
-      if (typeof value === "string") {
-        flattened[tokenName] = value;
-      } else if (typeof value === "object" && value !== null) {
-        // Recursively flatten nested token objects
-        Object.assign(flattened, flattenTokens(value, tokenName));
-      }
-    }
-
-    return flattened;
-  };
-
-  // Build complete Tailwind token map from config theme
-  // Only use specific token categories, not all theme keys
-  const tailwindTokens: Record<string, string> = {};
-
-  // Helper to flatten tokens without category prefix
   const flattenTokensForMatching = (tokens: Record<string, any>, prefix = ""): Record<string, string> => {
     const flattened: Record<string, string> = {};
-
     for (const [key, value] of Object.entries(tokens)) {
       const tokenName = prefix ? `${prefix}-${key}` : key;
-
       if (typeof value === "string") {
         flattened[tokenName] = value;
       } else if (typeof value === "object" && value !== null) {
         Object.assign(flattened, flattenTokensForMatching(value, tokenName));
       }
     }
-
     return flattened;
   };
 
   // Only build tokens from known categories that are meaningful for conversion
+  const tailwindTokens: Record<string, string> = {};
   const tokenCategories = [
     "colors",
     "spacing",
@@ -1106,13 +1171,11 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     for (const category of tokenCategories) {
       const values = effectiveConfig.theme[category];
       if (typeof values === "object" && values !== null) {
-        // Don't include category prefix for these tokens
         Object.assign(tailwindTokens, flattenTokensForMatching(values as Record<string, any>));
       }
     }
   }
 
-  // Helper to check if a resolved value matches a Tailwind token
   const findMatchingTailwindToken = (value: string): string | null => {
     const normalizedValue = value.toLowerCase();
     for (const [tokenName, tokenValue] of Object.entries(tailwindTokens)) {
@@ -1130,7 +1193,6 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     if (path.startsWith("[") && path.endsWith("]")) {
       return path; // Return as-is, already in Tailwind arbitrary value format
     }
-
     if (!pandaContext) return pandaTokenToTwSuffix(path);
 
     const category = tokenCategoryMap[prop];
@@ -1160,7 +1222,6 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     return pandaTokenToTwSuffix(path);
   };
 
-  // Helper to find a token by its value
   const findTokenByValue = (prop: string, value: string): string | null => {
     if (!pandaContext) return null;
 
@@ -1187,147 +1248,18 @@ export const extractTailwindClassesFromPandaCssWithContext = (
     return null;
   };
 
-  // Get responsive condition keys from context
   const responsiveConditionKeys = getResponsiveConditionKeys(pandaContext);
 
-  const traverse = (obj: any, modifiers: string[] = []): void => {
-    if (!obj || typeof obj !== "object") return;
-
-    Object.entries(obj).forEach(([key, value]) => {
-      // Handle textStyle specially - it's like a mixin
-      if (key === "textStyle" && typeof value === "string") {
-        if (inlineTextStyles && pandaContext) {
-          // When inlineTextStyles is true, expand textStyle to its actual CSS properties
-          const textStyles = pandaContext.config?.theme?.textStyles || {};
-          const resolvedTextStyle = resolveDottedPath(value, textStyles);
-
-          if (resolvedTextStyle && typeof resolvedTextStyle === "object") {
-            // If the resolved textStyle has a 'value' property (real-world Panda format),
-            // unwrap it and use that instead
-            const styleObject = resolvedTextStyle.value || resolvedTextStyle;
-            // Recursively process the resolved text style object
-            traverse(styleObject, modifiers);
-          }
-        } else {
-          // Default behavior: generate a simple class like "text-style-body"
-          const className = `text-style-${value}`;
-          if (modifiers.length > 0) {
-            classes.push(`${modifiers.join(":")}:${className}`);
-          } else {
-            classes.push(className);
-          }
-        }
-        return;
-      }
-
-      if (key.startsWith("_")) {
-        // Pseudo-selector like _hover, _focus, _active
-        const modifier = key.slice(1);
-        traverse(value, [...modifiers, modifier]);
-      } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-        // Nested object (could be responsive condition like md:, base: or pseudo-selector)
-        if (key === "base") {
-          // "base" is just the default, don't add it as a modifier
-          traverse(value, modifiers);
-        } else if (responsiveConditionKeys.includes(key)) {
-          // Apply as responsive modifier for known breakpoints (excluding base)
-          traverse(value, [...modifiers, key]);
-        } else {
-          // Try to convert CSS selector to Tailwind variant
-          const twVariant = selectorToTwVariant(key);
-          if (twVariant !== null) {
-            // Valid Tailwind variant found
-            let newModifiers = modifiers;
-            if (twVariant) {
-              // Check if it's an arbitrary selector (contains & and is not in pseudoSelectorMap)
-              if (twVariant.includes("&") && !pseudoSelectorMap[key]) {
-                // Wrap arbitrary selector in brackets for Tailwind's arbitrary selector syntax
-                // e.g., "&+div" becomes "[&+div]"
-                newModifiers = [...modifiers, `[${twVariant}]`];
-              } else {
-                // Regular pseudo-selector variant
-                newModifiers = [...modifiers, twVariant];
-              }
-            }
-            traverse(value, newModifiers);
-          } else if (modifiers.length > 0 && !key.startsWith("_")) {
-            // If we already have modifiers, treat other nested objects as additional conditions
-            traverse(value, [...modifiers, key]);
-          } else {
-            // Check if this is a responsive property definition (all keys are responsive conditions)
-            const objectKeys = Object.keys(value);
-            const allKeysAreResponsive =
-              objectKeys.length > 0 && objectKeys.every((k) => responsiveConditionKeys.includes(k) || k === "base");
-
-            // Also check if all values are primitives (strings/numbers), which indicates responsive values
-            const allValuesArePrimitives =
-              objectKeys.length > 0 &&
-              objectKeys.every((k) => typeof value[k] === "string" || typeof value[k] === "number");
-
-            if (allKeysAreResponsive || allValuesArePrimitives) {
-              // This is a responsive property like gridTemplateColumns: { base: '...', xl: '...' }
-              // Process each responsive variant
-              Object.entries(value).forEach(([respKey, respValue]) => {
-                const respModifiers = respKey === "base" ? modifiers : [...modifiers, respKey];
-                const propertyObj = { [key]: respValue };
-                traverse(propertyObj, respModifiers);
-              });
-            } else {
-              // Otherwise just process the nested object without adding a modifier
-              traverse(value, modifiers);
-            }
-          }
-        }
-      } else if (typeof value === "string" || typeof value === "number") {
-        // Actual style property with value - expand shorthand first
-        const expandedKey = expandShorthand(key, pandaContext, value);
-        let className = "";
-        let strValue = String(value).toLowerCase();
-        let isImportant = false;
-
-        // Check for !important flag
-        if (strValue.includes("!important")) {
-          isImportant = true;
-          strValue = strValue.replace(/\s*!important\s*/g, "").trim();
-        }
-
-        // Try special handling first
-        const specialClass = getSpecialPropertyClass(expandedKey, strValue);
-        if (specialClass !== null) {
-          className = specialClass;
-        } else {
-          // Default handling for all other properties
-          const mapping = propertyMap[expandedKey];
-          if (mapping) {
-            // First try to find this value as a token in the context
-            let suffix: string;
-            const tokenPath = findTokenByValue(expandedKey, String(value).replace(/\s*!important\s*/g, "").trim());
-
-            if (tokenPath) {
-              // Found a matching token, use the token name
-              suffix = pandaTokenToTwSuffix(tokenPath);
-            } else {
-              // Fallback to resolveToken for standard resolution
-              suffix = resolveToken(expandedKey, strValue);
-            }
-
-            className = suffix ? `${mapping.classPrefix}${suffix}` : mapping.classPrefix;
-          }
-        }
-
-        if (className) {
-          // Add important modifier prefix if needed (Tailwind's ! prefix)
-          if (isImportant) {
-            className = `!${className}`;
-          }
-          if (modifiers.length > 0) {
-            className = `${modifiers.join(":")}:${className}`;
-          }
-          classes.push(className);
-        }
-      }
-    });
-  };
+  const traverse = createCommonTraverse(
+    classes,
+    responsiveConditionKeys,
+    pandaContext,
+    {
+      inlineTextStyles,
+      findTokenByValue,
+      resolveToken,
+    },
+  );
 
   traverse(cssObj);
   return [...new Set(classes)]; // Remove duplicates
