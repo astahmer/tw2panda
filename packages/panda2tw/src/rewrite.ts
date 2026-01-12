@@ -141,40 +141,59 @@ const processSourceFile = (
   const cssCalls = findCssCalls(sourceFile);
   cssCalls.forEach((call) => {
     try {
-      const cssObj = nodeToObject(call.argument);
-      // Use context-aware conversion if available, otherwise pass context for shorthand/responsive resolution
-      const classes = pandaContext
-        ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext as any, tailwindConfig, inlineTextStyles)
-        : extractTailwindClassesFromPandaCss(cssObj, pandaContext as any);
+      const argumentText = call.argument.getText();
 
-      if (classes.length > 0) {
-        const classString = classes.join(" ");
+      // Check if the css argument contains a ternary expression
+      if (argumentText.includes("?") && argumentText.includes(":")) {
+        // Keep css() with ternary as-is, wrapped in cn() for consistency
+        // Format: css({ prop: condition ? value1 : value2 })
+        // Convert to: cn(condition ? css({ prop: value1 }) : css({ prop: value2 }))
 
-        // Check if css() call is inside a JSX expression (like className={css(...)})
-        // by checking if parent is a JsxExpression
-        let parent = call.node.getParent();
-        let isInJsxExpression = false;
-
-        while (parent) {
-          if (Node.isJsxExpression(parent)) {
-            isInJsxExpression = true;
-            break;
-          }
-          if (Node.isJsxAttribute(parent) || Node.isJsxOpeningElement(parent)) {
-            break;
-          }
-          parent = parent.getParent();
-        }
-
-        // If inside a JSX expression, just use the class string
-        // Otherwise, replace with className="..."
-        const replacement = isInJsxExpression ? `"${classString}"` : `className="${classString}"`;
+        // For now, we'll keep it as cn(css({...ternary...})) to preserve the ternary
+        const replacement = `cn(css(${argumentText}))`;
 
         magicStr.overwrite(call.startPos, call.endPos, replacement);
         conversions.push({
           original: call.node.getText(),
           replacement,
         });
+      } else {
+        // No ternary - proceed with normal conversion
+        const cssObj = nodeToObject(call.argument);
+        // Use context-aware conversion if available, otherwise pass context for shorthand/responsive resolution
+        const classes = pandaContext
+          ? extractTailwindClassesFromPandaCssWithContext(cssObj, pandaContext as any, tailwindConfig, inlineTextStyles)
+          : extractTailwindClassesFromPandaCss(cssObj, pandaContext as any);
+
+        if (classes.length > 0) {
+          const classString = classes.join(" ");
+
+          // Check if css() call is inside a JSX expression (like className={css(...)})
+          // by checking if parent is a JsxExpression
+          let parent = call.node.getParent();
+          let isInJsxExpression = false;
+
+          while (parent) {
+            if (Node.isJsxExpression(parent)) {
+              isInJsxExpression = true;
+              break;
+            }
+            if (Node.isJsxAttribute(parent) || Node.isJsxOpeningElement(parent)) {
+              break;
+            }
+            parent = parent.getParent();
+          }
+
+          // If inside a JSX expression, just use the class string
+          // Otherwise, replace with className="..."
+          const replacement = isInJsxExpression ? `"${classString}"` : `className="${classString}"`;
+
+          magicStr.overwrite(call.startPos, call.endPos, replacement);
+          conversions.push({
+            original: call.node.getText(),
+            replacement,
+          });
+        }
       }
     } catch (e) {
       console.error("Error converting css() call:", e);
@@ -330,23 +349,41 @@ const processSourceFile = (
             }
           }
 
+          // Check if the existing className is a cn() or cx() call with ternary
+          // If it contains a ternary, keep it as-is (we can't safely evaluate it)
+          const isCnOrCxWithTernary =
+            (existingClassName.startsWith("cn(") || existingClassName.startsWith("cx(")) &&
+            existingClassName.includes("?");
+
+          if (isCnOrCxWithTernary) {
+            // Keep the cn/cx call with ternary as-is, don't try to evaluate it
+            existingClasses = [existingClassName];
+          }
           // Check if the existing className is a css() call
-          if (existingClassName.startsWith("css(")) {
+          else if (existingClassName.startsWith("css(")) {
             try {
               // Try to extract and convert the css() call
               const cssMatch = existingClassName.match(/css\((.*)\)$/s);
               if (cssMatch) {
                 const cssArg = cssMatch[1];
-                const cssObj = new Function(`return (${cssArg})`)();
-                const existingTwClasses = pandaContext
-                  ? extractTailwindClassesFromPandaCssWithContext(
-                      cssObj,
-                      pandaContext as any,
-                      tailwindConfig,
-                      inlineTextStyles,
-                    )
-                  : extractTailwindClassesFromPandaCss(cssObj, pandaContext as any);
-                existingClasses = existingTwClasses;
+
+                // Check if the css argument contains a ternary
+                if (cssArg.includes("?") && cssArg.includes(":")) {
+                  // Has ternary - wrap with cn() and keep as-is
+                  existingClasses = [`cn(css(${cssArg}))`];
+                } else {
+                  // No ternary - convert normally
+                  const cssObj = new Function(`return (${cssArg})`)();
+                  const existingTwClasses = pandaContext
+                    ? extractTailwindClassesFromPandaCssWithContext(
+                        cssObj,
+                        pandaContext as any,
+                        tailwindConfig,
+                        inlineTextStyles,
+                      )
+                    : extractTailwindClassesFromPandaCss(cssObj, pandaContext as any);
+                  existingClasses = existingTwClasses;
+                }
               }
             } catch (e) {
               // If we can't parse it, keep the css() call as-is

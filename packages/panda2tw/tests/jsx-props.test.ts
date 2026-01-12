@@ -214,4 +214,65 @@ export const Button = () => {
     expect(result.output).not.toContain("css=");
     expect(result.conversions).toHaveLength(1);
   });
+
+  test("preserves cn() calls with ternaries (can't safely evaluate)", () => {
+    const input = `
+export const Component = ({ isActive }) => {
+  return (
+    <span className={cn(
+      css({
+        textStyle: isActive ? 'body.bold' : 'caption.bold',
+      })
+    )} />
+  );
+};
+    `.trim();
+
+    const result = rewritePandaToTailwind(input, "test.tsx");
+
+    // The cn() with ternary should be preserved as-is
+    expect(result.output).toContain("className={cn(");
+    expect(result.output).toContain("css({");
+    expect(result.output).toContain("textStyle: isActive ?");
+  });
+
+  test("converts css() with inline ternaries to cn(css(...))", () => {
+    const input = `
+export const Component = ({ isActive }) => {
+  return (
+    <span className={css({
+      textStyle: isActive ? 'body.bold' : 'caption.bold',
+    })} />
+  );
+};
+    `.trim();
+
+    const result = rewritePandaToTailwind(input, "test.tsx");
+
+    // css() with ternary should be wrapped with cn()
+    expect(result.output).toContain("className={cn(css({");
+    expect(result.output).toContain("textStyle: isActive ?");
+    expect(result.output).toContain("'body.bold' : 'caption.bold'");
+  });
+
+  test("preserves cx() calls with ternaries (can't safely evaluate)", () => {
+    const input = `
+export const Component = ({ condition }) => {
+  return (
+    <span className={cx(
+      css({
+        color: condition ? 'red.500' : 'blue.500',
+      })
+    )} />
+  );
+};
+    `.trim();
+
+    const result = rewritePandaToTailwind(input, "test.tsx");
+
+    // The cx() with ternary should be preserved as-is
+    expect(result.output).toContain("className={cx(");
+    expect(result.output).toContain("css({");
+    expect(result.output).toContain("color: condition ?");
+  });
 });
