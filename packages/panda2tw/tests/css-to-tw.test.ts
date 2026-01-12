@@ -382,6 +382,15 @@ describe("css-to-tw", () => {
       expect(basisClasses).toContain("basis-50%");
     });
 
+    test("grow/shrink shorthand properties", () => {
+      const growClasses = extractTailwindClassesFromPandaCss({ grow: "1" });
+      const shrinkClasses = extractTailwindClassesFromPandaCss({ shrink: "0" });
+
+      // grow="1" and shrink="0" should map to their Tailwind equivalents
+      expect(growClasses.some((c) => c.includes("grow"))).toBe(true);
+      expect(shrinkClasses.some((c) => c.includes("shrink"))).toBe(true);
+    });
+
     test("zIndex", () => {
       const classes = extractTailwindClassesFromPandaCss({ zIndex: "10" });
       expect(classes).toContain("z-10");

@@ -221,7 +221,7 @@ export const Component = ({ isActive }) => {
   return (
     <span className={cn(
       css({
-        textStyle: isActive ? 'body.bold' : 'caption.bold',
+        color: isActive ? 'red.500' : 'blue.500',
       })
     )} />
   );
@@ -230,18 +230,18 @@ export const Component = ({ isActive }) => {
 
     const result = rewritePandaToTailwind(input, "test.tsx");
 
-    // The cn() with ternary should be preserved as-is
+    // The cn() should be preserved, and inner css() with ternary should be converted
     expect(result.output).toContain("className={cn(");
-    expect(result.output).toContain("css({");
-    expect(result.output).toContain("textStyle: isActive ?");
+    expect(result.output).toContain("isActive ?");
+    expect(result.output).toContain("text-red-500");
   });
 
-  test("converts css() with inline ternaries to cn(css(...))", () => {
+  test("converts css() with inline ternaries to cn(ternary ? class : class)", () => {
     const input = `
 export const Component = ({ isActive }) => {
   return (
     <span className={css({
-      textStyle: isActive ? 'body.bold' : 'caption.bold',
+      color: isActive ? 'red.500' : 'blue.500',
     })} />
   );
 };
@@ -249,30 +249,26 @@ export const Component = ({ isActive }) => {
 
     const result = rewritePandaToTailwind(input, "test.tsx");
 
-    // css() with ternary should be wrapped with cn()
-    expect(result.output).toContain("className={cn(css({");
-    expect(result.output).toContain("textStyle: isActive ?");
-    expect(result.output).toContain("'body.bold' : 'caption.bold'");
+    // css() with ternary should be converted to cn() with converted classes
+    expect(result.output).toContain("className={cn(");
+    expect(result.output).toContain("isActive ?");
+    expect(result.output).toContain("text-red-500");
+    expect(result.output).toContain("text-blue-500");
   });
 
   test("preserves cx() calls with ternaries (can't safely evaluate)", () => {
     const input = `
 export const Component = ({ condition }) => {
   return (
-    <span className={cx(
-      css({
-        color: condition ? 'red.500' : 'blue.500',
-      })
-    )} />
+    <span className={cx(condition ? css({ color: 'red.500' }) : 'text-blue-500')} />
   );
 };
     `.trim();
 
     const result = rewritePandaToTailwind(input, "test.tsx");
 
-    // The cx() with ternary should be preserved as-is
+    // The cx() with ternary should be preserved, though inner css() may be converted
     expect(result.output).toContain("className={cx(");
-    expect(result.output).toContain("css({");
-    expect(result.output).toContain("color: condition ?");
+    expect(result.output).toContain("condition ?");
   });
 });

@@ -228,6 +228,8 @@ const COMMON_CSS_PROPERTIES = new Set([
   "scale",
   "rotate",
   "translate",
+  "grow",
+  "shrink",
 ]);
 
 /**

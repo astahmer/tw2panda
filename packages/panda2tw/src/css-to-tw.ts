@@ -113,6 +113,8 @@ const getDefaultShorthandMap = (): Record<string, string> => ({
   pointerEvents: "pointerEvents",
   visibility: "visibility",
   zIndex: "zIndex",
+  grow: "flexGrow",
+  shrink: "flexShrink",
 });
 
 export const expandShorthand = (prop: string, pandaContext?: PandaContext, value?: any): string => {

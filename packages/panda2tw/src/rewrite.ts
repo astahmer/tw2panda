@@ -115,6 +115,49 @@ const shouldConvertJsxProp = (
 };
 
 /**
+ * Convert a ternary expression with css values to cn with ternary branches
+ * Example: { prop: condition ? "value1" : "value2" }
+ * Becomes: condition ? "class1" : "class2"
+ */
+const convertTernaryInCss = (
+  objectText: string,
+  pandaContext?: PandaContext,
+  tailwindConfig?: Config,
+  inlineTextStyles?: boolean,
+): string | null => {
+  try {
+    // Try to find a ternary pattern within the object
+    // We're looking for patterns like: { prop: condition ? value1 : value2 }
+    const ternaryMatch = objectText.match(/{\s*(\w+):\s*(.+?)\s*\?\s*(.+?)\s*:\s*(.+?)\s*}/s);
+
+    if (!ternaryMatch) return null;
+
+    const [, propName, condition, trueValue, falseValue] = ternaryMatch;
+
+    // Create two css objects - one for each branch
+    const trueCssObj = { [propName]: trueValue.replace(/^["']|["']$/g, "").trim() };
+    const falseCssObj = { [propName]: falseValue.replace(/^["']|["']$/g, "").trim() };
+
+    // Convert each to Tailwind classes
+    const trueClasses = pandaContext
+      ? extractTailwindClassesFromPandaCssWithContext(trueCssObj, pandaContext as any, tailwindConfig, inlineTextStyles)
+      : extractTailwindClassesFromPandaCss(trueCssObj, pandaContext as any);
+
+    const falseClasses = pandaContext
+      ? extractTailwindClassesFromPandaCssWithContext(falseCssObj, pandaContext as any, tailwindConfig, inlineTextStyles)
+      : extractTailwindClassesFromPandaCss(falseCssObj, pandaContext as any);
+
+    const trueClassString = trueClasses.join(" ");
+    const falseClassString = falseClasses.join(" ");
+
+    // Return the ternary expression with converted classes
+    return `${condition} ? "${trueClassString}" : "${falseClassString}"`;
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
  * Internal function to process a source file
  */
 const processSourceFile = (
@@ -145,18 +188,26 @@ const processSourceFile = (
 
       // Check if the css argument contains a ternary expression
       if (argumentText.includes("?") && argumentText.includes(":")) {
-        // Keep css() with ternary as-is, wrapped in cn() for consistency
-        // Format: css({ prop: condition ? value1 : value2 })
-        // Convert to: cn(condition ? css({ prop: value1 }) : css({ prop: value2 }))
+        // Try to convert ternary branches to classes
+        const ternaryConversion = convertTernaryInCss(argumentText, pandaContext, tailwindConfig, inlineTextStyles);
 
-        // For now, we'll keep it as cn(css({...ternary...})) to preserve the ternary
-        const replacement = `cn(css(${argumentText}))`;
-
-        magicStr.overwrite(call.startPos, call.endPos, replacement);
-        conversions.push({
-          original: call.node.getText(),
-          replacement,
-        });
+        if (ternaryConversion) {
+          // Successfully converted - use cn() with converted ternary
+          const replacement = `cn(${ternaryConversion})`;
+          magicStr.overwrite(call.startPos, call.endPos, replacement);
+          conversions.push({
+            original: call.node.getText(),
+            replacement,
+          });
+        } else {
+          // Couldn't convert ternary - wrap with cn() as-is
+          const replacement = `cn(css(${argumentText}))`;
+          magicStr.overwrite(call.startPos, call.endPos, replacement);
+          conversions.push({
+            original: call.node.getText(),
+            replacement,
+          });
+        }
       } else {
         // No ternary - proceed with normal conversion
         const cssObj = nodeToObject(call.argument);
