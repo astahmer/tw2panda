@@ -1188,6 +1188,34 @@ describe("css-to-tw", () => {
       expect(classes.some((c) => c.includes("rounded-default"))).toBe(true);
     });
 
+    test("handles functional pseudo-classes like :has()", () => {
+      const cssObj = {
+        display: "flex",
+        position: "relative",
+        flexShrink: "0",
+        borderRadius: "default",
+        bgColor: "background.secondary",
+        overflow: "hidden",
+        "&:has(> .avatar__fallback)": {
+          border: "ui-kit-base",
+          borderColor: "border.subtle",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("flex");
+      expect(classes).toContain("relative");
+      expect(classes).toContain("shrink-0");
+      expect(classes).toContain("rounded-default");
+      expect(classes.some((c) => c.includes("bg-background-secondary"))).toBe(true);
+      expect(classes).toContain("overflow-hidden");
+      // :has() is a functional pseudo-class with spaces inside - should be treated as arbitrary selector
+      expect(classes.some((c) => c.includes("[&:has(>_.avatar__fallback)]"))).toBe(true);
+      expect(classes.some((c) => c.includes("border-ui-kit-base"))).toBe(true);
+      expect(classes.some((c) => c.includes("border-border-subtle"))).toBe(true);
+    });
+
     test("handles arbitrary selectors with spaces in attribute selectors", () => {
       const cssObj = {
         color: "red.500",

@@ -868,7 +868,16 @@ const selectorToTwVariant = (selector: string): string | null => {
   if (pseudoSelector) {
     // Look up the pseudo-selector in our map
     const variant = pseudoSelectorMap[pseudoSelector];
-    return variant ?? null;
+    if (variant !== undefined) {
+      return variant;
+    }
+    // If pseudo-selector is not in map but has parentheses (functional pseudo-class),
+    // treat the whole selector as arbitrary instead of ignoring it
+    if (!pseudoSelector.includes("(")) {
+      // Simple pseudo-selector/pseudo-element not in map, skip
+      return null;
+    }
+    // Fall through to arbitrary selector handling for functional pseudo-classes
   }
 
   // For arbitrary selectors, convert spaces to underscores for Tailwind's bracket notation
