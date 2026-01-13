@@ -1171,5 +1171,41 @@ describe("css-to-tw", () => {
 
       expect(classes.some((c) => c === "md:!p-4")).toBe(true);
     });
+
+    test("handles arbitrary selectors with multiple spaces (has selector)", () => {
+      const cssObj = {
+        display: "flex",
+        "&[has(> .avatar-fallback)]": {
+          borderRadius: "default",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes).toContain("flex");
+      // Spaces in selector should be converted to underscores
+      expect(classes.some((c) => c.includes("[&[has(>_.avatar-fallback)]"))).toBe(true);
+      expect(classes.some((c) => c.includes("rounded-default"))).toBe(true);
+    });
+
+    test("handles arbitrary selectors with spaces in attribute selectors", () => {
+      const cssObj = {
+        color: "red.500",
+        "& > .child": {
+          marginLeft: "2",
+        },
+        "&[data-state = active]": {
+          fontWeight: "bold",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      expect(classes.some((c) => c.includes("text-red"))).toBe(true);
+      // Spaces in selectors should be replaced with underscores
+      expect(classes.some((c) => c.includes("[&_>_.child]"))).toBe(true);
+      expect(classes.some((c) => c.includes("ml-2"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state_=_active]]"))).toBe(true);
+    });
   });
 });

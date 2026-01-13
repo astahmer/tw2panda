@@ -490,7 +490,8 @@ export const camelToKebab = (str: string): string => {
 export const pandaTokenToTwSuffix = (token: string): string => {
   if (!token) return "";
   // Replace dots with hyphens for color tokens like "red.500" -> "red-500"
-  return token.replace(/\./g, "-");
+  // Replace spaces with underscores for arbitrary values in Tailwind bracket syntax
+  return token.replace(/\./g, "-").replace(/\s+/g, "_");
 };
 
 export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string[] = []): string[] => {
@@ -1214,8 +1215,9 @@ export const extractTailwindClassesFromPandaCssWithContext = (
       if (matchingToken) {
         return matchingToken;
       }
-      // Otherwise, use arbitrary value syntax [value]
-      return `[${resolvedResult.value}]`;
+      // Use arbitrary value syntax [value] with spaces replaced by underscores
+      const escapedValue = String(resolvedResult.value).replace(/\s+/g, "_");
+      return `[${escapedValue}]`;
     }
 
     // Fallback to original token path
