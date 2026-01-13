@@ -220,7 +220,7 @@ const avatar = define.slotRecipe({
         },
       });
       "
-    `)
+    `);
   });
 
   test("converts slot recipe with pseudo-elements correctly", () => {
@@ -256,11 +256,11 @@ const badge = define.slotRecipe({
         slots: ['root', 'content'],
         base: {
           root: "relative inline-block",
-          content: "flex _before:content-[\\\\\\"\\\\\\"] _before:absolute",
+          content: "flex before:content-[\\\\\\"\\\\\\"] before:absolute",
         },
       });
       "
-    `)
+    `);
   });
 
   test("maintains single string format for slots without selectors", () => {
@@ -299,6 +299,6 @@ const buttonRecipe = define.slotRecipe({
         },
       });
       "
-    `)
+    `);
   });
 });

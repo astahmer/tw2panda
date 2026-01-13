@@ -123,7 +123,26 @@ export const expandShorthand = (prop: string, pandaContext?: PandaContext, value
   if (prop === "flex" && value !== undefined) {
     const strValue = String(value).toLowerCase();
     // These are actual CSS flex shorthand values, not display:flex shortcuts
-    if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "auto", "none", "initial", "inherit", "revert", "unset"].includes(strValue)) {
+    if (
+      [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "auto",
+        "none",
+        "initial",
+        "inherit",
+        "revert",
+        "unset",
+      ].includes(strValue)
+    ) {
       return prop; // Keep as flex
     }
   }
@@ -545,7 +564,15 @@ export const pandaCssToTailwindClasses = (cssObj: StyleObject, modifiers: string
 
 function getSpecialPropertyClass(key: string, strValue: string): string | null {
   // Handle percentage values for width/height
-  if ((key === "width" || key === "height" || key === "maxWidth" || key === "maxHeight" || key === "minWidth" || key === "minHeight") && strValue === "100%") {
+  if (
+    (key === "width" ||
+      key === "height" ||
+      key === "maxWidth" ||
+      key === "maxHeight" ||
+      key === "minWidth" ||
+      key === "minHeight") &&
+    strValue === "100%"
+  ) {
     const prefix = key === "width" || key === "maxWidth" || key === "minWidth" ? "w-" : "h-";
     return `${prefix}full`;
   }
@@ -810,6 +837,7 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
 const pseudoSelectorMap: Record<string, string> = {
   ":hover": "hover",
   ":focus": "focus",
+  ":focus-visible": "focus-visible",
   ":active": "active",
   ":disabled": "disabled",
   ":invalid": "invalid",
@@ -908,8 +936,6 @@ const extractImportantFlag = (value: string): { cleanValue: string; isImportant:
   return { cleanValue: strValue, isImportant };
 };
 
-
-
 /**
  * Helper to build final class name with important flag and modifiers
  */
@@ -932,11 +958,7 @@ export const extractTailwindClassesFromPandaCss = (cssObj: StyleObject, pandaCon
   const classes: string[] = [];
   const responsiveConditionKeys = getResponsiveConditionKeys(pandaContext);
 
-  const traverse = createCommonTraverse(
-    classes,
-    responsiveConditionKeys,
-    pandaContext,
-  );
+  const traverse = createCommonTraverse(classes, responsiveConditionKeys, pandaContext);
 
   traverse(cssObj);
   return [...new Set(classes)]; // Remove duplicates
@@ -981,8 +1003,10 @@ const createCommonTraverse = (
       }
 
       if (key.startsWith("_")) {
-        // Pseudo-selector like _hover, _focus
-        const modifier = key.slice(1);
+        // Pseudo-selector like _hover, _focus, _focusVisible
+        let modifier = key.slice(1);
+        // Convert camelCase to kebab-case for Tailwind modifiers (e.g., focusVisible -> focus-visible)
+        modifier = modifier.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
         traverse(value, [...modifiers, modifier]);
       } else if (typeof value === "object" && !Array.isArray(value)) {
         // Nested object (could be responsive condition like md:, base: or pseudo like _hover)
@@ -1049,8 +1073,15 @@ const createCommonTraverse = (
           if (className === "") {
             const mapping = propertyMap[expandedKey];
             if (mapping) {
-              const tokenPath = contextData.findTokenByValue(expandedKey, String(value).replace(/\s*!important\s*/g, "").trim());
-              const suffix = tokenPath ? pandaTokenToTwSuffix(tokenPath) : contextData.resolveToken(expandedKey, cleanValue);
+              const tokenPath = contextData.findTokenByValue(
+                expandedKey,
+                String(value)
+                  .replace(/\s*!important\s*/g, "")
+                  .trim(),
+              );
+              const suffix = tokenPath
+                ? pandaTokenToTwSuffix(tokenPath)
+                : contextData.resolveToken(expandedKey, cleanValue);
               className = suffix ? `${mapping.classPrefix}${suffix}` : mapping.classPrefix;
             }
           }
@@ -1087,7 +1118,6 @@ const createCommonTraverse = (
 
   return traverse;
 };
-
 
 /**
  * Helper function to resolve token values using Panda's token dictionary
@@ -1268,16 +1298,11 @@ export const extractTailwindClassesFromPandaCssWithContext = (
 
   const responsiveConditionKeys = getResponsiveConditionKeys(pandaContext);
 
-  const traverse = createCommonTraverse(
-    classes,
-    responsiveConditionKeys,
-    pandaContext,
-    {
-      inlineTextStyles,
-      findTokenByValue,
-      resolveToken,
-    },
-  );
+  const traverse = createCommonTraverse(classes, responsiveConditionKeys, pandaContext, {
+    inlineTextStyles: inlineTextStyles ?? false,
+    findTokenByValue,
+    resolveToken,
+  });
 
   traverse(cssObj);
   return [...new Set(classes)]; // Remove duplicates

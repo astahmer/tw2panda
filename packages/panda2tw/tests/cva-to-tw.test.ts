@@ -148,12 +148,10 @@ describe("cva-to-tw", () => {
     // Should extract pseudo-element content with proper quote handling
     expect(classes).toMatchInlineSnapshot(`
       [
-        "_before:content-[\\"\\"]",
-        "_before:block",
-        "_after:content-[\\"—\\"]",
+        "before:content-[\\"\\"]",
+        "before:block",
+        "after:content-[\\"—\\"]",
       ]
     `);
   });
 });
-
-

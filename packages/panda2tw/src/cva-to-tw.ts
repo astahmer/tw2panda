@@ -64,7 +64,10 @@ export const extractClassesFromNestedStyles = (obj: StyleObject, prefix: string 
 
     // Handle responsive/conditional styles (md:, dark:, etc.)
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      const nestedPrefix = prefix ? `${prefix}:${key}` : key;
+      // Strip leading underscore from Panda modifiers and convert camelCase to kebab-case
+      let cleanedKey = key.startsWith("_") ? key.slice(1) : key;
+      cleanedKey = cleanedKey.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+      const nestedPrefix = prefix ? `${prefix}:${cleanedKey}` : cleanedKey;
       classes.push(...extractClassesFromNestedStyles(value, nestedPrefix));
     } else {
       // Direct style property
