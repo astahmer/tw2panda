@@ -145,7 +145,12 @@ const convertTernaryInCss = (
       : extractTailwindClassesFromPandaCss(trueCssObj, pandaContext as any);
 
     const falseClasses = pandaContext
-      ? extractTailwindClassesFromPandaCssWithContext(falseCssObj, pandaContext as any, tailwindConfig, inlineTextStyles)
+      ? extractTailwindClassesFromPandaCssWithContext(
+          falseCssObj,
+          pandaContext as any,
+          tailwindConfig,
+          inlineTextStyles,
+        )
       : extractTailwindClassesFromPandaCss(falseCssObj, pandaContext as any);
 
     const trueClassString = trueClasses.join(" ");

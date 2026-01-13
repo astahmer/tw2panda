@@ -137,4 +137,3 @@ const cardStyles = cva({
     expect(result).toContain("text-sm");
   });
 });
-

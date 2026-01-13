@@ -46,9 +46,7 @@ export function detectAndConvertCvaInCode(code: string): string {
 function isCvaConfig(obj: ObjectLiteralExpression): boolean {
   const properties = obj.getProperties();
   const propertyNames = new Set(
-    properties
-      .filter((p) => Node.isPropertyAssignment(p))
-      .map((p) => (p as any).getName?.()),
+    properties.filter((p) => Node.isPropertyAssignment(p)).map((p) => (p as any).getName?.()),
   );
 
   // CVA configs must have either:
@@ -115,17 +113,7 @@ function convertStyleProperty(prop: any): void {
     );
 
     // Common slot names
-    const commonSlots = new Set([
-      "root",
-      "image",
-      "fallback",
-      "header",
-      "body",
-      "footer",
-      "icon",
-      "label",
-      "content",
-    ]);
+    const commonSlots = new Set(["root", "image", "fallback", "header", "body", "footer", "icon", "label", "content"]);
     const hasSlots = Array.from(slotNames).some((name) => commonSlots.has(name as string));
 
     if (hasSlots) {
