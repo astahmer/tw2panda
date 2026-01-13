@@ -50,6 +50,18 @@ export const extractClassesFromNestedStyles = (obj: StyleObject, prefix: string 
   const classes: string[] = [];
 
   Object.entries(obj).forEach(([key, value]: [string, any]) => {
+    // Handle CSS selectors (keys starting with &) - use them as prefixes
+    if (key.startsWith("&")) {
+      // Convert the selector to Tailwind format with spaces replaced by underscores
+      const selectorPrefix = key.replace(/\s+/g, "_");
+      // Wrap in brackets for arbitrary selector syntax
+      const prefixedModifier = prefix ? `${prefix}:[${selectorPrefix}]` : `[${selectorPrefix}]`;
+      if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+        classes.push(...extractClassesFromNestedStyles(value, prefixedModifier));
+      }
+      return;
+    }
+
     // Handle responsive/conditional styles (md:, dark:, etc.)
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       const nestedPrefix = prefix ? `${prefix}:${key}` : key;

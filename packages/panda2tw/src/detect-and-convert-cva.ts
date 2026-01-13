@@ -160,7 +160,46 @@ function convertSlotStyles(obj: ObjectLiteralExpression): void {
       if (styleObj) {
         const classes = extractClassesFromNestedStyles(styleObj);
         if (classes.length > 0) {
-          prop.setInitializer(`"${classes.join(" ")}"`);
+          // Check if any classes contain arbitrary selectors (with '[' and ']')
+          // If so, keep the object structure; otherwise convert to string
+          const hasArbitrarySelectors = classes.some((c) => c.includes("[") && c.includes("]"));
+          if (hasArbitrarySelectors) {
+            // Keep as object to preserve selector context
+            // Create an object with converted classes split by selector
+            const classesWithoutSelectors: string[] = [];
+            const selectorClasses: Record<string, string[]> = {};
+
+            for (const cls of classes) {
+              if (cls.includes("[") && cls.includes("]")) {
+                // Extract selector and class
+                const match = cls.match(/^(\[.*?\]):(.*)/);
+                if (match) {
+                  const [, selector, classOnly] = match;
+                  if (!selectorClasses[selector]) {
+                    selectorClasses[selector] = [];
+                  }
+                  selectorClasses[selector].push(classOnly);
+                }
+              } else {
+                classesWithoutSelectors.push(cls);
+              }
+            }
+
+            // Build the object representation
+            if (classesWithoutSelectors.length > 0 || Object.keys(selectorClasses).length > 0) {
+              const objectParts: string[] = [];
+              if (classesWithoutSelectors.length > 0) {
+                objectParts.push(`__base: "${classesWithoutSelectors.join(" ")}"`);
+              }
+              for (const [selector, cls] of Object.entries(selectorClasses)) {
+                objectParts.push(`"${selector}": "${cls.join(" ")}"`);
+              }
+              prop.setInitializer(`{ ${objectParts.join(", ")} }`);
+            }
+          } else {
+            // No arbitrary selectors, safe to convert to string
+            prop.setInitializer(`"${classes.join(" ")}"`);
+          }
         }
       }
     }
@@ -177,6 +216,53 @@ function evaluateObjectLiteral(obj: ObjectLiteralExpression): any {
     const func = new Function(`return (${code})`);
     return func();
   } catch (e) {
-    return null;
+    // Fallback: manually extract properties from the object literal
+    // This handles cases with special characters in keys like '&:has(...)'
+    try {
+      return extractObjectLiteralProperties(obj);
+    } catch (fallbackError) {
+      return null;
+    }
   }
+}
+
+/**
+ * Extract properties from an object literal expression by parsing the AST
+ * Handles string keys with special characters that can't be evaluated with new Function
+ */
+function extractObjectLiteralProperties(obj: ObjectLiteralExpression): any {
+  const result: any = {};
+
+  for (const prop of obj.getProperties()) {
+    if (!Node.isPropertyAssignment(prop)) continue;
+
+    const keyNode = prop.getChildAtIndex(0);
+    let key: string;
+
+    // Handle both identifier keys and string literal keys
+    if (Node.isIdentifier(keyNode)) {
+      key = keyNode.getText();
+    } else if (Node.isStringLiteral(keyNode)) {
+      key = keyNode.getLiteralValue();
+    } else {
+      continue;
+    }
+
+    const valueNode = prop.getInitializer();
+    if (!valueNode) continue;
+
+    // Recursively evaluate the value
+    if (Node.isObjectLiteralExpression(valueNode)) {
+      result[key] = extractObjectLiteralProperties(valueNode);
+    } else if (Node.isStringLiteral(valueNode)) {
+      result[key] = valueNode.getLiteralValue();
+    } else if (Node.isNumericLiteral(valueNode)) {
+      result[key] = Number(valueNode.getLiteralValue());
+    } else {
+      // For other types (computed values, etc.), try to get the text representation
+      result[key] = valueNode.getText();
+    }
+  }
+
+  return result;
 }
