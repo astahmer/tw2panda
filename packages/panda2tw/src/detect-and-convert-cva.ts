@@ -138,7 +138,8 @@ function convertStyleProperty(prop: any): void {
         const classes = extractClassesFromNestedStyles(styleObj);
         if (classes.length > 0) {
           // Replace with a string of Tailwind classes
-          prop.setInitializer(`"${classes.join(" ")}"`);
+          // Use JSON.stringify to properly escape the string for TypeScript
+          prop.setInitializer(JSON.stringify(classes.join(" ")));
         }
       }
     }
@@ -160,49 +161,10 @@ function convertSlotStyles(obj: ObjectLiteralExpression): void {
       if (styleObj) {
         const classes = extractClassesFromNestedStyles(styleObj);
         if (classes.length > 0) {
-          // Check if any classes contain arbitrary selectors (with '[' and ']')
-          // If so, keep the object structure; otherwise convert to string
-          const hasArbitrarySelectors = classes.some((c) => c.includes("[") && c.includes("]"));
-          if (hasArbitrarySelectors) {
-            // Keep as object to preserve selector context
-            // Create an object with converted classes split by selector
-            const classesWithoutSelectors: string[] = [];
-            const selectorClasses: Record<string, string[]> = {};
-
-            for (const cls of classes) {
-              if (cls.includes("[") && cls.includes("]")) {
-                // Extract selector and class
-                const match = cls.match(/^(\[.*?\]):(.*)/);
-                if (match) {
-                  const [, selector, classOnly] = match;
-                  if (!selectorClasses[selector]) {
-                    selectorClasses[selector] = [];
-                  }
-                  selectorClasses[selector].push(classOnly);
-                }
-              } else {
-                classesWithoutSelectors.push(cls);
-              }
-            }
-
-            // Build the object representation
-            if (classesWithoutSelectors.length > 0 || Object.keys(selectorClasses).length > 0) {
-              const objectParts: string[] = [];
-              if (classesWithoutSelectors.length > 0) {
-                const escapedClasses = classesWithoutSelectors.join(" ").replace(/"/g, '\\"');
-                objectParts.push(`__base: "${escapedClasses}"`);
-              }
-              for (const [selector, cls] of Object.entries(selectorClasses)) {
-                const escapedClasses = cls.join(" ").replace(/"/g, '\\"');
-                objectParts.push(`"${selector}": "${escapedClasses}"`);
-              }
-              prop.setInitializer(`{ ${objectParts.join(", ")} }`);
-            }
-          } else {
-            // No arbitrary selectors, safe to convert to string
-            const escapedClasses = classes.join(" ").replace(/"/g, '\\"');
-            prop.setInitializer(`"${escapedClasses}"`);
-          }
+          // Convert all classes to a single string, including arbitrary selectors
+          const classesStr = classes.join(" ");
+          // Use JSON.stringify to properly escape the string for TypeScript
+          prop.setInitializer(JSON.stringify(classesStr));
         }
       }
     }
