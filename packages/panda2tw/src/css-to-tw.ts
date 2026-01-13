@@ -181,6 +181,8 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   borderLeftColor: { pattern: /^.*$/, classPrefix: "border-l-" },
   strokeColor: { pattern: /^.*$/, classPrefix: "stroke-" },
   fillColor: { pattern: /^.*$/, classPrefix: "fill-" },
+  fill: { pattern: /^.*$/, classPrefix: "fill-" },
+  stroke: { pattern: /^.*$/, classPrefix: "stroke-" },
 
   // Sizing
   width: { pattern: /^.*$/, classPrefix: "w-" },

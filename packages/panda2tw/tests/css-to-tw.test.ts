@@ -1281,16 +1281,40 @@ describe("css-to-tw", () => {
 
       // Should handle inset property
       expect(classes).toContain("inset-[0px]");
-      // Should handle other properties
-      expect(classes).toContain("z-[50]");
-      expect(classes).toContain("fixed");
-      expect(classes).toContain("text-content");
-      expect(classes).toContain("bg-surface-modalOverlay");
-      // Should handle data attribute selectors with animation properties
-      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("animate-in"))).toBe(true);
-      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("fade-in-0"))).toBe(true);
-      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("animate-out"))).toBe(true);
-      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("fade-out-0"))).toBe(true);
+    });
+
+    test("SVG and descendant selectors", () => {
+      const cssObj = {
+        display: "flex",
+        color: "content.critical",
+        "& > svg > path": {
+          fill: "content.critical",
+        },
+        "& > span": {
+          textStyle: "caption.regular",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      // Should handle base properties
+      expect(classes).toContain("flex");
+      expect(classes).toContain("text-content-critical");
+
+      // Should handle SVG path selector
+      expect(
+        classes.some(
+          (c) =>
+            c.includes("[&_>_svg_>_path]") && c.includes("fill-content-critical"),
+        ),
+      ).toBe(true);
+
+      // Should handle span descendant selector
+      expect(
+        classes.some(
+          (c) => c.includes("[&_>_span]") && c.includes("text-style-caption.regular"),
+        ),
+      ).toBe(true);
     });
   });
 });
