@@ -1257,5 +1257,40 @@ describe("css-to-tw", () => {
       expect(classes.some((c) => c.includes("after:") && c.includes("content-"))).toBe(true);
       expect(classes.some((c) => c.includes("before:") && c.includes("block"))).toBe(true);
     });
+
+    test("data attribute selectors with animation and inset", () => {
+      const cssObj = {
+        overlay: {
+          zIndex: "[50]",
+          position: "fixed",
+          inset: "[0px]",
+          color: "content",
+          bgColor: "surface.modalOverlay",
+          "&[data-state=open]": {
+            animateIn: true,
+            fadeIn: "0",
+          },
+          "&[data-state=closed]": {
+            animateOut: true,
+            fadeOut: "0",
+          },
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj.overlay);
+
+      // Should handle inset property
+      expect(classes).toContain("inset-[0px]");
+      // Should handle other properties
+      expect(classes).toContain("z-[50]");
+      expect(classes).toContain("fixed");
+      expect(classes).toContain("text-content");
+      expect(classes).toContain("bg-surface-modalOverlay");
+      // Should handle data attribute selectors with animation properties
+      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("animate-in"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("fade-in-0"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("animate-out"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("fade-out-0"))).toBe(true);
+    });
   });
 });

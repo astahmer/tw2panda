@@ -248,6 +248,7 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   right: { pattern: /^.*$/, classPrefix: "right-" },
   bottom: { pattern: /^.*$/, classPrefix: "bottom-" },
   left: { pattern: /^.*$/, classPrefix: "left-" },
+  inset: { pattern: /^.*$/, classPrefix: "inset-" },
 
   // Effects
   opacity: { pattern: /^.*$/, classPrefix: "opacity-" },
@@ -266,6 +267,10 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   transitionDuration: { pattern: /^.*$/, classPrefix: "duration-" },
   transitionTimingFunction: { pattern: /^.*$/, classPrefix: "ease-" },
   animation: { pattern: /^.*$/, classPrefix: "animate-" },
+  animateIn: { pattern: /^.*$/, classPrefix: "" }, // Special handling
+  animateOut: { pattern: /^.*$/, classPrefix: "" }, // Special handling
+  fadeIn: { pattern: /^.*$/, classPrefix: "fade-in-" },
+  fadeOut: { pattern: /^.*$/, classPrefix: "fade-out-" },
 
   // Additional Typography
   textTransform: { pattern: /^(uppercase|lowercase|capitalize|none)$/, classPrefix: "" },
@@ -829,6 +834,14 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
       const escapedValue = strValue.replace(/"/g, '\\"');
       return `content-[${escapedValue}]`;
     }
+
+    case "animateIn":
+      if (strValue === "true" || strValue === "1") return "animate-in";
+      break;
+
+    case "animateOut":
+      if (strValue === "true" || strValue === "1") return "animate-out";
+      break;
   }
 
   return null;
@@ -925,12 +938,12 @@ const selectorToTwVariant = (selector: string): string | null => {
  * Extract important flag from a CSS value and return cleaned value
  */
 const extractImportantFlag = (value: string): { cleanValue: string; isImportant: boolean } => {
-  let strValue = String(value).toLowerCase();
+  let strValue = String(value);
   let isImportant = false;
 
-  if (strValue.includes("!important")) {
+  if (strValue.toLowerCase().includes("!important")) {
     isImportant = true;
-    strValue = strValue.replace(/\s*!important\s*/g, "").trim();
+    strValue = strValue.replace(/\s*!important\s*/gi, "").trim();
   }
 
   return { cleanValue: strValue, isImportant };
@@ -1059,10 +1072,11 @@ const createCommonTraverse = (
             }
           }
         }
-      } else if (typeof value === "string" || typeof value === "number") {
+      } else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
         // Actual style property
         const expandedKey = expandShorthand(key, pandaContext, value);
-        const strValue = String(value).toLowerCase();
+        const originalValue = String(value);
+        const strValue = originalValue.toLowerCase();
 
         // For context-aware version with advanced token resolution
         if (contextData?.findTokenByValue && contextData?.resolveToken) {
@@ -1075,9 +1089,7 @@ const createCommonTraverse = (
             if (mapping) {
               const tokenPath = contextData.findTokenByValue(
                 expandedKey,
-                String(value)
-                  .replace(/\s*!important\s*/g, "")
-                  .trim(),
+                originalValue.replace(/\s*!important\s*/g, "").trim(),
               );
               const suffix = tokenPath
                 ? pandaTokenToTwSuffix(tokenPath)
@@ -1092,15 +1104,16 @@ const createCommonTraverse = (
           }
         } else {
           // Simple version - process property directly
-          const { cleanValue, isImportant } = extractImportantFlag(strValue);
+          const { cleanValue: lowerCleanValue, isImportant } = extractImportantFlag(strValue);
+          const { cleanValue: originalCleanValue } = extractImportantFlag(originalValue);
 
-          // Try special handling first
-          let className = getSpecialPropertyClass(expandedKey, cleanValue);
+          // Try special handling first (uses lowercase for comparison)
+          let className = getSpecialPropertyClass(expandedKey, lowerCleanValue);
           if (className === null) {
-            // Default handling for all other properties
+            // Default handling for all other properties (preserve original case for tokens)
             const mapping = propertyMap[expandedKey];
             if (mapping) {
-              const suffix = pandaTokenToTwSuffix(cleanValue);
+              const suffix = pandaTokenToTwSuffix(originalCleanValue);
               className = `${mapping.classPrefix}${suffix}`;
             } else {
               className = "";

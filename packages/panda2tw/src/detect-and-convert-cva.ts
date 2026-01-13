@@ -4,7 +4,7 @@
  */
 
 import { Project, ObjectLiteralExpression, Node, SyntaxKind } from "ts-morph";
-import { pandaCvaToTailwind, extractClassesFromNestedStyles } from "./cva-to-tw.js";
+import { extractClassesFromNestedStyles } from "./cva-to-tw.js";
 
 /**
  * Detects CVA patterns (base + variants) in code and converts them to Tailwind
