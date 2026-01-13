@@ -1235,5 +1235,27 @@ describe("css-to-tw", () => {
       expect(classes.some((c) => c.includes("ml-2"))).toBe(true);
       expect(classes.some((c) => c.includes("[&[data-state_=_active]]"))).toBe(true);
     });
+
+    test("handles pseudo-elements with quoted content properties", () => {
+      const cssObj = {
+        _before: {
+          content: '""',
+          display: "block",
+        },
+        _after: {
+          content: '"—"',
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      // Should handle content properties with proper quote escaping
+      expect(classes.some((c) => c.includes('content-[\\"\\"]'))).toBe(true);
+      expect(classes.some((c) => c.includes('content-[\\"—\\"]'))).toBe(true);
+      // Should preserve the pseudo-element modifiers
+      expect(classes.some((c) => c.includes("before:") && c.includes("content-"))).toBe(true);
+      expect(classes.some((c) => c.includes("after:") && c.includes("content-"))).toBe(true);
+      expect(classes.some((c) => c.includes("before:") && c.includes("block"))).toBe(true);
+    });
   });
 });

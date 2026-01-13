@@ -131,6 +131,29 @@ describe("cva-to-tw", () => {
       ]
     `);
   });
+
+  test("extractClassesFromNestedStyles - pseudo-elements with quoted content", () => {
+    const styles = {
+      _before: {
+        content: '""',
+        display: "block",
+      },
+      _after: {
+        content: '"—"',
+      },
+    };
+
+    const classes = extractClassesFromNestedStyles(styles);
+
+    // Should extract pseudo-element content with proper quote handling
+    expect(classes).toMatchInlineSnapshot(`
+      [
+        "_before:content-[\\"\\"]",
+        "_before:block",
+        "_after:content-[\\"—\\"]",
+      ]
+    `);
+  });
 });
 
 

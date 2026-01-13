@@ -795,6 +795,13 @@ function getSpecialPropertyClass(key: string, strValue: string): string | null {
       }
       break;
     }
+
+    case "content": {
+      // Handle CSS content property - use arbitrary value syntax with proper quote escaping
+      // Escape double quotes in the value for Tailwind's bracket notation
+      const escapedValue = strValue.replace(/"/g, '\\"');
+      return `content-[${escapedValue}]`;
+    }
   }
 
   return null;

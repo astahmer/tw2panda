@@ -189,16 +189,19 @@ function convertSlotStyles(obj: ObjectLiteralExpression): void {
             if (classesWithoutSelectors.length > 0 || Object.keys(selectorClasses).length > 0) {
               const objectParts: string[] = [];
               if (classesWithoutSelectors.length > 0) {
-                objectParts.push(`__base: "${classesWithoutSelectors.join(" ")}"`);
+                const escapedClasses = classesWithoutSelectors.join(" ").replace(/"/g, '\\"');
+                objectParts.push(`__base: "${escapedClasses}"`);
               }
               for (const [selector, cls] of Object.entries(selectorClasses)) {
-                objectParts.push(`"${selector}": "${cls.join(" ")}"`);
+                const escapedClasses = cls.join(" ").replace(/"/g, '\\"');
+                objectParts.push(`"${selector}": "${escapedClasses}"`);
               }
               prop.setInitializer(`{ ${objectParts.join(", ")} }`);
             }
           } else {
             // No arbitrary selectors, safe to convert to string
-            prop.setInitializer(`"${classes.join(" ")}"`);
+            const escapedClasses = classes.join(" ").replace(/"/g, '\\"');
+            prop.setInitializer(`"${escapedClasses}"`);
           }
         }
       }
