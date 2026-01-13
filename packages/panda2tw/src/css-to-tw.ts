@@ -273,6 +273,16 @@ const propertyMap: Record<string, { pattern: RegExp; classPrefix: string }> = {
   animateOut: { pattern: /^.*$/, classPrefix: "" }, // Special handling
   fadeIn: { pattern: /^.*$/, classPrefix: "fade-in-" },
   fadeOut: { pattern: /^.*$/, classPrefix: "fade-out-" },
+  zoomIn: { pattern: /^.*$/, classPrefix: "zoom-in-" },
+  zoomOut: { pattern: /^.*$/, classPrefix: "zoom-out-" },
+  slideInFromTop: { pattern: /^.*$/, classPrefix: "slide-in-from-top-" },
+  slideInFromRight: { pattern: /^.*$/, classPrefix: "slide-in-from-right-" },
+  slideInFromBottom: { pattern: /^.*$/, classPrefix: "slide-in-from-bottom-" },
+  slideInFromLeft: { pattern: /^.*$/, classPrefix: "slide-in-from-left-" },
+  slideOutToTop: { pattern: /^.*$/, classPrefix: "slide-out-to-top-" },
+  slideOutToRight: { pattern: /^.*$/, classPrefix: "slide-out-to-right-" },
+  slideOutToBottom: { pattern: /^.*$/, classPrefix: "slide-out-to-bottom-" },
+  slideOutToLeft: { pattern: /^.*$/, classPrefix: "slide-out-to-left-" },
 
   // Additional Typography
   textTransform: { pattern: /^(uppercase|lowercase|capitalize|none)$/, classPrefix: "" },

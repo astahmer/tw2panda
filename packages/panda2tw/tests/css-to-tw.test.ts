@@ -1316,5 +1316,44 @@ describe("css-to-tw", () => {
         ),
       ).toBe(true);
     });
+
+    test("animation properties (fadeIn, zoomIn, slideIn/Out)", () => {
+      const cssObj = {
+        display: "flex",
+        "&[data-state=open]": {
+          animateIn: true,
+          fadeIn: "0",
+          zoomIn: 95,
+          slideInFromTop: "[5%]",
+          slideInFromLeft: "[5%]",
+        },
+        "&[data-state=closed]": {
+          animateOut: true,
+          fadeOut: "0",
+          zoomOut: 95,
+          slideOutToTop: "[5%]",
+          slideOutToLeft: "[5%]",
+        },
+      };
+
+      const classes = extractTailwindClassesFromPandaCss(cssObj);
+
+      // Base property
+      expect(classes).toContain("flex");
+
+      // Open state animations
+      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("animate-in"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("fade-in-0"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("zoom-in-95"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("slide-in-from-top-[5%]"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=open]]") && c.includes("slide-in-from-left-[5%]"))).toBe(true);
+
+      // Closed state animations
+      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("animate-out"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("fade-out-0"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("zoom-out-95"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("slide-out-to-top-[5%]"))).toBe(true);
+      expect(classes.some((c) => c.includes("[&[data-state=closed]]") && c.includes("slide-out-to-left-[5%]"))).toBe(true);
+    });
   });
 });
