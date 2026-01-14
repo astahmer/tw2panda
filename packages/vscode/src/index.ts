@@ -157,7 +157,7 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      const { mergeCss } = createMergeCss(Object.assign(current.panda, { hash: false }));
+      const { mergeCss } = createMergeCss({ ...current.panda, ...{ hash: false } });
       const range = vscodeRangeToStartEndRange(currentEditor.document, currentSelection);
 
       // TODO pass RewriteOptions from settings

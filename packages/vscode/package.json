@@ -65,16 +65,16 @@
     "local:build": "pnpm rewrite-deps && pnpm clean && pnpm override-esbuild && pnpm i --ignore-scripts --ignore-workspace && pnpm local:package"
   },
   "dependencies": {
-    "@pandacss/config": "^0.7.0",
-    "@pandacss/generator": "^0.7.0",
-    "@pandacss/node": "^0.7.0",
-    "@pandacss/parser": "^0.7.0",
-    "@pandacss/preset-base": "0.7.0",
-    "@pandacss/preset-panda": "0.7.0",
-    "@pandacss/shared": "^0.7.0",
+    "@pandacss/config": "^0.37.2",
+    "@pandacss/generator": "^0.37.2",
+    "@pandacss/node": "^0.37.2",
+    "@pandacss/parser": "^0.37.2",
+    "@pandacss/preset-base": "0.37.2",
+    "@pandacss/preset-panda": "0.37.2",
+    "@pandacss/shared": "^0.37.2",
     "prettier": "2.8.4",
     "tailwindcss": "^3.3.3",
-    "ts-morph": "18.0.0",
+    "ts-morph": "21.0.1",
     "tw2panda": "workspace:*"
   },
   "bundledDependencies": [
@@ -93,7 +93,7 @@
     "tw2panda"
   ],
   "devDependencies": {
-    "@pandacss/vsix-builder": "0.7.0",
+    "@pandacss/vsix-builder": "0.18.0",
     "@pnpm/find-workspace-dir": "^6.0.2",
     "@pnpm/find-workspace-packages": "^6.0.9",
     "@pnpm/types": "^9.2.0",
@@ -110,8 +110,8 @@
     "perfect-debounce": "^1.0.0",
     "rimraf": "^5.0.1",
     "semver": "^7.5.4",
-    "tsup": "7.1.0",
-    "tsx": "^3.12.7",
+    "tsup": "8.0.2",
+    "tsx": "4.11.0",
     "typescript": "^5.1.6",
     "vscode": "^1.1.37"
   },

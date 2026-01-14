@@ -1,0 +1,58 @@
+{
+    "name": "panda2tw",
+    "type": "module",
+    "version": "0.1.0",
+    "bin": {
+        "panda2tw": "bin.js"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.js"
+        }
+    },
+    "main": "dist/index.cjs",
+    "module": "dist/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/astahmer/tw2panda.git",
+        "directory": "packages/panda2tw"
+    },
+    "scripts": {
+        "start": "node ./dist/cli.cjs",
+        "dev": "tsup --watch",
+        "build": "tsup",
+        "test": "vitest run",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@pandacss/config": "1.8.0",
+        "@pandacss/core": "1.8.0",
+        "@pandacss/generator": "1.8.0",
+        "@pandacss/node": "1.8.0",
+        "@pandacss/parser": "1.8.0",
+        "@pandacss/preset-base": "1.8.0",
+        "@pandacss/preset-panda": "1.8.0",
+        "@pandacss/shared": "1.8.0",
+        "@pandacss/token-dictionary": "1.8.0",
+        "@pandacss/types": "1.8.0",
+        "bundle-n-require": "^1.0.1",
+        "cac": "^6.7.14",
+        "escalade": "^3.1.1",
+        "glob": "^10.3.10",
+        "hookable": "^5.5.3",
+        "magic-string": "^0.30.1",
+        "pathe": "^1.1.1",
+        "postcss": "^8.4.26",
+        "tailwindcss": "^3.3.0",
+        "ts-morph": "^20.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/tailwindcss": "^3.0.0",
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
+        "vitest": "^1.0.0"
+    }
+}

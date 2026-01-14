@@ -1,34 +1,60 @@
-# tw2panda
+# tw2panda & panda2tw
 
-Easily migrate code from tailwind to Panda CSS
+Easily migrate code between Tailwind CSS and Panda CSS
 
 ![Screenshot 2023-08-08 at 01 34 49](https://github.com/astahmer/tw2panda/assets/47224540/47992889-6330-47fa-8e15-a0ccd2e4ae02)
 
-## Features
+## Packages
 
+This monorepo contains two complementary tools:
+
+### 📦 [tw2panda](./packages/tw2panda) - Tailwind → Panda CSS
+
+Migrate code from Tailwind CSS to Panda CSS with automatic conversion of classes to `css()` and `cva()` function calls.
+
+**Features:**
 - `rewrite`, `extract` and `convert` CLI commands
-- use your own custom [`panda.config`](https://panda-css.com/docs/references/config) and/or custom `tailwind.config`
-  file
-- also rewrites [`class-variance-authority`](https://cva.style/docs) to panda's
-  [`cva`](https://panda-css.com/docs/concepts/recipes#atomic-recipe-or-cva) function
+- Custom [`panda.config`](https://panda-css.com/docs/references/config) and `tailwind.config` support
+- Converts [`class-variance-authority`](https://cva.style/docs) to panda's [`cva`](https://panda-css.com/docs/concepts/recipes#atomic-recipe-or-cva)
+- VSCode extension: https://marketplace.visualstudio.com/items?itemName=astahmer.tw2panda-vscode
 
-You can look at this file for an example of what it can do:
-[example](./packages/tw2panda/tests/rewrite-tw-file-content-to-panda.test.ts)
+### 📦 [panda2tw](./packages/panda2tw) - Panda CSS → Tailwind
 
-## VSCode extension
+Migrate code back from Panda CSS to Tailwind CSS with automatic conversion of `css()` and `cva()` calls to class strings.
+
+**Features:**
+- `rewrite` and `convert` CLI commands
+- Handles responsive modifiers, pseudo-selectors, and conditions
+- Batch file conversion support
+
+## Quick Start
+
+### tw2panda (Tailwind → Panda)
+
+```sh
+npx tw2panda rewrite ./src/button.tsx -w
+```
+
+### panda2tw (Panda → Tailwind)
+
+```sh
+npx panda2tw rewrite ./src/button.tsx -w
+```
+
+## VSCode Extension
 
 Select the text you want to convert and run the `tw2panda: Rewrite tw to Panda CSS` command.
 https://marketplace.visualstudio.com/items?itemName=astahmer.tw2panda-vscode
 
-## Install & usage
+## Install & Usage
+
+### tw2panda
 
 ```sh
 pnpm add tw2panda
 ```
 
-It exports a bunch of functions that can be used to build your own tooling on top of it. You can look at the
-[CLI code](packages/tw2panda/src/cli.ts) or the
-[tests](packages/tw2panda/tests/rewrite-tw-file-content-to-panda.test.ts) to see how it can be used.
+[Full tw2panda documentation](./packages/tw2panda)
 
 ## CLI
 
